@@ -80,7 +80,7 @@ Con esto, Docker quedará instalado, el demonio se iniciará y el proceso se hab
 $ sudo apt install docker-cesudo systemctl status docker
 ```
 El resultado debe ser similar al siguiente, y mostrar que el servicio está activo y en ejecución:
-`![Resultado Status Docker](statusDocker.png)`
+`![Resultado Status Docker](https://github.com/davyyelor/VeganMania/blob/master/statusDocker.png)`
 
 #### Instalación Chrome
 
