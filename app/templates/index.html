@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<link rel="shortcut icon" href="../images/salad_bowl_food_vegetables_vegan_healthy_food_icon_207981.ico" />
+<html>
+<head>
+  <title>Mi pagina web</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--===============================================================================================-->
+  <link rel="icon" type="image/png" href="{{url_for('static', filename='images/icons/favicon.ico') }}" />
+  <!--===============================================================================================-->
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+  <!--===============================================================================================-->
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='fonts/font-awesome-4.7.0/css/font-awesome.min.css') }}">
+  <!--===============================================================================================-->
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/animate/animate.css')}}">
+  <!--===============================================================================================-->
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/css-hamburgers/hamburgers.min.css') }}">
+  <!--===============================================================================================-->
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/animsition/css/animsition.min.css') }}">
+  <!--===============================================================================================-->
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/select2/select2.min.css') }}">
+  <!--===============================================================================================-->
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/daterangepicker/daterangepicker.css') }}">
+  <!--===============================================================================================-->
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/util.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/style.css') }}">
+  <!--===============================================================================================-->
+  <style>
+    /* Add any additional styles here */
+    .navbar {
+        background-color: #4CAF50; /* Cambia #333 a #4CAF50 para verde */
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+    }
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 10px;
+    }
+      
+
+    .navbar a.active {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div>
+      <a href="{{ url_for('registro')}}" class="create-account">
+        <img src="{{ url_for('static', filename='images/icons/user.ico') }}" alt="User Icon" width="20" height="20">
+        Crear Cuenta
+      </a>
+
+      <a href="{{ url_for('login')}}" class="laogin">
+        <img src="{{ url_for('static', filename='images/icons/user.ico') }}" alt="User Icon" width="20" height="20">
+        Iniciar Sesión
+      </a>
+
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
