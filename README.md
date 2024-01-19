@@ -81,7 +81,7 @@ $ sudo apt install docker-cesudo systemctl status docker
 ```
 El resultado debe ser similar al siguiente, y mostrar que el servicio está activo y en ejecución:
 <p align="center">
-  <img src="https://github.com/davyyelor/VeganMania/blob/master/statusDocker.png" height=100>
+  <img src="https://github.com/davyyelor/VeganMania/blob/master/statusDocker.png" height=300>
 </p>
 
 #### Instalación Chrome
