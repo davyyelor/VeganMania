@@ -1,5 +1,6 @@
 from flask import Flask
 import datetime
+import re
 
 app = Flask(__name__)
 from flask import render_template, request, flash, url_for, redirect, session
@@ -55,7 +56,9 @@ def calcular_calorias_objetivo(fecha_nacimiento, genero):
 
 
 
-
+def validate_email(email):
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email)
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
@@ -78,6 +81,24 @@ def registro():
             }
             connection = mysql.connect(**config)
             cur = connection.cursor()
+
+            # Insertar datos en la tabla clientes
+            cur.execute('SELECT * FROM clientes WHERE email = %s', (email,))
+            user = cur.fetchone()
+
+            if not nombre or not usuario or not email or not contrasena or not fechaNacimiento or not peso or not altura or not genero:
+                flash('Por favor, rellena todos los campos.', 'error')
+                return redirect(url_for('registro'))
+            
+            if not validate_email(email):
+                flash('El correo electrónico no cumple con el formato requerido. Por favor, utiliza otro correo.', 'error')
+                return redirect(url_for('registro'))
+
+            if user:
+                flash('¡Ya existe un usuario con ese email!', 'error')
+                return redirect(url_for('registro'))
+            
+
 
             # Insertar datos en la tabla clientes
             cur.execute('INSERT INTO clientes (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero))
