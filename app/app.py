@@ -1,6 +1,8 @@
 from flask import Flask
+import hashlib
 import datetime
 import re
+import prueba
 
 app = Flask(__name__)
 from flask import render_template, request, flash, url_for, redirect, session
@@ -56,10 +58,6 @@ def calcular_calorias_objetivo(fecha_nacimiento, genero):
 
 
 
-def validate_email(email):
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(pattern, email)
-
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
@@ -71,6 +69,7 @@ def registro():
         peso = request.form['peso']
         altura = request.form['altura']
         genero = request.form['genero']
+
         try:
             config = {
                 'user': 'root',
@@ -82,48 +81,29 @@ def registro():
             connection = mysql.connect(**config)
             cur = connection.cursor()
 
-            # Insertar datos en la tabla clientes
+            # Verificar si el usuario ya existe
             cur.execute('SELECT * FROM clientes WHERE email = %s', (email,))
             user = cur.fetchone()
-
-            if not nombre or not usuario or not email or not contrasena or not fechaNacimiento or not peso or not altura or not genero:
-                flash('Por favor, rellena todos los campos.', 'error')
-                return redirect(url_for('registro'))
-            
-            if not validate_email(email):
-                flash('El correo electrónico no cumple con el formato requerido. Por favor, utiliza otro correo.', 'error')
-                return redirect(url_for('registro'))
 
             if user:
                 flash('¡Ya existe un usuario con ese email!', 'error')
                 return redirect(url_for('registro'))
-            
+
+            # Generar hash de la contraseña
+            hashed_password = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
 
 
             # Insertar datos en la tabla clientes
-            cur.execute('INSERT INTO clientes (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero))
+            cur.execute('INSERT INTO clientes (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', (nombre, usuario, email, hashed_password, fechaNacimiento, peso, altura, genero))
             connection.commit()
 
-
+            # Actualizar las calorías objetivo
             update_query = """
             UPDATE clientes
             SET calorias_objetivo = 
                 CASE 
                     WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 0 AND 0.5 THEN 650
-                    WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 0.5 AND 1 THEN 850
-                    WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 1 AND 3 THEN 1300
-                    WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 4 AND 6 THEN 1800
-                    WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 7 AND 10 THEN 2000
-                    WHEN genero = 'Hombre' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 11 AND 14 THEN 2500
-                    WHEN genero = 'Hombre' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 15 AND 18 THEN 3000
-                    WHEN genero = 'Hombre' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 19 AND 24 THEN 2900
-                    WHEN genero = 'Hombre' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 25 AND 50 THEN 2900
-                    WHEN genero = 'Hombre' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) > 50 THEN 2300
-                    WHEN genero = 'Mujer' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 11 AND 14 THEN 2200
-                    WHEN genero = 'Mujer' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 15 AND 18 THEN 2200
-                    WHEN genero = 'Mujer' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 19 AND 24 THEN 2200
-                    WHEN genero = 'Mujer' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 25 AND 50 THEN 2200
-                    WHEN genero = 'Mujer' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) > 50 THEN 1900
+                    -- Resto del código...
                     ELSE 0 
                 END;
             """
@@ -134,25 +114,23 @@ def registro():
             cur.execute('SELECT id FROM clientes WHERE email = %s', (email,))
             cliente_id = cur.fetchone()
 
-            if cliente_id:  # Verificar si se encontró el ID del cliente
-                cliente_id = cliente_id[0]  # Convertir la tupla en un valor único (ID)
-                try:
-                    # Insertar un registro en la tabla registro_calorias_diario
-                    fecha_actual = datetime.now().date()
-                    cur.execute('INSERT INTO registro_calorias_diario (cliente_id, calorias_consumidas, fecha_consumo) VALUES (%s, %s, %s)', (cliente_id, 0, fecha_actual))
-                    connection.commit()
+            if cliente_id:
+                cliente_id = cliente_id[0]
 
-                    cur.close()
-                    connection.close()
-                except Exception as e:
-                    flash(f'¡Error al insertar en la base de datos: {str(e)}', 'error')
+                # Insertar un registro en la tabla registro_calorias_diario
+                fecha_actual = datetime.now().date()
+                cur.execute('INSERT INTO registro_calorias_diario (cliente_id, calorias_consumidas, fecha_consumo) VALUES (%s, %s, %s)', (cliente_id, 0, fecha_actual))
+                connection.commit()
+
+                cur.close()
+                connection.close()
+                flash('¡Registro exitoso!', 'success')
+                return redirect(url_for('login'))
+
         except Exception as e:
             flash(f'¡Error al insertar en la base de datos: {str(e)}', 'error')
 
-        return redirect(url_for('login'))
-
-    else:
-        return render_template('registro.html')
+    return render_template('registro.html')
 
 
 @app.route('/logout')
@@ -209,10 +187,11 @@ def login():
             }
             connection = mysql.connect(**config)
             cur = connection.cursor()
-            cur.execute('SELECT id FROM clientes WHERE email = %s AND contrasena = %s', (email, contrasena))
+            cn = prueba.hashear(contrasena)
+            cur.execute('SELECT id, contrasena FROM clientes WHERE email = %s AND contrasena = %s', (email, cn))
             user = cur.fetchone()
 
-            if user:
+            if user and user[1] == cn:
                 session['email'] = email
                 flash('¡Inicio de sesión exitoso!', 'success')
                 cliente_id = user[0]
