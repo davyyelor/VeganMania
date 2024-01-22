@@ -2,7 +2,7 @@ from flask import Flask
 import hashlib
 import datetime
 import re
-import prueba
+import app.hashAPI as hashAPI
 
 app = Flask(__name__)
 from flask import render_template, request, flash, url_for, redirect, session
@@ -187,7 +187,7 @@ def login():
             }
             connection = mysql.connect(**config)
             cur = connection.cursor()
-            cn = prueba.hashear(contrasena)
+            cn = hashAPI.hashear(contrasena)
             cur.execute('SELECT id, contrasena FROM clientes WHERE email = %s AND contrasena = %s', (email, cn))
             user = cur.fetchone()
 
