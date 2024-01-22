@@ -176,7 +176,7 @@ EDAMAM_consulta = Edamam_mcd(id_nutrition=nutrition_appid,
                             key_food=food_appkey)
 
 # Ejercución de los métodos de cada una de las API's para realizar solicitudes
-Response_Nut = EDAMAM_consulta.Nut_Analysis(query= '1 egg')
+Response_Nut = EDAMAM_consulta.Nut_Analysis(query= '100 gr zucchini lasagna')
 Response_Food = EDAMAM_consulta.Search_food(query= 'pizza')
 Response_Recipe = EDAMAM_consulta.Search_recipe(query= 'ribs')
 # Ejecución de los métodos para obtener los dataframe con los resultados para cada una de las API's
