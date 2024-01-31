@@ -2,7 +2,7 @@ from flask import Flask
 import hashlib
 import datetime
 import re
-import app.hashAPI as hashAPI
+import hashAPI
 
 app = Flask(__name__)
 from flask import render_template, request, flash, url_for, redirect, session
@@ -20,42 +20,6 @@ def index():
 
 from datetime import datetime
 
-def calcular_calorias_objetivo(fecha_nacimiento, genero):
-    edad = datetime.now().year - fecha_nacimiento.year
-
-    if 0 <= edad <= 0.5:
-        return 650
-    elif 0.5 < edad <= 1:
-        return 850
-    elif 1 < edad <= 3:
-        return 1300
-    elif 4 < edad <= 6:
-        return 1800
-    elif 7 < edad <= 10:
-        return 2000
-    elif genero == 'Hombre' and 11 < edad <= 14:
-        return 2500
-    elif genero == 'Hombre' and 15 < edad <= 18:
-        return 3000
-    elif genero == 'Hombre' and 19 < edad <= 24:
-        return 2900
-    elif genero == 'Hombre' and 25 < edad <= 50:
-        return 2900
-    elif genero == 'Hombre' and edad > 50:
-        return 2300
-    elif genero == 'Mujer' and 11 < edad <= 14:
-        return 2200
-    elif genero == 'Mujer' and 15 < edad <= 18:
-        return 2200
-    elif genero == 'Mujer' and 19 < edad <= 24:
-        return 2200
-    elif genero == 'Mujer' and 25 < edad <= 50:
-        return 2200
-    elif genero == 'Mujer' and edad > 50:
-        return 1900
-    else:
-        return 0
-
 
 
 @app.route('/registro', methods=['GET', 'POST'])
@@ -69,6 +33,7 @@ def registro():
         peso = request.form['peso']
         altura = request.form['altura']
         genero = request.form['genero']
+        actividad = request.form['actividad']
 
         try:
             config = {
@@ -94,20 +59,7 @@ def registro():
 
 
             # Insertar datos en la tabla clientes
-            cur.execute('INSERT INTO clientes (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', (nombre, usuario, email, hashed_password, fechaNacimiento, peso, altura, genero))
-            connection.commit()
-
-            # Actualizar las calorías objetivo
-            update_query = """
-            UPDATE clientes
-            SET calorias_objetivo = 
-                CASE 
-                    WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 0 AND 0.5 THEN 650
-                    -- Resto del código...
-                    ELSE 0 
-                END;
-            """
-            cur.execute(update_query)
+            cur.execute('INSERT INTO clientes (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero, actividad) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (nombre, usuario, email, hashed_password, fechaNacimiento, peso, altura, genero, actividad))
             connection.commit()
 
             # Obtener el ID del cliente recién registrado
@@ -137,38 +89,6 @@ def registro():
 def logout():
     session.pop('email', None)
     return redirect(url_for('index'))
-
-# Dados las calorias introducidas por le cliente se actualiza las calorias consumidas de ese cliente en el dia actual
-@app.route('/añadirCalorias', methods=['GET', 'POST'])
-def añadirCalorias():
-    if request.method == 'POST':
-        calorias = request.form['calorias']
-
-        try:
-            config = {
-                'user': 'root',
-                'password': 'rootasdeg2324',
-                'host': 'db',
-                'port': '3306',
-                'database': 'usuarios'
-            }
-            connection = mysql.connect(**config)
-            cur = connection.cursor()
-
-            cur.execute('UPDATE registro_calorias_diario SET calorias_consumidas = calorias_consumidas + %s WHERE cliente_id = (SELECT id FROM clientes WHERE email = %s) AND fecha_consumo = CURDATE()', (calorias, session['email']))
-            connection.commit()
-
-            cur.close()
-            connection.close()
-            flash('¡Calorías añadidas correctamente!', 'success')
-
-            return redirect(url_for('buenHome'))
-        except Exception as e:
-            flash(f'¡Error al añadir las calorías: {str(e)}', 'error')
-
-    return render_template('BuenHome.html')
-
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -218,28 +138,6 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/admin')
-def admin():
-    try:
-        config = {
-        'user': 'root',
-        'password': 'rootasdeg2324',
-        'host': 'db',
-        'port': '3306',
-        'database': 'usuarios'
-    	}
-        connection = mysql.connect(**config)
-        cur = connection.cursor()
-        cur.execute('SELECT * FROM clientes')
-        data=cur.fetchall()
-        cur.close()
-        connection.close()
-        flash('¡Operación completada con éxito!', 'success')
-    except Exception as e:
-        flash('¡Error al obtener los clientes de la base de datos:', 'error')   
-    return render_template('admin.html', usuarios=data)
-
-
 @app.route('/buenHome')
 def buenHome():
     if 'email' in session:
@@ -277,15 +175,14 @@ def buenHome():
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('login'))
+    
 
+# Dados las calorias introducidas por le cliente se actualiza las calorias consumidas de ese cliente en el dia actual
+@app.route('/añadirCalorias', methods=['GET', 'POST'])
+def añadirCalorias():
+    if request.method == 'POST':
+        calorias = request.form['calorias']
 
-
-def actualizarDia():
-    today = datetime.date.today()
-    last_date = session.get('last_date')
-
-    # Si la fecha ha cambiado desde la última solicitud
-    if last_date != today:
         try:
             config = {
                 'user': 'root',
@@ -294,71 +191,23 @@ def actualizarDia():
                 'port': '3306',
                 'database': 'usuarios'
             }
-
             connection = mysql.connect(**config)
-            cursor = connection.cursor()
+            cur = connection.cursor()
 
-            # Actualizar las calorías objetivo para todos los usuarios
-            update_query = """
-            UPDATE clientes
-            SET calorias_objetivo = 
-                CASE 
-                    WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 0 AND 0.5 THEN 650
-                    WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 0.5 AND 1 THEN 850
-                    WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 1 AND 3 THEN 1300
-                    WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 4 AND 6 THEN 1800
-                    WHEN TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 7 AND 10 THEN 2000
-                    WHEN genero = 'Hombre' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 11 AND 14 THEN 2500
-                    WHEN genero = 'Hombre' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 15 AND 18 THEN 3000
-                    WHEN genero = 'Hombre' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 19 AND 24 THEN 2900
-                    WHEN genero = 'Hombre' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 25 AND 50 THEN 2900
-                    WHEN genero = 'Hombre' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) > 50 THEN 2300
-                    WHEN genero = 'Mujer' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 11 AND 14 THEN 2200
-                    WHEN genero = 'Mujer' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 15 AND 18 THEN 2200
-                    WHEN genero = 'Mujer' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 19 AND 24 THEN 2200
-                    WHEN genero = 'Mujer' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) BETWEEN 25 AND 50 THEN 2200
-                    WHEN genero = 'Mujer' AND TIMESTAMPDIFF(YEAR, fechaNacimiento, CURDATE()) > 50 THEN 1900
-                    ELSE 0 
-                END;
-            """
-            cursor.execute(update_query)
+            cur.execute('UPDATE registro_calorias_diario SET calorias_consumidas = calorias_consumidas + %s WHERE cliente_id = (SELECT id FROM clientes WHERE email = %s) AND fecha_consumo = CURDATE()', (calorias, session['email']))
             connection.commit()
 
-            cursor.close()
+            cur.close()
             connection.close()
+            flash('¡Calorías añadidas correctamente!', 'success')
 
-            # Actualizar la fecha de la última solicitud en la sesión
-            session['last_date'] = today
-
+            return redirect(url_for('buenHome'))
         except Exception as e:
-            # Manejar cualquier error que pueda ocurrir durante la actualización
-            flash(f'Error al actualizar las calorías: {str(e)}', 'error')
+            flash(f'¡Error al añadir las calorías: {str(e)}', 'error')
+
+    return render_template('BuenHome.html')
 
 
 
-
-'''
-@app.route('/borrar/<string:id>')
-def borrar_cliente(id):
-        try:
-        config = {
-        'user': 'root',
-        'password': 'rootasdeg2324',
-        'host': 'db',
-        'port': '3306',
-        'database': 'usuarios'
-    	}
-        connection = mysql.connect(**config)
-        cur = connection.cursor()
-        cur.execute('DELETE FROM clientes WHERE id= %s',(id))
-        data=cur.fetchall()
-        cur.close()
-        connection.close()
-        flash('¡Correctamente borrado!', 'success')
-    except Exception as e:
-        flash('¡Error al borrar en la base de datos:', 'error')   
-    return redirect (url_for('admin'))   
-  
-'''
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

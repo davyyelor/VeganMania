@@ -1,81 +1,21 @@
-
-{% extends 'layout.html' %}
-
-{% block body %}
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='fonts/font-awesome-4.7.0/css/font-awesome.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/animate/animate.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/css-hamburgers/hamburgers.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/animsition/css/animsition.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/select2/select2.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='vendor/daterangepicker/daterangepicker.css') }}">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Login V8</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/util.css') }}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/main.css') }}">
-
-    <script src="{{url_for('static', filename='vendor/jquery/jquery-3.2.1.min.js') }}"></script>
-    <script src="{{url_for('static', filename='vendor/animsition/js/animsition.min.js') }}"></script>
-    <script src="{{url_for('static', filename='vendor/bootstrap/js/popper.js') }}"></script>
-    <script src="{{url_for('static', filename='vendor/bootstrap/js/bootstrap.min.js') }}"></script>
-    <script src="{{url_for('static', filename='vendor/select2/select2.min.js') }}"></script>
-    <script src="{{url_for('static', filename='vendor/daterangepicker/moment.min.js') }}"></script>
-    <script src="{{url_for('static', filename='vendor/daterangepicker/daterangepicker.js') }}"></script>
-    <script src="{{url_for('static', filename='vendor/countdowntime/countdowntime.js') }}"></script>
-    <script src="{{url_for('static', filename='js/main.js') }}"></script>
-
-    <style>
-        /* Add any additional styles here */
-        .limiter {
-        margin-top: 100px; /* Ajusta este valor según sea necesario */
-        }
-
-        .wrap-login100 {
-            width: 100%;
-        }
-
-        .login100-form-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-            display: block; /* Asegura que el título ocupe todo el ancho */
-        }
-
-        .navbar {
-            background-color: #4CAF50; /* Cambia #333 a #4CAF50 para verde */
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-        }
-
-        .navbar a {
-            color: #fff;
-            text-decoration: none;
-            margin-right: 10px;
-        }
-
-        .navbar a.active {
-            font-weight: bold;
-        }
-        
-        .container-login100-form-btn {
-        margin-top: 20px;
-        }
-    </style>
-
-    <div class="navbar">
-        <div>
-            <a href="{{ url_for('index') }}">Inicio</a>
-        </div>
-    </div>
-
-    <div class="limiter">
-        <div class="container-login100">
-            <div class="wrap-login100 p-l-55 p-r-55 p-t-30 p-b-30">
-                <!-- Formulario de Inicio de Sesión -->
-                <form class="login100-form validate-form" action="/login" method="post" novalidate>
-
-
-                    <!-- Campos para el inicio de sesión -->
-                    <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your email">
+</head>
+<body>	
+	<div class="limiter">
+		<div class="container-login100">
+			<div class="wrap-login100">
+				<form class="login100-form validate-form p-l-55 p-r-55 p-t-178" action="/login" method="post" novalidate>
+					<span class="login100-form-title">
+						Iniciar Sesión
+					</span>
+					<div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your email">
                         <input class="input100" type="email" name="email" id="email" placeholder="Tu email" required>
                         <span class="focus-input100"></span>
                     </div>
@@ -85,7 +25,17 @@
                         <span class="focus-input100"></span>
                     </div>
 
-                    <div class="container-login100-form-btn">
+					<div class="text-right p-t-13 p-b-23">
+						<span class="txt1">
+							Se te ha olvidado
+						</span>
+
+						<a href="#" class="txt2">
+							Email / Contraseña?
+						</a>
+					</div>
+
+					<div class="container-login100-form-btn">
                         <button class="login100-form-btn">
                             Iniciar Sesión
                         </button>
@@ -106,14 +56,17 @@
                         <span class="txt1 p-b-9">
                             No te has unido a nosotros aún?
                         </span>
-
-                        <!-- Enlace para ir a la página de registro -->
                         <a href="{{ url_for('registro')}}" class="txt3">
                             Crear cuenta
                         </a>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-{% endblock %}
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	
+	<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>
