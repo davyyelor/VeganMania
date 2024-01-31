@@ -15,7 +15,7 @@ La ruta raíz '/' se asocia a la función index(), que renderiza una plantilla H
 '''
 @app.route('/')
 def index():
-   return render_template('index2.html')
+   return render_template('index.html')
 
 
 from datetime import datetime
