@@ -3,6 +3,7 @@ import hashlib
 import datetime
 import re
 import hashAPI
+from datetime import datetime
 
 app = Flask(__name__)
 from flask import render_template, request, flash, url_for, redirect, session
@@ -16,11 +17,6 @@ La ruta raíz '/' se asocia a la función index(), que renderiza una plantilla H
 @app.route('/')
 def index():
    return render_template('index.html')
-
-
-from datetime import datetime
-
-
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
@@ -127,7 +123,7 @@ def login():
 
                 cur.close()
                 connection.close()
-                return redirect(url_for('buenHome'))
+                return redirect(url_for('inicioUsu'))
 
             else:
                 flash('Credenciales incorrectas. Inténtalo de nuevo.', 'error')
@@ -138,8 +134,8 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/buenHome')
-def buenHome():
+@app.route('/inicioUsu')
+def inicioUsu():
     if 'email' in session:
         try:
             email = session['email']
@@ -165,7 +161,7 @@ def buenHome():
                 calorias_consumidas = data[2]
                 calorias_restantes = calorias_objetivo - calorias_consumidas
 
-                return render_template('buenHome.html', nombre=nombre, calorias_objetivo=calorias_objetivo, calorias_consumidas=calorias_consumidas, calorias_restantes=calorias_restantes)
+                return render_template('inicioUsu.html', nombre=nombre, calorias_objetivo=calorias_objetivo, calorias_consumidas=calorias_consumidas, calorias_restantes=calorias_restantes)
             # Obtener el ID del cliente actual
         except Exception as e:
             flash(f'Error al cargar la página de inicio: {str(e)}', 'error')
@@ -201,7 +197,7 @@ def añadirCalorias():
             connection.close()
             flash('¡Calorías añadidas correctamente!', 'success')
 
-            return redirect(url_for('buenHome'))
+            return redirect(url_for('inicioUsu'))
         except Exception as e:
             flash(f'¡Error al añadir las calorías: {str(e)}', 'error')
 
