@@ -35,6 +35,9 @@ body, html {
 	height: 100%;
 	font-family: Ubuntu-Regular, sans-serif;
 }
+/*---------------------------------------------*/
+
+/*---------------------------------------------*/
 
 /*---------------------------------------------*/
 a {
@@ -130,6 +133,91 @@ iframe {
 }
 
 /*//////////////////////////////////////////////////////////////////
+[ NavBar ]*/
+/* Estilos para el navbar */
+/* Agrega estilos para el navbar */
+nav {
+  background-color: #57b846;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  padding: 10px 0;
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+
+}
+
+
+.nav-content ul {
+  display: flex;
+  color: white;
+  list-style-type: none;
+  margin-left: 0; /* Añadido para quitar el margen izquierdo predeterminado */
+}
+
+.nav-content ul li {
+  margin-right: 20px;
+  margin-left: 0; /* Añadido para quitar el margen izquierdo predeterminado */
+}
+
+.nav-content ul li a {
+  color: black;
+  text-decoration: none;
+  font-family: Ubuntu-Regular, sans-serif;
+  text-transform: uppercase;
+}
+
+.nav-content ul li a:hover {
+  color: white;
+  text-decoration: none;
+}
+
+/* Mantener el logotipo en su posición original */
+.nav-brand {
+  margin-right: auto; /* Mueve el logo a la izquierda */
+  margin-left: 0; /* Añadido para quitar el margen izquierdo predeterminado */
+}
+
+.nav-brand a {
+  font-family: Ubuntu-Bold, sans-serif;
+  font-size: 25px;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-brand a:hover {
+  text-decoration: none;
+  color: black;
+}
+
+/*//////////////////////////////////////////////////////////////////
+[ Main ]*/
+section h1 {
+  font: 2em Arial, sans-serif;
+  border-radius: 10px;
+  color: white;   
+  padding: 6px;
+}
+
+article {
+  background-color: white;
+  text-align: justify;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+  flex: 3;
+  margin: 0 20px;
+  overflow-y: auto;
+  height: auto;
+  margin: 30px;
+}
+
+
+main {
+  background-color: #57b846;
+}
+
+
+/*//////////////////////////////////////////////////////////////////
 [ Utility ]*/
 .txt1 {
   font-family: Ubuntu-Regular;
@@ -218,7 +306,6 @@ iframe {
 
 /*------------------------------------------------------------------
 [ Input ]*/
-
 .wrap-input100 {
   width: 100%;
   background-color: #fff;
@@ -384,6 +471,71 @@ iframe {
     visibility: visible;
     opacity: 1;
   }
+}
+
+
+
+/*//////////////////////////////////////////////////////////////////
+[ Responsive ]*/
+.list-social {
+  padding: 10px;
+}
+
+.list-social li {
+  display: inline;
+  margin-right: 10px;
+}
+
+/* Estilos para la sección de contacto */
+.list-social a {
+  color: white;
+  text-decoration: none;
+}
+
+/* Estilos para el formulario de contacto */
+.form-contact {
+  margin-top: 20px;
+}
+
+/* Estilo para la sección de derechos de autor */
+.row {
+  margin-top: 20px;
+}
+
+/* Estilo para los enlaces en el pie de página */
+.footer-links a {
+  color: #4CAF50;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+footer {
+  padding: 10px;
+  text-align: center;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: black;
+  color: #fff;
+}
+
+footer a {
+  color: #fff;
+}
+
+footer p {
+  margin: 10px;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+form {
+  margin-top: 10px;
 }
 
 /*//////////////////////////////////////////////////////////////////

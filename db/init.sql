@@ -26,13 +26,13 @@ CREATE TABLE IF NOT EXISTS registro_calorias_diario (
   FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
 
---Las contraseñas se han añadido encriptadas con la función SHA256, la contraseña es '1111'
+
 INSERT INTO clientes
   (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero, actividad)
 VALUES
   ('Kepa', 'kepab', 'kepa@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', '1990-01-01', 70.5, 180.0, 'Hombre', 'Sedentario'),
   ('Ander', 'andere', 'ander@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', '1995-05-05', 65.2, 175.0, 'Hombre', 'Sedentario');
---Las contraseñas se han añadido encriptadas con la función SHA256, la contraseña es '1111'
+
 
 
 INSERT INTO registro_calorias_diario (cliente_id, calorias_consumidas, fecha_consumo)
