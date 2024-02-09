@@ -107,7 +107,7 @@ Abra una terminal, la normal en Linux y en Windows La de Visual Studio que apare
 
 Para obtener los archivos del directorio del proyecto se ha de emplear el siguiente comando:
 ```bash
-$git clone https://github.com/davyyelor/VeganMania
+$git clone https://github.com/kepaxabier/flask-mysql-dockercompose
 ```
 
 Tras esto, desplegamos los servicios mediante:

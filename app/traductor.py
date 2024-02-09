@@ -6,4 +6,4 @@ def traducir(texto, idioma):
     return traduccion
 
 if __name__ == "__main__":
-    print(traducir("Hola mundo", "en"))
+    print(traducir("150gr de atún", "en"))

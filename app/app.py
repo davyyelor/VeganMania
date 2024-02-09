@@ -16,7 +16,8 @@ La ruta raíz '/' se asocia a la función index(), que renderiza una plantilla H
 '''
 @app.route('/')
 def index():
-   return render_template('index.html')
+    session.pop('email', None)
+    return render_template('index.html')
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():

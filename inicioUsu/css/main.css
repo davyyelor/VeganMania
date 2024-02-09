@@ -191,29 +191,24 @@ nav {
 
 /*//////////////////////////////////////////////////////////////////
 [ Main ]*/
+section{
+  margin-top: 100px;
+}
 section h1 {
   font: 2em Arial, sans-serif;
   border-radius: 10px;
-  color: white;   
+  color: darkblue;   
   padding: 6px;
 }
 
-article {
-  background-color: white;
-  text-align: justify;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
-  flex: 3;
-  margin: 0 20px;
-  overflow-y: auto;
-  height: auto;
-  margin: 30px;
+.container .main-content {
+  margin-top: 100px;
+
 }
 
 
 main {
-  background-color: #57b846;
+  background-color: white;
 }
 
 
@@ -536,6 +531,96 @@ footer a:hover {
 
 form {
   margin-top: 10px;
+}
+
+article {
+  background-color: white;
+  text-align: justify;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+  flex: 3;
+  margin: 0 20px;
+  overflow-y: auto;
+  height: auto;
+  margin: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+.contenido {
+  flex: 1;
+  margin-bottom: 10px;
+  width: 70%; /* Ajusta el ancho según sea necesario */
+}
+
+.porcentajes {
+  position: relative;
+  width: 10%; /* Ajusta el ancho según sea necesario */
+  margin-left: 20px; /* Agrega espacio entre los dos divs */
+  width: 100px;
+}
+
+.article {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@keyframes rellenar {
+  to {
+    stroke-dasharray: var(--porcentaje) 100;
+  }
+}
+
+body {
+  gap: 30px;
+}
+.porcentajes {
+  position: relative;
+}
+
+.porcentajes span {
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  bottom: 0%;
+  right: 0%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 25px/1em Verdana;
+}
+
+.porcentajes .spanN {
+  position: absolute;
+  top: calc(100% + 5px); /* Posiciona el elemento por debajo del span */
+  left: 50%;
+  margin-left: 30px;
+  transform: translateX(-50%);
+  font: 10px/1em Verdana;
+}
+
+circle {
+  fill: none;
+  stroke-width: 20;
+  transform: rotate(-90deg);
+  transform-origin: 50%;
+  stroke-dasharray: 100 100;
+  stroke: #AAA;
+}
+
+circle:nth-child(2) {
+  stroke: var(--color);
+  stroke-dasharray: 0 100;
+  animation: rellenar .35s linear forwards;
+}
+
+.porcentajes .spanP {
+  font-size: 24px; /* Tamaño de fuente del porcentaje */
+  margin-left: 50px;;
 }
 
 /*//////////////////////////////////////////////////////////////////
