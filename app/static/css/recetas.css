@@ -1,0 +1,199 @@
+/*//////////////////////////////////////////////////////////////////
+[ FONT ]*/
+
+@font-face {
+    font-family: Ubuntu-Regular;
+    src: url('../fonts/ubuntu/Ubuntu-Regular.ttf'); 
+}
+
+@font-face {
+    font-family: Ubuntu-Bold;
+    src: url('../fonts/ubuntu/Ubuntu-Bold.ttf'); 
+}
+
+@font-face {
+    font-family: JosefinSans-Bold;
+    src: url('../fonts/JosefinSans/JosefinSans-Bold.ttf'); 
+}
+
+/*//////////////////////////////////////////////////////////////////
+[ NAVBAR ]*/
+
+nav {
+    background-color: #57b846;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    top: 0;
+}
+
+.nav-content ul {
+    display: flex;
+    color: white;
+    list-style-type: none;
+    margin-left: 0;
+}
+
+.nav-content ul li {
+    margin-right: 20px;
+    margin-left: 0;
+}
+
+.nav-content ul li a {
+    color: black;
+    text-decoration: none;
+    font-family: Ubuntu-Regular, sans-serif;
+    text-transform: uppercase;
+}
+
+.nav-content ul li a:hover {
+    color: white;
+    text-decoration: none;
+}
+
+.nav-brand {
+    margin-right: auto;
+    margin-left: 0;
+}
+
+.nav-brand a {
+    font-family: Ubuntu-Bold, sans-serif;
+    font-size: 25px;
+    color: white;
+    text-decoration: none;
+}
+
+.nav-brand a:hover {
+    text-decoration: none;
+    color: black;
+}
+
+/*//////////////////////////////////////////////////////////////////
+[ FOOTER ]*/
+
+.footer-links a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    padding: 10px;
+    text-align: center;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: black;
+    color: #fff;
+    position: fixed; /* Cambiado a fixed */
+    display: none; /* Agregado */
+}
+
+footer.show {
+    display: block; /* Agregado */
+}
+
+footer a {
+    color: #fff;
+}
+
+footer p {
+    margin: 10px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+form {
+    margin-top: 10px;
+}
+
+/*//////////////////////////////////////////////////////////////////
+[ RECETAS SECTION ]*/
+
+.recetas {
+    margin-top: 90px;
+    padding-top: 90px;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.recetas main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.recetas .title {
+    width: 100%;
+    margin-bottom: 30px;
+    text-align: center;
+    font-family: JosefinSans-Bold, sans-serif;
+    font-size: 30px;
+    color: #57b846;
+}
+
+.recetas .buscar-wrapper {
+    width: 100%;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.recetas .buscar-wrapper input[type="text"] {
+    width: 70%;
+    height: 40px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+}
+
+.recetas .buscar-wrapper button {
+    width: 20%;
+    height: 40px;
+    margin-left: 10px;
+    background-color: #57b846;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    outline: none;
+}
+
+.recetas .receta {
+    width: calc(33.33% - 20px); /* Cambiado a 33.33% */
+    margin-bottom: 40px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+.recetas .receta h2 {
+    font-family: Ubuntu-Bold, sans-serif;
+    font-size: 20px;
+    color: #57b846;
+    margin-bottom: 10px;
+    font-weight: bold; /* Agregado */
+}
+
+.recetas .receta ul {
+    padding-left: 20px;
+}
+
+.recetas .receta li {
+    margin-bottom: 5px;
+}
+
+@media (max-width: 768px) {
+    .recetas .receta {
+        width: 100%;
+    }
+}

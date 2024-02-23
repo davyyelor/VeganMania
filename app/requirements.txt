@@ -1,2 +1,6 @@
 Flask
 mysql-connector
+requests
+pandas
+openpyxl
+flask-login

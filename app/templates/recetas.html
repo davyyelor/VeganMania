@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VeganMania</title>
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/salad_bowl_food_vegetables_vegan_healthy_food_icon_207981.ico') }}">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/util.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/recetas.css') }}">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+<nav>
+    <div class="container">
+        <div class="nav-brand">
+            <a href="{{url_for('inicioUsu')}}">VeganMania</a>
+        </div>
+        <div class="nav-content">
+            <ul>
+                <li><a href="{{url_for('inicioUsu')}}">Inicio</a></li>
+                <li><a href="{{url_for('recetas')}}">Recetas</a></li>
+                <li><a href="{{url_for('inicioUsu')}}">Info Comida</a></li>
+                <li><a href="#">Contacto</a></li>
+                <li><a href="{{ url_for('logout')}}">Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="recetas">
+    <main>
+        <h1 class="title"> Buscar Recetas</h1>
+        <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
+            <input type="text" name="query" placeholder="Buscar receta">
+            <button type="submit">Buscar</button>
+        </form>
+
+        {% if recipes_list %}
+        <h2 style="text-align: center;">Recetas encontradas:</h2>
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+            {% for recipe in recipes_list %}
+            <div style="width: calc(33.33% - 20px); margin-bottom: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+                <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ recipe['Recipe'] }}</h2>
+                <ul style="padding-left: 20px;">
+                    {% for ingredient in recipe['Ingredients'].split('\n') %}
+                    <li>{{ ingredient }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </main>
+
+</div>
+<footer>
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2 text-center">
+            <ul class="list-inline list-social">
+                <li><a href="https://github.com/davyyelor" class="btn btn-link"><i class="fa fa-github fa-fw"></i> Github</a></li>
+                <li><a href="http://linkedin/in/pozhilov" class="btn btn-link"><i class="fa fa-linkedin fa-fw"></i> LinkedIn</a></li>
+            </ul>
+            &copy; 2024 VeganMania. CC BY-NC-SA 4.0 DEED Atribución-NoComercial-CompartirIgual 4.0 Internacional.
+        </div>
+
+    </div>
+</footer>
+
+
+</body>
+</html>

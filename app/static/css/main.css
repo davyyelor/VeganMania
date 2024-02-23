@@ -143,7 +143,7 @@ nav {
   position: fixed;
   width: 100%;
   z-index: 1000;
-
+  top: 0;
 }
 
 
@@ -621,6 +621,54 @@ circle:nth-child(2) {
 .porcentajes .spanP {
   font-size: 24px; /* Tamaño de fuente del porcentaje */
   margin-left: 50px;;
+}
+
+#search-box {
+  position: relative;
+  width: 100%;
+  margin: 0;
+}
+#search-form {
+  height: 32px;
+  border: 1px solid #feacae;
+  background-color: #fff;
+  overflow: hidden;
+}
+#search-text {
+  font-size: 14px;
+  color: #ddd;
+  border-width: 0;
+  background: transparent;
+}
+
+#search-box input[type="text"] {
+  width: 90%;
+  padding: 8px 0 12px 1em;
+  color: #333;
+  outline: none;
+}
+#search-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 34px;
+  width: 80px;
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+  line-height: 4px;
+  border-width: 0;
+  background-color: #cbf3ee;
+  cursor: pointer;
+}
+
+
+
+.recetas {
+  margin-top: 90px;
+  padding-top: 90px;
+  width: 80%;
+  margin: 0 auto;
 }
 
 /*//////////////////////////////////////////////////////////////////

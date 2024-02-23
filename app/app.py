@@ -6,10 +6,14 @@ import hashAPI
 from datetime import datetime
 
 app = Flask(__name__)
+from flask_login import LoginManager, login_required, current_user
 from flask import render_template, request, flash, url_for, redirect, session
 import mysql.connector as mysql
 app.config['SECRET_KEY'] = 'abcd1234@'
 app.config['SESSION_TYPE'] = 'filesystem'  # Puedes elegir otro tipo de sesión
+
+from edamamApi import run
+import pandas as pd
 
 '''
 La ruta raíz '/' se asocia a la función index(), que renderiza una plantilla HTML llamada 'index.html'. Esta ruta se utiliza para mostrar la página principal de la aplicación.
@@ -173,6 +177,29 @@ def inicioUsu():
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('login'))
     
+
+@app.route('/recetas', methods=['GET', 'POST'])
+def recetas():
+    if 'email' in session:  # Verificar si el usuario ha iniciado sesión
+        if request.method == 'POST':
+            ingredient = request.form['query']
+            run(ingredient)
+            dataframe_receta = pd.read_csv(f"{ingredient}_recipes_dataframe.csv")
+            
+            # Seleccionar solo las columnas necesarias (Recipe y Ingredients)
+            dataframe_receta = dataframe_receta[['Recipe', 'Ingredients']]
+            
+            # Convertir el DataFrame a una lista de diccionarios
+            recipes_list = dataframe_receta.to_dict(orient='records')
+            
+            return render_template('recetas.html', recipes_list=recipes_list)
+        return render_template('recetas.html', recipes_list=None)
+    else:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('login'))
+    
+
+
 
 # Dados las calorias introducidas por le cliente se actualiza las calorias consumidas de ese cliente en el dia actual
 @app.route('/añadirCalorias', methods=['GET', 'POST'])

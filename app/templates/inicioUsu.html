@@ -18,14 +18,14 @@
     <nav>
         <div class="container">
             <div class="nav-brand">
-                <a href="inicioUsu.html">VeganMania</a>
+                <a href="{{url_for('inicioUsu')}}">VeganMania</a>
             </div>
             <div class="nav-content">
                 <ul>
-                    <li><a href="inicioUsu.html">Inicio</a></li>
-                    <li><a href="recetas.html">Recetas</a></li>
-                    <li><a href="restaurantes.html">Restaurantes</a></li>
-                    <li><a href="contacto.html">Contacto</a></li>
+                    <li><a href="{{url_for('inicioUsu')}}">Inicio</a></li>
+                    <li><a href="{{url_for('recetas')}}">Recetas</a></li>
+                    <li><a href="{{url_for('inicioUsu')}}">Info Comida</a></li>
+                    <li><a href="#">Contacto</a></li>
                     <li><a href="{{ url_for('logout')}}">Cerrar Sesión</a></li>
                 </ul>
             </div>
