@@ -6,7 +6,6 @@ import hashAPI
 from datetime import datetime
 
 app = Flask(__name__)
-from flask_login import LoginManager, login_required, current_user
 from flask import render_template, request, flash, url_for, redirect, session
 import mysql.connector as mysql
 app.config['SECRET_KEY'] = 'abcd1234@'

@@ -23,8 +23,7 @@ def save_to_dataframe(recipes, ingredient):
             recipe_list.append({'Recipe': recipe_name, 'Ingredients': recipe_ingredients})
 
         df = pd.DataFrame(recipe_list)
-        df_head = df.head()  # Seleccionar solo las primeras 5 filas
-        df_head.to_csv(f"{ingredient}_recipes_dataframe.csv", index=False)
+        df.to_csv(f"{ingredient}_recipes_dataframe.csv", index=False)
         print(f"Recipes saved to {ingredient}_recipes_dataframe.csv")
     else:
         print("No recipes found")

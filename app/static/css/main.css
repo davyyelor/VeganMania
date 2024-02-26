@@ -195,10 +195,12 @@ section{
   margin-top: 100px;
 }
 section h1 {
-  font: 2em Arial, sans-serif;
-  border-radius: 10px;
-  color: darkblue;   
-  padding: 6px;
+  width: 100%;
+  margin-bottom: 30px;
+  text-align: center;
+  font-family: JosefinSans-Bold, sans-serif;
+  font-size: 30px;
+  color: #57b846;
 }
 
 .container .main-content {
@@ -208,6 +210,7 @@ section h1 {
 
 
 main {
+  margin-top: 15px;
   background-color: white;
 }
 
@@ -469,7 +472,6 @@ main {
 }
 
 
-
 /*//////////////////////////////////////////////////////////////////
 [ Responsive ]*/
 .list-social {
@@ -661,8 +663,6 @@ circle:nth-child(2) {
   background-color: #cbf3ee;
   cursor: pointer;
 }
-
-
 
 .recetas {
   margin-top: 90px;
