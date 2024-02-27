@@ -140,10 +140,10 @@ nav {
   background-color: #57b846;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   padding: 10px 0;
-  position: fixed;
   width: 100%;
   z-index: 1000;
   top: 0;
+  position: fixed;
 }
 
 
@@ -531,6 +531,11 @@ footer a:hover {
   text-decoration: underline;
 }
 
+footer {
+  margin-bottom: 0;
+  position: fixed;
+}
+
 form {
   margin-top: 10px;
 }
@@ -679,3 +684,88 @@ circle:nth-child(2) {
     padding-right: 15px;
   }
 }
+
+    /*//////////////////////////////////////////////////////////////////
+    [ RECETAS SECTION ]*/
+
+    .recetas {
+      margin-top: 90px;
+      padding-top: 90px;
+      width: 80%;
+      margin: 0 auto;
+      margin-bottom: 100px; /* Agrega margen inferior para dejar espacio al footer */
+  }
+
+  .recetas main {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+  }
+
+  .recetas .title {
+      width: 100%;
+      margin-bottom: 30px;
+      text-align: center;
+      font-family: JosefinSans-Bold, sans-serif;
+      font-size: 30px;
+      color: #57b846;
+  }
+
+  .recetas .buscar-wrapper {
+      width: 100%;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  }
+
+  .recetas .buscar-wrapper input[type="text"] {
+      width: 70%;
+      height: 40px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      outline: none;
+  }
+
+  .recetas .buscar-wrapper button {
+      width: 20%;
+      height: 40px;
+      margin-left: 10px;
+      background-color: #57b846;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      outline: none;
+  }
+
+  .recetas .receta {
+      width: calc(33.33% - 20px); /* Cambiado a 33.33% */
+      margin-bottom: 40px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+  }
+
+  .recetas .receta h2 {
+      font-family: Ubuntu-Bold, sans-serif;
+      font-size: 20px;
+      color: #57b846;
+      margin-bottom: 10px;
+      font-weight: bold; /* Agregado */
+  }
+
+  .recetas .receta ul {
+      padding-left: 20px;
+  }
+
+  .recetas .receta li {
+      margin-bottom: 5px;
+  }
+
+  @media (max-width: 768px) {
+      .recetas .receta {
+          width: 100%;
+      }
+  }

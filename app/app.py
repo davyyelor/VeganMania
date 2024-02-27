@@ -197,6 +197,9 @@ def recetas():
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('login'))
     
+@app.route('/infoComida', methods=['GET', 'POST'])
+def infoComida():
+    return render_template('infoComida.html')
 
 
 
