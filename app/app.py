@@ -9,10 +9,17 @@ app = Flask(__name__)
 from flask import render_template, request, flash, url_for, redirect, session
 import mysql.connector as mysql
 app.config['SECRET_KEY'] = 'abcd1234@'
-app.config['SESSION_TYPE'] = 'filesystem'  # Puedes elegir otro tipo de sesión
+app.config['SESSION_TYPE'] = 'filesystem'  #
 
-from edamamApi import recipe_search, nut_analysis
 import pandas as pd
+from edamamApi import Nut_Analysis, Search_recipe, Search_food, Nutrient_Guide, ingredients_table, food_table, write_files
+
+nutrition_appid = 'f6e716d9'
+nutrition_appkey = 'd1abec1a4aafd5edec03531a66177e48'
+recipes_appid = 'd7ebb8a1'
+recipes_appkey = '069e3065266fd36a874e3c8aebf06c5c'
+food_appid = '988976bd'
+food_appkey = '6e7b62840e9f82d56b401b80937a8d6d'
 
 '''
 La ruta raíz '/' se asocia a la función index(), que renderiza una plantilla HTML llamada 'index.html'. Esta ruta se utiliza para mostrar la página principal de la aplicación.
@@ -182,14 +189,13 @@ def recetas():
     if 'email' in session:  # Verificar si el usuario ha iniciado sesión
         if request.method == 'POST':
             ingredient = request.form['query']
-            dataframe_receta = recipe_search(ingredient)
-            
-            # Renderizar la plantilla con el DataFrame como contexto
-            return render_template('recetas.html', recipes_list=dataframe_receta.to_dict(orient='records'))
-        
-        # Si el método de solicitud es GET, renderizar la plantilla con None
-        return render_template('recetas.html', recipes_list=None)
-    
+            Response_Recipe = Search_recipe(recipes_appid, recipes_appkey, ingredient)
+            df_Recipe = ingredients_table(Response_Recipe)
+            if df_Recipe is not None:
+                return render_template('recetas.html', recipes_list=df_Recipe.to_dict(orient='records'))
+        else:
+            # Renderizar la plantilla 'recetas.html' sin datos de recetas
+            return render_template('recetas.html', recipes_list=None)
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('login'))

@@ -3,32 +3,22 @@
 {% block content %}
 <div class="recetas">
     <main>
-        <h1 class="title"> Buscar Información Nutricional</h1>
-        <form class="buscar-wrapper" action="{{ url_for('infoComida') }}" method="post">
-            <input type="text" name="query" placeholder="Buscar alimento">
+        <h1 class="title"> Buscar Recetas</h1>
+        <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
+            <input type="text" name="query" placeholder="Buscar recetas">
             <button type="submit">Buscar</button>
         </form>
         
-        {% if df_list %}
-        <h2 style="text-align: center;">Información nutricional encontrada:</h2>
-        <table>
-            <tr>
-                <th>Nombre del Nutriente</th>
-                <th>Cantidad</th>
-                <th>Unidad</th>
-            </tr>
-            {% for nutrient in df_list %}
-            <tr>
-                <td>{{ nutrient['label'] }}</td>
-                <td>{{ nutrient['quantity'] }}</td>
-                <td>{{ nutrient['unit'] }}</td>
-            </tr>
+        {% if recipes_list%}
+        <h2 style="text-align: center;">Recetas encontradas:</h2>
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+            {% for recipe in recipes_list %}
+            <div style="width: calc(33.33% - 20px); margin-bottom: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+                <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ recipe['Types'] }}</h2>
+                <img src="{{ recipe['image'] }}" alt="{{ recipe['Types'] }}" style="width: 50%; height: auto; border-radius: 10px;">
+            </div>
             {% endfor %}
-        </table>
-        {% endif %}
-
-        {% if mensaje %}
-        <p>{{ mensaje }}</p>
+        </div>
         {% endif %}
     </main>
 </div>
