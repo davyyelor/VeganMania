@@ -11,7 +11,7 @@ import mysql.connector as mysql
 app.config['SECRET_KEY'] = 'abcd1234@'
 app.config['SESSION_TYPE'] = 'filesystem'  # Puedes elegir otro tipo de sesión
 
-from edamamApi import run
+from edamamApi import recipe_search, nut_analysis
 import pandas as pd
 
 '''
@@ -182,24 +182,33 @@ def recetas():
     if 'email' in session:  # Verificar si el usuario ha iniciado sesión
         if request.method == 'POST':
             ingredient = request.form['query']
-            run(ingredient)
-            dataframe_receta = pd.read_csv(f"{ingredient}_recipes_dataframe.csv")
+            dataframe_receta = recipe_search(ingredient)
             
-            # Seleccionar solo las columnas necesarias (Recipe y Ingredients)
-            dataframe_receta = dataframe_receta[['Recipe', 'Ingredients']]
-            
-            # Convertir el DataFrame a una lista de diccionarios
-            recipes_list = dataframe_receta.to_dict(orient='records')
-            
-            return render_template('recetas.html', recipes_list=recipes_list)
+            # Renderizar la plantilla con el DataFrame como contexto
+            return render_template('recetas.html', recipes_list=dataframe_receta.to_dict(orient='records'))
+        
+        # Si el método de solicitud es GET, renderizar la plantilla con None
         return render_template('recetas.html', recipes_list=None)
+    
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('login'))
     
+
 @app.route('/infoComida', methods=['GET', 'POST'])
 def infoComida():
-    return render_template('infoComida.html')
+    if request.method == 'POST':
+        food = request.form['query']
+        df = nut_analysis(food)
+        if df is not None:
+            df_list = df.to_dict(orient='records')
+            return render_template('infoComida.html', df_list=df_list)
+        else:
+            mensaje = f"No se encontraron datos nutricionales para {food}."
+            return render_template('infoComida.html', mensaje=mensaje)
+
+    mensaje = "Bienvenido a la página de información sobre comida"
+    return render_template('infoComida.html', mensaje=mensaje)
 
 
 

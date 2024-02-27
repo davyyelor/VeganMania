@@ -1,36 +1,53 @@
 import requests
 import pandas as pd
-
-
+import logging
 
 def recipe_search(ingredient):
-    app_id = 'd7ebb8a1'  # Replace with your Edamam API app ID
-    app_key = '069e3065266fd36a874e3c8aebf06c5c'  # Replace with your Edamam API app key
+    app_id_recipe = 'd7ebb8a1'  
+    app_key_recipe = '069e3065266fd36a874e3c8aebf06c5c'  
     result = requests.get(
-        'https://api.edamam.com/search?q={}&app_id={}&app_key={}'.format(ingredient, app_id, app_key)
+        'https://api.edamam.com/search?q={}&app_id={}&app_key={}'.format(ingredient, app_id_recipe, app_key_recipe)
     )
     data = result.json()
-    return data['hits']
-
-def save_to_dataframe(recipes, ingredient):
-    if recipes:
-        recipe_list = []
-
-        for recipe in recipes:
-            recipe_info = recipe['recipe']
-            recipe_name = recipe_info['label']
-            recipe_ingredients = "\n".join(recipe_info['ingredientLines'])  # Convertir la lista de ingredientes en una cadena
-            recipe_list.append({'Recipe': recipe_name, 'Ingredients': recipe_ingredients})
-
-        df = pd.DataFrame(recipe_list)
-        df.to_csv(f"{ingredient}_recipes_dataframe.csv", index=False)
-        print(f"Recipes saved to {ingredient}_recipes_dataframe.csv")
-    else:
-        print("No recipes found")
-
-
     
-def run(ingredient):
-    results = recipe_search(ingredient)
-    save_to_dataframe(results, ingredient)
+    # Extract recipe data
+    recipe_list = []
+    for hit in data['hits']:
+        recipe = hit['recipe']
+        recipe_list.append({
+            'Recipe': recipe['label'],
+            'Ingredients': '\n'.join(recipe['ingredientLines'])
+        })
+    
+    return pd.DataFrame(recipe_list)
 
+def nut_analysis(food):
+    app_id = 'f6e716d9'  
+    app_key = 'd1abec1a4aafd5edec03531a66177e48' 
+    url_req_nutr = 'https://api.edamam.com/api/nutrition-data'
+
+    params_nutr= {
+        'app_id': app_id,
+        'app_key': app_key,
+        'ingr': food
+    }
+    
+    response = requests.get(url_req_nutr, params=params_nutr)
+
+    if response.status_code == 401:
+        logging.error('Invalid API Key')
+
+    data = response.json()
+    return data
+
+def save_to_dataframe(recipe_df, nut_df):
+    recipe_df.to_csv('recipes.csv', index=False)
+    nut_df.to_csv('nutritional_analysis.csv', index=False)
+    print("Recipes saved to recipes.csv")
+    print("Nutritional analysis saved to nutritional_analysis.csv")
+
+if __name__ == "__main__":
+    ingredient = '1 apple'
+    recipe_data = recipe_search(ingredient)
+    nut_data = nut_analysis(ingredient)
+    save_to_dataframe(recipe_data, pd.DataFrame([nut_data]))

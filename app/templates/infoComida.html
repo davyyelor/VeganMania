@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
-    <div class="main-content">
-        <section>
-            print("Hello")
-        </section>
-    </div>
+<div class="recetas">
+    <main>
+        <h1 class="title"> Buscar Información Nutricional</h1>
+        <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
+            <input type="text" name="query" placeholder="Buscar info">
+            <button type="submit">Buscar</button>
+        </form>
+    </main>
 </div>
 {% endblock %}

@@ -3,43 +3,33 @@
 {% block content %}
 <div class="recetas">
     <main>
-        <h1 class="title"> Buscar Recetas</h1>
-        <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
-            <input type="text" name="query" placeholder="Buscar receta">
+        <h1 class="title"> Buscar Información Nutricional</h1>
+        <form class="buscar-wrapper" action="{{ url_for('infoComida') }}" method="post">
+            <input type="text" name="query" placeholder="Buscar alimento">
             <button type="submit">Buscar</button>
-            <button type="submit" name="vegano" {% if not mostrar_vegano %}disabled{% endif %}>Vegano</button>
-            <button type="submit" name="vegetariano" {% if not mostrar_vegetariano %}disabled{% endif %}>Vegetariano</button>
-            <select name="no_deseados">
-                <option value="">Ingredientes no deseados</option>
-                {% for ingrediente in lista_no_deseados %}
-                    <option value="{{ ingrediente }}">{{ ingrediente }}</option>
-                {% endfor %}
-            </select>
-            <select name="favoritos">
-                <option value="">Ingredientes favoritos/deseados</option>
-                {% for ingrediente in lista_favoritos %}
-                    <option value="{{ ingrediente }}">{{ ingrediente }}</option>
-                {% endfor %}
-            </select>
         </form>
         
-
-        {% if recipes_list %}
-        <h2 style="text-align: center;">Recetas encontradas:</h2>
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
-            {% for recipe in recipes_list %}
-            <div style="width: calc(33.33% - 20px); margin-bottom: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-                <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ recipe['Recipe'] }}</h2>
-                <ul style="padding-left: 20px;">
-                    {% for ingredient in recipe['Ingredients'].split('\n') %}
-                    <li>{{ ingredient }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
+        {% if df_list %}
+        <h2 style="text-align: center;">Información nutricional encontrada:</h2>
+        <table>
+            <tr>
+                <th>Nombre del Nutriente</th>
+                <th>Cantidad</th>
+                <th>Unidad</th>
+            </tr>
+            {% for nutrient in df_list %}
+            <tr>
+                <td>{{ nutrient['label'] }}</td>
+                <td>{{ nutrient['quantity'] }}</td>
+                <td>{{ nutrient['unit'] }}</td>
+            </tr>
             {% endfor %}
-        </div>
+        </table>
         {% endif %}
 
+        {% if mensaje %}
+        <p>{{ mensaje }}</p>
+        {% endif %}
     </main>
 </div>
 {% endblock %}
