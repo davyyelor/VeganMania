@@ -1,3 +1,7 @@
+#####################################################################################################################################
+###################################################### Importaciones ##############################################################
+#####################################################################################################################################
+
 from flask import Flask
 import hashlib
 import datetime
@@ -10,25 +14,24 @@ from flask import render_template, request, flash, url_for, redirect, session
 import mysql.connector as mysql
 app.config['SECRET_KEY'] = 'abcd1234@'
 app.config['SESSION_TYPE'] = 'filesystem'  #
-
 import pandas as pd
-from edamamApi import Nut_Analysis, Search_recipe, Search_food, Nutrient_Guide, ingredients_table, food_table, write_files
 
-nutrition_appid = 'f6e716d9'
-nutrition_appkey = 'd1abec1a4aafd5edec03531a66177e48'
-recipes_appid = 'd7ebb8a1'
-recipes_appkey = '069e3065266fd36a874e3c8aebf06c5c'
-food_appid = '988976bd'
-food_appkey = '6e7b62840e9f82d56b401b80937a8d6d'
+from edamamApi import buscar_receta
 
-'''
-La ruta raíz '/' se asocia a la función index(), que renderiza una plantilla HTML llamada 'index.html'. Esta ruta se utiliza para mostrar la página principal de la aplicación.
-'''
+
+#####################################################################################################################################
+###################################################### Index ##############################################################
+#####################################################################################################################################
+
 @app.route('/')
 def index():
     session.pop('email', None)
     return render_template('index.html')
 
+
+#####################################################################################################################################
+###################################################### Registro/Login ##############################################################
+#####################################################################################################################################
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
@@ -145,6 +148,10 @@ def login():
     return render_template('login.html')
 
 
+#####################################################################################################################################
+###################################################### Inicio Usu ##############################################################
+#####################################################################################################################################
+
 @app.route('/inicioUsu')
 def inicioUsu():
     if 'email' in session:
@@ -186,35 +193,37 @@ def inicioUsu():
 
 @app.route('/recetas', methods=['GET', 'POST'])
 def recetas():
-    if 'email' in session:  # Verificar si el usuario ha iniciado sesión
-        if request.method == 'POST':
-            ingredient = request.form['query']
-            Response_Recipe = Search_recipe(recipes_appid, recipes_appkey, ingredient)
-            df_Recipe = ingredients_table(Response_Recipe)
-            if df_Recipe is not None:
-                return render_template('recetas.html', recipes_list=df_Recipe.to_dict(orient='records'))
+    if request.method == 'POST':
+        food = request.form['query']
+        if food == '':
+            return render_template('recetas.html')
         else:
-            # Renderizar la plantilla 'recetas.html' sin datos de recetas
-            return render_template('recetas.html', recipes_list=None)
+            buscar_receta(food)
+            dataframe_receta = pd.read_csv(f"{food}_recipes_dataframe.csv")
+            
+            # Seleccionar solo las columnas necesarias (Recipe y Ingredients)
+            dataframe_receta = dataframe_receta[['name', 'image']]
+            
+            # Convertir el DataFrame a una lista de diccionarios
+            recipes_list = dataframe_receta.to_dict(orient='records')
+
+            return render_template('recetas.html', recipes_list=recipes_list)
+            
+
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
-        return redirect(url_for('login'))
+        return render_template('recetas.html', recetas=None)
+    
+@app.route('/recetas/<nombre_receta>')
+def mostrar_receta(nombre_receta):
+    return render_template('recetaX.html', nombre_receta=nombre_receta)
+
+    
     
 
 @app.route('/infoComida', methods=['GET', 'POST'])
 def infoComida():
-    if request.method == 'POST':
-        food = request.form['query']
-        df = nut_analysis(food)
-        if df is not None:
-            df_list = df.to_dict(orient='records')
-            return render_template('infoComida.html', df_list=df_list)
-        else:
-            mensaje = f"No se encontraron datos nutricionales para {food}."
-            return render_template('infoComida.html', mensaje=mensaje)
+    print("Hello World!")
 
-    mensaje = "Bienvenido a la página de información sobre comida"
-    return render_template('infoComida.html', mensaje=mensaje)
 
 
 
@@ -247,8 +256,6 @@ def añadirCalorias():
             flash(f'¡Error al añadir las calorías: {str(e)}', 'error')
 
     return render_template('BuenHome.html')
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

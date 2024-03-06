@@ -769,3 +769,11 @@ circle:nth-child(2) {
           width: 100%;
       }
   }
+
+  .zoom {
+    transition: transform 0.3s;
+  }
+
+  .zoom:hover {
+      transform: scale(1.1);
+  }

@@ -1,6 +1,5 @@
 import requests
 import pandas as pd
-import openpyxl
 import logging
 
 def Nut_Analysis(id_nutrition, key_nutrition, query):
@@ -49,15 +48,6 @@ def Nutrient_Guide(response):
     except Exception as e:
         print(e)
 
-def ingredients_table(response):
-    try:
-        list_label = [element_hits.get('recipe').get('label') for element_hits in response.get('hits')]
-        list_ingredientes = [element_ingre.get('recipe').get('ingredients') for element_ingre in response.get('hits')]
-        df_ = pd.DataFrame(list_ingredientes, index=list_label).stack().apply(pd.Series).drop(columns=['foodId'])
-        df_Recipe = df_.rename_axis(["Types", "Items"], axis="rows").rename(columns={"foodCategory": "food category", "text": "ingredient name"})
-        return df_Recipe
-    except Exception as e:
-        print(e)
 
 def food_table(response):
     try:
@@ -84,6 +74,29 @@ def write_files(df_Nutrition, df_totalDaily, df_total_Nut, df_Recipe, df_food_ta
     
     df_Recipe.to_csv(path_Recipe)
     df_food_table.to_csv(path_food)
+
+def buscar_receta(alimento):
+    recipes_appkey = '069e3065266fd36a874e3c8aebf06c5c'
+    recipes_appid = 'd7ebb8a1'
+    data = Search_recipe(recipes_appid, recipes_appkey, alimento)
+    recipes = []
+    for recipe in data['hits']:
+        recipe_info = {
+            'name': recipe['recipe']['label'],
+            'image': recipe['recipe']['image'],
+            'recipe_link': recipe['recipe']['url'],
+            'diet_labels': ', '.join(recipe['recipe']['dietLabels']),
+            'health_labels': ', '.join(recipe['recipe']['healthLabels']),
+            'ingredients': recipe['recipe']['ingredientLines']
+        }
+        recipes.append(recipe_info)
+
+    df = pd.DataFrame(recipes)
+    df.to_csv(f"{alimento}_recipes_dataframe.csv", index=False)
+
+
+
+
 
 '''
 # Claves / ID's de las aplicaciones asignadas

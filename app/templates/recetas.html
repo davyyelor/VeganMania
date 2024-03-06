@@ -3,23 +3,26 @@
 {% block content %}
 <div class="recetas">
     <main>
-        <h1 class="title"> Buscar Recetas</h1>
+        <h1 class="title">Buscar Recetas</h1>
         <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
             <input type="text" name="query" placeholder="Buscar recetas">
             <button type="submit">Buscar</button>
         </form>
         
-        {% if recipes_list%}
+        {% if recipes_list %}
         <h2 style="text-align: center;">Recetas encontradas:</h2>
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
             {% for recipe in recipes_list %}
             <div style="width: calc(33.33% - 20px); margin-bottom: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-                <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ recipe['Types'] }}</h2>
-                <img src="{{ recipe['image'] }}" alt="{{ recipe['Types'] }}" style="width: 50%; height: auto; border-radius: 10px;">
+                <a href="{{ url_for('mostrar_receta', nombre_receta=recipe['name']) }}">
+                    <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ recipe['name'] }}</h2>
+                    <img src="{{ recipe.image }}" alt="Imagen de la receta" style="max-width: 100%; height: auto;" class="zoom">
+                </a>
             </div>
             {% endfor %}
         </div>
         {% endif %}
+        
     </main>
 </div>
 {% endblock %}
