@@ -202,7 +202,7 @@ def recetas():
             dataframe_receta = pd.read_csv(f"{food}_recipes_dataframe.csv")
             
             # Seleccionar solo las columnas necesarias (Recipe y Ingredients)
-            dataframe_receta = dataframe_receta[['name', 'image']]
+            dataframe_receta = dataframe_receta[['name','image','recipe_link','diet_labels','health_labels','ingredients']]
             
             # Convertir el DataFrame a una lista de diccionarios
             recipes_list = dataframe_receta.to_dict(orient='records')
@@ -225,7 +225,9 @@ def infoComida():
     print("Hello World!")
 
 
-
+#####################################################################################################################################
+###################################################### Funciones Auxiliares ##############################################################
+#####################################################################################################################################
 
 # Dados las calorias introducidas por le cliente se actualiza las calorias consumidas de ese cliente en el dia actual
 @app.route('/añadirCalorias', methods=['GET', 'POST'])
