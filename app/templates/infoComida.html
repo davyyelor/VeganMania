@@ -3,7 +3,11 @@
 {% block content %}
 <div class="recetas">
     <main>
-        <h1 class="title">Información Nutricional</h1>
+        <h1 class="title">Buscar Información Nutricional</h1>
+        <form class="buscar-wrapper" action="{{ url_for('infoComida') }}" method="post">
+            <input type="text" name="query" placeholder="Buscar info">
+            <button type="submit">Buscar</button>
+        </form>
 
         {% if analisis is not none %}
             {% if not analisis.empty %}
