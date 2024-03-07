@@ -20,13 +20,22 @@
         
         {% if recipes_list %}
         <h2 style="text-align: center;">Recetas encontradas:</h2>
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+        <div class="recipe-container" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
             {% for recipe in recipes_list %}
-            <div style="width: calc(33.33% - 20px); margin-bottom: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+            <div class="recipe" style="width: calc(33.33% - 20px); margin-bottom: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
                 <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ recipe['name'] }}</h2>
-                <a href="{{ url_for('mostrar_receta', nombre_receta=recipe['name'], food=recipe['name']) }}">
-                    <img src="{{ recipe['image'] }}" alt="Imagen de la receta" style="max-width: 100%; height: auto;" class="zoom">
-                </a>
+                <img src="{{ recipe['image'] }}" alt="Imagen de la receta" style="max-width: 100%; height: auto;" class="zoom" onclick="showRecipeDetails(this)">
+                <div class="recipe-details" style="display: none; padding: 10px;">
+                    <p><strong>Diet Labels:</strong> {{ recipe['diet_labels'] }}</p>
+                    <p><strong>Health Labels:</strong> {{ recipe['health_labels'] }}</p>
+                    <p><strong>Ingredients:</strong></p>
+                    <ul style="padding-left: 20px;">
+                        {% for ingredient in recipe['ingredients'].split("', '") %}
+                            <li>{{ ingredient|replace("'", "") }}</li>
+                        {% endfor %}
+                    </ul>
+                    <p><a href="{{ recipe['recipe_link'] }}" target="_blank">Link a la receta</a></p>
+                </div>
             </div>
             {% endfor %}
         </div>
@@ -34,4 +43,25 @@
         
     </main>
 </div>
+
+<script>
+    function showRecipeDetails(image) {
+        const recipeContainer = image.closest('.recipe-container');
+        const recipes = recipeContainer.querySelectorAll('.recipe');
+        const clickedRecipe = image.closest('.recipe');
+        
+        // Oculta las recetas no seleccionadas
+        recipes.forEach(recipe => {
+            if (recipe !== clickedRecipe) {
+                recipe.style.display = 'none';
+            }
+        });
+        
+        // Muestra los detalles de la receta seleccionada y ajusta su ancho
+        const recipeDetails = clickedRecipe.querySelector('.recipe-details');
+        recipeDetails.style.display = 'block';
+        clickedRecipe.style.width = '100%';
+    }
+</script>
+
 {% endblock %}

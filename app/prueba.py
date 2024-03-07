@@ -1,7 +1,5 @@
-from edamamApi import buscar_receta
+from edamamApi import analisisNutricional
 
-recetas = buscar_receta('ribs')
+input = analisisNutricional('1 egg')
 
-recetas = recetas.to_dict(orient='records')
-
-print(recetas)
+print(input) 

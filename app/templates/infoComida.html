@@ -3,11 +3,36 @@
 {% block content %}
 <div class="recetas">
     <main>
-        <h1 class="title"> Buscar Información Nutricional</h1>
-        <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
-            <input type="text" name="query" placeholder="Buscar info">
-            <button type="submit">Buscar</button>
-        </form>
+        <h1 class="title">Información Nutricional</h1>
+
+        {% if analisis is not none %}
+            {% if not analisis.empty %}
+                <div class="info-nutricional">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nutriente</th>
+                                <th>Cantidad</th>
+                                <th>Unidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for index, row in analisis.iterrows() %}
+                                <tr>
+                                    <td>{{ row['label'] }}</td>
+                                    <td>{{ row['quantity'] }}</td>
+                                    <td>{{ row['unit'] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No se ha encontrado información nutricional para esta comida.</p>
+            {% endif %}
+        {% else %}
+            <p>No se ha realizado un análisis nutricional.</p>
+        {% endif %}
     </main>
 </div>
 {% endblock %}

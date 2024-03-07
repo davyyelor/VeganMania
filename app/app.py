@@ -16,7 +16,7 @@ app.config['SECRET_KEY'] = 'abcd1234@'
 app.config['SESSION_TYPE'] = 'filesystem'  #
 import pandas as pd
 
-from edamamApi import buscar_receta
+from edamamApi import buscar_receta, analisisNutricional
 
 global recipes_list
 recipes_list = []
@@ -215,26 +215,27 @@ def recetas():
     else:
         return render_template('recetas.html', recipes_list=None)
 
-    
-@app.route('/recetas/<nombre_receta>')
-def mostrar_receta(nombre_receta):
-    global recipes_list
-    if recipes_list:
-        for recipe in recipes_list:
-            if recipe['name'] == nombre_receta:
-                return render_template('recetaX.html', selected_recipe=recipe)
-        flash('No se encontró la receta seleccionada.', 'error')
-        return redirect(url_for('recetas'))
-    else:
-        flash('No se proporcionó ninguna lista de recetas.', 'error')
-        return redirect(url_for('recetas'))
 
     
     
 
 @app.route('/infoComida', methods=['GET', 'POST'])
 def infoComida():
-    print("Hello World!")
+    if request.method == 'POST':
+        food = request.form['query']
+        if food == '':
+            return render_template('infoComida.html')
+        else:
+            analisis_data = analisisNutricional(food)
+            if analisis_data is not None:
+                analisis = pd.DataFrame(analisis_data)
+                flash('¡Análisis nutricional realizado con éxito!', 'success')
+                return render_template('infoComida.html', analisis=analisis)
+            flash('¡No se pudo realizar el análisis nutricional!', 'error')
+            return render_template('infoComida.html')
+        
+    else:
+        return render_template('infoComida.html', analisis=None)
 
 
 #####################################################################################################################################

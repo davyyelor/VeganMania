@@ -94,7 +94,14 @@ def buscar_receta(alimento):
     df = pd.DataFrame(recipes)
     df.to_csv(f"{alimento}_recipes_dataframe.csv", index=False)
 
+def analisisNutricional(alimento):
+    nutrition_appid = 'f6e716d9'
+    nutrition_appkey = 'd1abec1a4aafd5edec03531a66177e48'
 
+    Response_Nut = Nut_Analysis(nutrition_appid, nutrition_appkey, alimento)
+
+    df_Nutrition, df_totalDaily, df_total_Nut, Nutrient_Cal, totalWeight = Nutrient_Guide(Response_Nut)
+    return df_Nutrition
 
 
 

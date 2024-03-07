@@ -533,7 +533,6 @@ footer a:hover {
 
 footer {
   margin-bottom: 0;
-  position: fixed;
 }
 
 form {
@@ -763,8 +762,6 @@ circle:nth-child(2) {
   .recetas .receta li {
       margin-bottom: 5px;
   }
-
-  
 
   @media (max-width: 768px) {
       .recetas .receta {
