@@ -4,6 +4,15 @@
 <div class="recetas">
     <main>
         <h1 class="title">Buscar Recetas</h1>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
         <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
             <input type="text" name="query" placeholder="Buscar recetas">
             <button type="submit">Buscar</button>
@@ -15,7 +24,7 @@
             {% for recipe in recipes_list %}
             <div style="width: calc(33.33% - 20px); margin-bottom: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
                 <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ recipe['name'] }}</h2>
-                <a href="{{ url_for('mostrar_receta', nombre_receta=recipe['name']) }}">
+                <a href="{{ url_for('mostrar_receta', nombre_receta=recipe['name'], food=recipe['name']) }}">
                     <img src="{{ recipe['image'] }}" alt="Imagen de la receta" style="max-width: 100%; height: auto;" class="zoom">
                 </a>
             </div>

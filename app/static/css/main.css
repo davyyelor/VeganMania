@@ -764,6 +764,8 @@ circle:nth-child(2) {
       margin-bottom: 5px;
   }
 
+  
+
   @media (max-width: 768px) {
       .recetas .receta {
           width: 100%;

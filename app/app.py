@@ -18,6 +18,9 @@ import pandas as pd
 
 from edamamApi import buscar_receta
 
+global recipes_list
+recipes_list = []
+
 
 #####################################################################################################################################
 ###################################################### Index ##############################################################
@@ -193,6 +196,7 @@ def inicioUsu():
 
 @app.route('/recetas', methods=['GET', 'POST'])
 def recetas():
+    global recipes_list
     if request.method == 'POST':
         food = request.form['query']
         if food == '':
@@ -208,14 +212,22 @@ def recetas():
             recipes_list = dataframe_receta.to_dict(orient='records')
 
             return render_template('recetas.html', recipes_list=recipes_list)
-            
-
     else:
-        return render_template('recetas.html', recetas=None)
+        return render_template('recetas.html', recipes_list=None)
+
     
 @app.route('/recetas/<nombre_receta>')
 def mostrar_receta(nombre_receta):
-    return render_template('recetaX.html', nombre_receta=nombre_receta)
+    global recipes_list
+    if recipes_list:
+        for recipe in recipes_list:
+            if recipe['name'] == nombre_receta:
+                return render_template('recetaX.html', selected_recipe=recipe)
+        flash('No se encontró la receta seleccionada.', 'error')
+        return redirect(url_for('recetas'))
+    else:
+        flash('No se proporcionó ninguna lista de recetas.', 'error')
+        return redirect(url_for('recetas'))
 
     
     
