@@ -1,7 +1,7 @@
 #####################################################################################################################################
 ###################################################### Importaciones ##############################################################
 #####################################################################################################################################
-
+from deep_translator import GoogleTranslator
 from flask import Flask
 import hashlib
 import datetime
@@ -59,7 +59,6 @@ def registro():
             connection = mysql.connect(**config)
             cur = connection.cursor()
 
-            # Verificar si el usuario ya existe
             cur.execute('SELECT * FROM clientes WHERE email = %s', (email,))
             user = cur.fetchone()
 
@@ -67,22 +66,18 @@ def registro():
                 flash('¡Ya existe un usuario con ese email!', 'error')
                 return redirect(url_for('registro'))
 
-            # Generar hash de la contraseña
             hashed_password = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
 
 
-            # Insertar datos en la tabla clientes
             cur.execute('INSERT INTO clientes (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero, actividad) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (nombre, usuario, email, hashed_password, fechaNacimiento, peso, altura, genero, actividad))
             connection.commit()
 
-            # Obtener el ID del cliente recién registrado
             cur.execute('SELECT id FROM clientes WHERE email = %s', (email,))
             cliente_id = cur.fetchone()
 
             if cliente_id:
                 cliente_id = cliente_id[0]
 
-                # Insertar un registro en la tabla registro_calorias_diario
                 fecha_actual = datetime.now().date()
                 cur.execute('INSERT INTO registro_calorias_diario (cliente_id, calorias_consumidas, fecha_consumo) VALUES (%s, %s, %s)', (cliente_id, 0, fecha_actual))
                 connection.commit()
@@ -129,11 +124,10 @@ def login():
                 flash('¡Inicio de sesión exitoso!', 'success')
                 cliente_id = user[0]
 
-                # Comprobar si existe un registro de calorías para hoy
                 cur.execute('SELECT id FROM registro_calorias_diario WHERE cliente_id = %s AND fecha_consumo = CURDATE()', (cliente_id,))
                 registro_hoy = cur.fetchone()
 
-                if not registro_hoy:  # Si no existe registro de hoy, crea uno
+                if not registro_hoy:  
                     cur.execute('INSERT INTO registro_calorias_diario (cliente_id, calorias_consumidas, fecha_consumo) VALUES (%s, %s, %s)', (cliente_id, 0, datetime.now().date()))
                     connection.commit()
                     flash('¡Registro de calorías diario creado!', 'success')
@@ -183,7 +177,7 @@ def inicioUsu():
                 calorias_restantes = calorias_objetivo - calorias_consumidas
 
                 return render_template('inicioUsu.html', nombre=nombre, calorias_objetivo=calorias_objetivo, calorias_consumidas=calorias_consumidas, calorias_restantes=calorias_restantes)
-            # Obtener el ID del cliente actual
+
         except Exception as e:
             flash(f'Error al cargar la página de inicio: {str(e)}', 'error')
 
@@ -204,11 +198,8 @@ def recetas():
         else:
             buscar_receta(food)
             dataframe_receta = pd.read_csv(f"{food}_recipes_dataframe.csv")
-            
-            # Seleccionar solo las columnas necesarias (Recipe y Ingredients)
             dataframe_receta = dataframe_receta[['name','image','recipe_link','diet_labels','health_labels','ingredients']]
-            
-            # Convertir el DataFrame a una lista de diccionarios
+
             recipes_list = dataframe_receta.to_dict(orient='records')
 
             return render_template('recetas.html', recipes_list=recipes_list)
@@ -241,8 +232,6 @@ def infoComida():
 #####################################################################################################################################
 ###################################################### Funciones Auxiliares ##############################################################
 #####################################################################################################################################
-
-# Dados las calorias introducidas por le cliente se actualiza las calorias consumidas de ese cliente en el dia actual
 @app.route('/añadirCalorias', methods=['GET', 'POST'])
 def añadirCalorias():
     if request.method == 'POST':
@@ -271,6 +260,9 @@ def añadirCalorias():
             flash(f'¡Error al añadir las calorías: {str(e)}', 'error')
 
     return render_template('BuenHome.html')
+
+def traductor(texto):
+    return GoogleTranslator(source='auto', target='de').translate(text=texto)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

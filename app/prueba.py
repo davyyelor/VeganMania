@@ -1,5 +1,3 @@
-from edamamApi import analisisNutricional
+from deep_translator import GoogleTranslator
 
-input = analisisNutricional('1 egg')
-
-print(input) 
+print(GoogleTranslator().get_supported_languages())
