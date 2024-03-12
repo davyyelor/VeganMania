@@ -3,3 +3,4 @@ mysql-connector
 requests
 pandas
 openpyxl
+deep_translator

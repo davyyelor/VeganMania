@@ -188,11 +188,13 @@ def inicioUsu():
         return redirect(url_for('login'))
     
 
+
 @app.route('/recetas', methods=['GET', 'POST'])
 def recetas():
     global recipes_list
     if request.method == 'POST':
         food = request.form['query']
+        food = traductor(food, 'en')
         if food == '':
             return render_template('recetas.html')
         else:
@@ -200,11 +202,16 @@ def recetas():
             dataframe_receta = pd.read_csv(f"{food}_recipes_dataframe.csv")
             dataframe_receta = dataframe_receta[['name','image','recipe_link','diet_labels','health_labels','ingredients']]
 
+            dataframe_receta = dataframe_receta.dropna()
+
             recipes_list = dataframe_receta.to_dict(orient='records')
 
-            return render_template('recetas.html', recipes_list=recipes_list)
+
+
+            return render_template('recetas.html', recipes_list=recipes_list, traductor=traductor) # Pasar la función traductor al renderizar la plantilla
     else:
-        return render_template('recetas.html', recipes_list=None)
+        return render_template('recetas.html', recipes_list=None, traductor=traductor) # Pasar la función traductor al renderizar la plantilla
+
 
 
     
@@ -214,12 +221,14 @@ def recetas():
 def infoComida():
     if request.method == 'POST':
         food = request.form['query']
+        food = traductor(food, 'en')
         if food == '':
             return render_template('infoComida.html')
         else:
             analisis_data = analisisNutricional(food)
             if analisis_data is not None:
                 analisis = pd.DataFrame(analisis_data)
+                analisis.columns = [traductor(col, 'es') for col in analisis.columns]
                 flash('¡Análisis nutricional realizado con éxito!', 'success')
                 return render_template('infoComida.html', analisis=analisis)
             flash('¡No se pudo realizar el análisis nutricional!', 'error')
@@ -261,8 +270,12 @@ def añadirCalorias():
 
     return render_template('BuenHome.html')
 
-def traductor(texto):
-    return GoogleTranslator(source='auto', target='de').translate(text=texto)
-
+def traductor(texto, form):
+    if form == 'es':
+        return GoogleTranslator(source='auto', target='es').translate(text=texto)
+    elif form == 'en':
+        return GoogleTranslator(source='auto', target='en').translate(text=texto)
+    
+    
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
