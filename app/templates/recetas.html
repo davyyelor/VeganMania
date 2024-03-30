@@ -39,6 +39,7 @@
             </div>
             {% endfor %}
         </div>
+        <button id="volverBtn" style="display: none;" onclick="showAllRecipes()">Volver y ver todas las recetas</button>
         {% endif %}
         
     </main>
@@ -61,6 +62,24 @@
         const recipeDetails = clickedRecipe.querySelector('.recipe-details');
         recipeDetails.style.display = 'block';
         clickedRecipe.style.width = '100%';
+
+        // Muestra el botón de volver
+        document.getElementById('volverBtn').style.display = 'block';
+    }
+
+    function showAllRecipes() {
+        const recipeContainers = document.querySelectorAll('.recipe-container');
+        recipeContainers.forEach(container => {
+            const recipes = container.querySelectorAll('.recipe');
+            recipes.forEach(recipe => {
+                recipe.style.display = 'block';
+                recipe.style.width = 'calc(33.33% - 20px)';
+                const recipeDetails = recipe.querySelector('.recipe-details');
+                recipeDetails.style.display = 'none';
+            });
+        });
+
+        document.getElementById('volverBtn').style.display = 'none';
     }
 </script>
 
