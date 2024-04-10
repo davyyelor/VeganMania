@@ -75,6 +75,16 @@
                         {% endwith %}
                     </div>
                 </form>
+
+                <div class="container-login100-form-btn text-center"></div>
+                    <p>No se puede modificar el email con el que te registraste, si quieres puedes borrar la cuenta y crearte una nueva</p>
+                </div>
+
+                <div class="container-login100-form-btn text-center"></div>
+                    <form action="/eliminarCuenta" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.');">
+                        <button type="submit" class="btn btn-danger">Eliminar Cuenta</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

@@ -31,8 +31,64 @@ def index():
     session.pop('email', None)
     return render_template('index.html')
 
+@app.route('/eliminarCuenta', methods=['POST'])
+def eliminarCuenta():
+    if 'email' in session:
+        try:
+            email = session['email']
+            config = {
+                'user': 'root',
+                'password': 'rootasdeg2324',
+                'host': 'db',
+                'port': '3306',
+                'database': 'usuarios'
+            }
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
+
+            # Obtener el ID del cliente
+            cur.execute('SELECT id FROM clientes WHERE email = %s', (email,))
+            cliente_id = cur.fetchone()
+
+            if cliente_id:
+                cliente_id = cliente_id[0]
+
+                # Eliminar los registros asociados en registro_calorias_diario
+                cur.execute('DELETE FROM registro_calorias_diario WHERE cliente_id = %s', (cliente_id,))
+                connection.commit()
+
+                # Eliminar la cuenta de usuario
+                cur.execute('DELETE FROM clientes WHERE email = %s', (email,))
+                connection.commit()
+
+                cur.close()
+                connection.close()
+
+                # Limpiar la sesión
+                session.pop('email', None)
+                flash('¡Cuenta eliminada correctamente!', 'success')
+                return redirect(url_for('index'))
+
+            else:
+                flash('No se encontró al usuario en la base de datos.', 'error')
+                return redirect(url_for('modificarUsuario'))
+
+        except Exception as e:
+            flash(f'Error al eliminar la cuenta: {str(e)}', 'error')
+            return redirect(url_for('modificarUsuario'))
+
+    else:
+        flash('No se pudo encontrar la sesión del usuario.', 'error')
+        return redirect(url_for('modificarUsuario'))
+
+
+
 @app.route('/modificarUsuario', methods=['GET', 'POST'])
 def modificarUsuario():
+    if 'email' not in session:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
         nombre = request.form.get('nombre')
         usuario = request.form.get('usuario')
@@ -204,7 +260,6 @@ def login():
 #####################################################################################################################################
 ###################################################### Inicio Usu ##############################################################
 #####################################################################################################################################
-
 @app.route('/inicioUsu')
 def inicioUsu():
     if 'email' in session:
@@ -241,54 +296,58 @@ def inicioUsu():
 
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
-        return redirect(url_for('login'))
-    
+        return redirect(url_for('index'))
 
-    
+
 @app.route('/recetas', methods=['GET', 'POST'])
 def recetas():
-    global recipes_list
-    if request.method == 'POST':
-        food = request.form['query']
-        if food == '':
-            return render_template('recetas.html')
+    if 'email' in session:
+        global recipes_list
+        if request.method == 'POST':
+            food = request.form['query']
+            if food == '':
+                return render_template('recetas.html')
+            else:
+                buscar_receta(food)
+                dataframe_receta = pd.read_csv(f"{food}_recipes_dataframe.csv")
+
+                # Traducir todas las columnas excepto la columna de la imagen
+                dataframe_receta_translated = dataframe_receta.copy()
+                for column in dataframe_receta_translated.columns:
+                    if column != 'image':
+                        dataframe_receta_translated[column] = dataframe_receta_translated[column].apply(lambda x: GoogleTranslator(source='auto', target='es').translate(str(x)))
+
+                recipes_list = dataframe_receta_translated.to_dict(orient='records')
+
+                return render_template('recetas.html', recipes_list=recipes_list)
         else:
-            buscar_receta(food)
-            dataframe_receta = pd.read_csv(f"{food}_recipes_dataframe.csv")
-
-            # Traducir todas las columnas excepto la columna de la imagen
-            dataframe_receta_translated = dataframe_receta.copy()
-            for column in dataframe_receta_translated.columns:
-                if column != 'image':
-                    dataframe_receta_translated[column] = dataframe_receta_translated[column].apply(lambda x: GoogleTranslator(source='auto', target='es').translate(str(x)))
-
-            recipes_list = dataframe_receta_translated.to_dict(orient='records')
-
-            return render_template('recetas.html', recipes_list=recipes_list)
+            return render_template('recetas.html', recipes_list=None)
     else:
-        return render_template('recetas.html', recipes_list=None)
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('index'))
 
-
-    
-    
 
 @app.route('/infoComida', methods=['GET', 'POST'])
 def infoComida():
-    if request.method == 'POST':
-        food = request.form['query']
-        if food == '':
-            return render_template('infoComida.html')
+    if 'email' in session:
+        if request.method == 'POST':
+            food = request.form['query']
+            if food == '':
+                return render_template('infoComida.html')
+            else:
+                analisis_data = analisisNutricional(food)
+                if analisis_data is not None:
+                    analisis = pd.DataFrame(analisis_data)
+                    flash('¡Análisis nutricional realizado con éxito!', 'success')
+                    return render_template('infoComida.html', analisis=analisis)
+                flash('¡No se pudo realizar el análisis nutricional!', 'error')
+                return render_template('infoComida.html')
+
         else:
-            analisis_data = analisisNutricional(food)
-            if analisis_data is not None:
-                analisis = pd.DataFrame(analisis_data)
-                flash('¡Análisis nutricional realizado con éxito!', 'success')
-                return render_template('infoComida.html', analisis=analisis)
-            flash('¡No se pudo realizar el análisis nutricional!', 'error')
-            return render_template('infoComida.html')
-        
+            return render_template('infoComida.html', analisis=None)
     else:
-        return render_template('infoComida.html', analisis=None)
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('index'))
 
 
 #####################################################################################################################################
