@@ -31,6 +31,62 @@ def index():
     session.pop('email', None)
     return render_template('index.html')
 
+@app.route('/modificarUsuario', methods=['GET', 'POST'])
+def modificarUsuario():
+    if request.method == 'POST':
+        nombre = request.form.get('nombre')
+        usuario = request.form.get('usuario')
+        email = session.get('email')
+        contrasena = request.form.get('contrasena')
+        fechaNacimiento = request.form.get('fechaNacimiento')
+        peso = request.form.get('peso')
+        altura = request.form.get('altura')
+        genero = request.form.get('genero')
+        actividad = request.form.get('actividad')
+
+        try:
+            config = {
+                'user': 'root',
+                'password': 'rootasdeg2324',
+                'host': 'db',
+                'port': '3306',
+                'database': 'usuarios'
+            }
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
+
+            cur.execute('SELECT * FROM clientes WHERE email = %s', (email,))
+            user = cur.fetchone()
+
+            if user:
+                if nombre:
+                    cur.execute('UPDATE clientes SET nombre = %s WHERE email = %s', (nombre, email))
+                if usuario:
+                    cur.execute('UPDATE clientes SET usuario = %s WHERE email = %s', (usuario, email))
+                if contrasena:
+                    hashed_password = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
+                    cur.execute('UPDATE clientes SET contrasena = %s WHERE email = %s', (hashed_password, email))
+                if fechaNacimiento:
+                    cur.execute('UPDATE clientes SET fechaNacimiento = %s WHERE email = %s', (fechaNacimiento, email))
+                if peso:
+                    cur.execute('UPDATE clientes SET peso = %s WHERE email = %s', (peso, email))
+                if altura:
+                    cur.execute('UPDATE clientes SET altura = %s WHERE email = %s', (altura, email))
+                if genero:
+                    cur.execute('UPDATE clientes SET genero = %s WHERE email = %s', (genero, email))
+                if actividad:
+                    cur.execute('UPDATE clientes SET actividad = %s WHERE email = %s', (actividad, email))
+
+                connection.commit()
+                flash('¡Usuario modificado correctamente!', 'success')
+            else:
+                flash('¡No se encontró un usuario con ese email!', 'error')
+
+        except Exception as e:
+            flash(f'¡Error al modificar el usuario: {str(e)}', 'error')
+
+    return render_template('modificarUsuario.html')
+
 
 #####################################################################################################################################
 ###################################################### Registro/Login ##############################################################

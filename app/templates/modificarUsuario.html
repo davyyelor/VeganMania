@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main style="margin-top: 100px;">
+
+
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100">
+                <form class="login100-form validate-form p-l-55 p-r-55 p-t-178" action="/modificarUsuario" method="post" novalidate>
+                    <span class="login100-form-title">
+                        Modificar Datos
+                    </span>
+                    <p> Modifica los campos que quieres cambiar, no hace falta que pongas todos unicamente los que veas necesarios</p>
+                    <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your username">
+                        <input class="input100" type="text" name="nombre" id="nombre" placeholder="Tu nombre" required>
+                        <span class="focus-input100"></span>
+                    </div>
+
+                    <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your password">
+                        <input class="input100" type="password" name="contrasena" id="contrasena" placeholder="Tu contraseña" required>
+                        <span class="focus-input100"></span>
+                    </div>
+
+                    <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your date of birth">
+                        <input class="input100" type="date" name="fechaNacimiento" id="fechaNacimiento" required>
+                        <span class="focus-input100"></span>
+                    </div>
+
+                    <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your weight">
+                        <input class="input100" type="number" name="peso" id="peso" placeholder="Tu peso" required>
+                        <span class="focus-input100"></span>
+                    </div>
+
+                    <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your height">
+                        <input class="input100" type="number" name="altura" id="altura" placeholder="Tu altura" required>
+                        <span class="focus-input100"></span>
+                    </div>
+
+                    <div class="wrap-input100 validate-input m-b-16" data-validate="Please select your gender">
+                        <select class="input100" name="genero" id="genero" required>
+                            <option value="" disabled selected>Selecciona Género</option>
+                            <option value="Hombre">Hombre</option>
+                            <option value="Mujer">Mujer</option>
+                        </select>
+                        <span class="focus-input100"></span>
+                    </div>
+
+                    <div class="wrap-input100 validate-input m-b-16" data-validate="Selecciona tu nivel de actividad">
+                        <select class="input100" name="actividad" id="actividad" required>
+                            <option value="" disabled selected>Selecciona tu nivel de actividad</option>
+                            <option value="sedentaria"> Sedentaria </option>
+                            <option value="sedentaria">Normal</option>
+                            <option value="activa">Activa</option>
+                            <option value="muyActiva">Muy activa</option>
+                        </select>
+                        <span class="focus-input100"></span>
+                    </div>
+
+
+                    <div class="container-login100-form-btn">
+                        <button class="login100-form-btn">
+                            Modificar Datos
+                        </button>
+                    </div>
+                    <div>
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+                                <ul>
+                                    {% for message in messages %}
+                                        <li>{{ message }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+
+{% endblock %}

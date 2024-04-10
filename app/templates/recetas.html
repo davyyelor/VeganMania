@@ -4,15 +4,6 @@
 <div class="recetas">
     <main>
         <h1 class="title">Buscar Recetas</h1>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for message in messages %}
-                        <div class="flash-message">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
         <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
             <input type="text" name="query" placeholder="Buscar recetas">
             <button type="submit">Buscar</button>
