@@ -140,8 +140,42 @@ def modificarUsuario():
 
         except Exception as e:
             flash(f'¡Error al modificar el usuario: {str(e)}', 'error')
+    else:
+        email = session['email']
+        try:
+            config = {
+                'user': 'root',
+                'password': 'rootasdeg2324',
+                'host': 'db',
+                'port': '3306',
+                'database': 'usuarios'
+            }
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
 
-    return render_template('modificarUsuario.html')
+            cur.execute('SELECT nombre, contrasena, fechaNacimiento, peso, altura, genero, actividad FROM clientes WHERE email = %s', (email,))
+            user_data = cur.fetchone()
+            cur.close()
+            connection.close()
+
+            # Pasar los datos actuales del usuario a la plantilla
+            if user_data:
+                nombre_actual = user_data[0]
+                fechaNacimiento_actual = user_data[2]
+                peso_actual = user_data[3]
+                altura_actual = user_data[4]
+                genero_actual = user_data[5]
+                actividad_actual = user_data[6]
+
+                # Puedes seguir extrayendo los otros campos de usuario aquí
+                return render_template('modificarUsuario.html', nombre_actual=nombre_actual, fechaNacimiento_actual=fechaNacimiento_actual, peso_actual=peso_actual, altura_actual=altura_actual, genero_actual=genero_actual, actividad_actual=actividad_actual)
+            else:
+                flash('No se encontró al usuario en la base de datos.', 'error')
+                return redirect(url_for('modificarUsuario'))
+
+        except Exception as e:
+            flash(f'Error al obtener los datos del usuario: {str(e)}', 'error')
+            return redirect(url_for('modificarUsuario'))
 
 
 #####################################################################################################################################

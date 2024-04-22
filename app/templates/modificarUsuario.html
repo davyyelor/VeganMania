@@ -2,8 +2,6 @@
 
 {% block content %}
 <main style="margin-top: 100px;">
-
-
     <div class="limiter">
         <div class="container-login100">
             <div class="wrap-login100">
@@ -12,31 +10,32 @@
                         Modificar Datos
                     </span>
                     <p> Modifica los campos que quieres cambiar, no hace falta que pongas todos unicamente los que veas necesarios</p>
+                    
+                    <span>Tu nombre actual es: {{ nombre_actual }}</span>
                     <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your username">
                         <input class="input100" type="text" name="nombre" id="nombre" placeholder="Tu nombre" required>
                         <span class="focus-input100"></span>
                     </div>
 
-                    <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your password">
-                        <input class="input100" type="password" name="contrasena" id="contrasena" placeholder="Tu contraseña" required>
-                        <span class="focus-input100"></span>
-                    </div>
-
+                    <span>Tu fecha de nacimiento actual es: {{ fechaNacimiento_actual }}</span>
                     <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your date of birth">
-                        <input class="input100" type="date" name="fechaNacimiento" id="fechaNacimiento" required>
+                        <input class="input100" type="date" name="fechaNacimiento" id="fechaNacimiento" placeholder="Fecha de nacimiento" required>
                         <span class="focus-input100"></span>
-                    </div>
+                    </div>                    
 
+                    <span>Tu peso actual es: {{ peso_actual }}</span>
                     <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your weight">
                         <input class="input100" type="number" name="peso" id="peso" placeholder="Tu peso" required>
                         <span class="focus-input100"></span>
                     </div>
 
+                    <span>Tu altura actual es: {{ altura_actual }}</span>
                     <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your height">
                         <input class="input100" type="number" name="altura" id="altura" placeholder="Tu altura" required>
                         <span class="focus-input100"></span>
                     </div>
 
+                    <span>Tu género actual es: {{ genero_actual }}</span>
                     <div class="wrap-input100 validate-input m-b-16" data-validate="Please select your gender">
                         <select class="input100" name="genero" id="genero" required>
                             <option value="" disabled selected>Selecciona Género</option>
@@ -46,6 +45,7 @@
                         <span class="focus-input100"></span>
                     </div>
 
+                    <span>Tu nivel de actividad actual es: {{ actividad_actual }}</span>
                     <div class="wrap-input100 validate-input m-b-16" data-validate="Selecciona tu nivel de actividad">
                         <select class="input100" name="actividad" id="actividad" required>
                             <option value="" disabled selected>Selecciona tu nivel de actividad</option>
@@ -56,7 +56,6 @@
                         </select>
                         <span class="focus-input100"></span>
                     </div>
-
 
                     <div class="container-login100-form-btn">
                         <button class="login100-form-btn">
