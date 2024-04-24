@@ -25,5 +25,31 @@
             <button type="submit" id="btnAñadir">Añadir</button>
         </div>
     </form>
-<section>
+    <div class="notification" id="toastNotification" style="display: none;">
+        <div class="notification__body">
+            <img
+                src="{{url_for('static', filename='images/icons/check-circle.svg')}}"
+                alt="Success"
+                class="notification__icon"
+            >
+            Alimento añadido! &#128640; 
+        </div>
+        <div class="notification__progress"></div>
+    </div>
+    
+</section>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var añadirForm = document.getElementById('añadirForm');
+        var toastNotification = document.getElementById('toastNotification');
+
+        añadirForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar el envío del formulario
+            toastNotification.style.display = 'block';
+            setTimeout(function() {
+                toastNotification.style.display = 'none';
+            }, 5000); // Aumentar el tiempo para mostrar la notificación
+        });
+    });
+</script>
 {% endblock %}
