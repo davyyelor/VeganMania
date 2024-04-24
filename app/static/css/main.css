@@ -509,30 +509,26 @@ main {
   text-decoration: underline;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.site {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
 footer {
+  flex-shrink: 0;
   padding: 10px;
   text-align: center;
-  bottom: 0;
-  left: 0;
-  width: 100%;
   background-color: black;
   color: #fff;
-}
-
-footer a {
-  color: #fff;
-}
-
-footer p {
-  margin: 10px;
-}
-
-footer a:hover {
-  text-decoration: underline;
-}
-
-footer {
-  margin-bottom: 0;
 }
 
 form {
@@ -927,4 +923,54 @@ circle:nth-child(2) {
   to {
       transform: scaleX(1);
   }
+}
+.añadir-alimento {
+  margin-top: 100px; /* Ajusta el margen superior del contenedor según sea necesario */
+}
+
+.añadir-alimento h1 {
+  margin-bottom: 20px; /* Ajusta el margen inferior del título según sea necesario */
+  font-family: JosefinSans-Bold, sans-serif; /* Establece la fuente del título */
+  font-size: 30px; /* Tamaño de fuente */
+  color: #57b846; /* Color del texto */
+  text-align: center; /* Alinea el texto al centro */
+}
+
+.añadir-alimento-form {
+  max-width: 400px; /* Establece el ancho máximo del formulario */
+  margin: 0 auto; /* Centra el formulario horizontalmente */
+}
+
+.añadir-alimento-form .form-group {
+  margin-bottom: 20px; /* Ajusta el margen inferior del grupo de formulario según sea necesario */
+}
+
+.añadir-alimento-form label {
+  font-family: Ubuntu-Regular, sans-serif; /* Establece la fuente de las etiquetas */
+  font-size: 16px; /* Tamaño de fuente */
+  color: #666666; /* Color del texto */
+}
+
+.añadir-alimento-form input[type="number"],
+.añadir-alimento-form select,
+.añadir-alimento-form input[type="date"],
+.añadir-alimento-form input[type="time"] {
+  width: 100%; /* Ajusta el ancho del campo de entrada */
+  height: 40px; /* Ajusta la altura del campo de entrada */
+  padding: 8px; /* Ajusta el relleno del campo de entrada */
+  border: 1px solid #ccc; /* Establece el borde del campo de entrada */
+  border-radius: 5px; /* Establece el radio del borde del campo de entrada */
+  outline: none; /* Elimina el contorno alrededor del campo de entrada */
+}
+
+.añadir-alimento-form button[type="submit"] {
+  width: 100%; /* Ajusta el ancho del botón */
+  height: 40px; /* Ajusta la altura del botón */
+  background-color: #57b846; /* Establece el color de fondo del botón */
+  color: white; /* Establece el color del texto del botón */
+  border: none; /* Elimina el borde del botón */
+  border-radius: 5px; /* Establece el radio del borde del botón */
+  cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+  font-family: Ubuntu-Bold, sans-serif; /* Establece la fuente del botón */
+  font-size: 16px; /* Tamaño de fuente */
 }
