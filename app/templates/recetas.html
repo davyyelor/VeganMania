@@ -17,11 +17,12 @@
                 <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ recipe['name'] }}</h2>
                 <img src="{{ recipe['image'] }}" alt="Imagen de la receta" style="max-width: 100%; height: auto;" class="zoom" onclick="showRecipeDetails(this)">
                 <div class="recipe-details" style="display: none; padding: 10px;">
-                    <p><strong>Diet Labels:</strong> {{ recipe['diet_labels'] }}</p>
-                    <p><strong>Health Labels:</strong> {{ recipe['health_labels'] }}</p>
-                    <p><strong>Ingredients:</strong></p>
+                    <p><strong>Etiquetas de Dieta:</strong> {{ recipe['diet_labels'] }}</p>
+                    <p><strong>Etiquetas de Salud :</strong> {{ recipe['health_labels'] }}</p>
+                    <p><strong>Ingredientes:</strong></p>
                     <ul style="padding-left: 20px;">
-                        {% for ingredient in recipe['ingredients'].split("', '") %}
+                        {% set ingredients_list = recipe['ingredients'].split("', '") %}
+                        {% for ingredient in ingredients_list[1:-1] %}
                             <li>{{ ingredient|replace("'", "") }}</li>
                         {% endfor %}
                     </ul>
