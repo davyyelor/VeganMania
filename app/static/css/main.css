@@ -840,3 +840,15 @@ circle:nth-child(2) {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+
+.container-login100-form-btn {
+  margin-top: 20px; /* Ajusta el margen superior según sea necesario */
+  text-align: right; /* Alinea el texto a la derecha */
+}
+
+.container-login100-form-btn p {
+  font-family: Ubuntu-Regular; /* Establece la fuente del texto */
+  font-size: 14px; /* Tamaño de fuente */
+  color: #666666; /* Color del texto */
+}

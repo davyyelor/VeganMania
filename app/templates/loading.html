@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loader.css') }}">
+    <title>Cargando recetas...</title>
+</head>
+
+<body>
+    <h1 class="centered">Cargando...</h1>
+
+    <p class="centered">Se estan buscando y traduciendo las recetas. Por favor, espera.
+    </p>
+    <div class="centered">
+        <div class="lds-facebook">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+    <p class="centered">Una vez termine el proceso podrás hacer una buena receta.</p>
+</body>
+<script>window.location.href = "{{ url_for('results') }}";</script>
+
+</html>
+
+
+
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyBtYgl9EBbin7N97paWjau02OVPU6xYxsc",
+      authDomain: "veganmania-3bb14.firebaseapp.com",
+      projectId: "veganmania-3bb14",
+      storageBucket: "veganmania-3bb14.appspot.com",
+      messagingSenderId: "1031843889400",
+      appId: "1:1031843889400:web:c761d0c4491391953bfb0d",
+      measurementId: "G-WN3LTT7L8V"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>

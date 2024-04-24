@@ -333,6 +333,48 @@ def inicioUsu():
         return redirect(url_for('index'))
 
 
+
+def slow_loading_function(food: str):
+    """Simulates a time consuming process (wait 10 seconds and return a reversed string)"""
+
+    buscar_receta(food)
+    dataframe_receta = pd.read_csv(f"{food}_recipes_dataframe.csv")
+
+    # Traducir todas las columnas excepto la columna de la imagen
+    dataframe_receta_translated = dataframe_receta.copy()
+    for column in dataframe_receta_translated.columns:
+        if column != 'image':
+            dataframe_receta_translated[column] = dataframe_receta_translated[column].apply(lambda x: GoogleTranslator(source='auto', target='es').translate(str(x)))
+
+    recipes_list = dataframe_receta_translated.to_dict(orient='records')
+    return recipes_list
+
+
+@app.route("/loading", methods=["POST"])
+def loading():
+    if request.method == "POST":
+        global recipes_list
+        food = request.form['query']
+        session['food'] = food
+        if food == '':
+            return render_template('recetas.html')
+        else:
+            return render_template("loading.html")
+
+
+@app.route("/results")
+def results():
+    if 'food' not in session:
+        # Handle case where 'food' key is not in session
+        flash('Please provide a food query.', 'error')
+        return redirect(url_for('index'))  # Redirect to index or another suitable route
+    else:
+        # 'food' key exists in session, proceed with processing
+        recipes_list = slow_loading_function(session['food'])
+        return render_template('recetas.html', recipes_list=recipes_list)
+
+
+
 @app.route('/recetas', methods=['GET', 'POST'])
 def recetas():
     if 'email' in session:
@@ -359,6 +401,12 @@ def recetas():
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
+
+
+
+
+
+
 
 
 @app.route('/infoComida', methods=['GET', 'POST'])
