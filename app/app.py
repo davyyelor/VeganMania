@@ -403,8 +403,20 @@ def recetas():
         return redirect(url_for('index'))
 
 
-
-
+@app.route('/añadirComida', methods=['GET', 'POST'])
+def añadirComida():
+    if 'email' in session:
+        if request.method == 'POST':
+            # Lógica para procesar los datos del formulario y añadir la comida
+            # a la base de datos debería ir aquí
+            flash('Comida añadida con éxito!', 'success')
+            return redirect(url_for('añadirComida'))  # Redireccionar a la página principal, por ejemplo
+        else:
+            # Mostrar el formulario para añadir comida
+            return render_template('añadirAlimento.html')
+    else:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('index'))
 
 
 
@@ -468,9 +480,6 @@ def añadirCalorias():
             flash(f'¡Error al añadir las calorías: {str(e)}', 'error')
 
     return render_template('BuenHome.html')
-
-def traductor(texto):
-    return GoogleTranslator(source='auto', target='de').translate(text=texto)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

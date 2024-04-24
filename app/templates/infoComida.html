@@ -38,5 +38,8 @@
             <p>No se ha realizado un análisis nutricional.</p>
         {% endif %}
     </main>
+    <form class="añadir-alimento-form" action="{{ url_for('añadirComida') }}">
+        <button type="submit">Añadir comida</button>
+    </form>
 </div>
 {% endblock %}
