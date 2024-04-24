@@ -414,12 +414,17 @@ def infoComida():
     if 'email' in session:
         if request.method == 'POST':
             food = request.form['query']
+            food = GoogleTranslator(source='auto', target='en').translate(food)
             if food == '':
                 return render_template('infoComida.html')
             else:
                 analisis_data = analisisNutricional(food)
                 if analisis_data is not None:
                     analisis = pd.DataFrame(analisis_data)
+
+                    for column in analisis.columns:
+                        if column == 'label':
+                            analisis[column] = analisis[column].apply(lambda x: GoogleTranslator(source='auto', target='es').translate(str(x)))
                     flash('¡Análisis nutricional realizado con éxito!', 'success')
                     return render_template('infoComida.html', analisis=analisis)
                 flash('¡No se pudo realizar el análisis nutricional!', 'error')
