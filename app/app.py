@@ -8,6 +8,8 @@ import datetime
 import re
 import hashAPI
 from datetime import datetime
+from random import sample
+from sendMailAPI import send_email
 
 app = Flask(__name__)
 from flask import render_template, request, flash, url_for, redirect, session
@@ -235,6 +237,7 @@ def registro():
 
         except Exception as e:
             flash(f'¡Error al insertar en la base de datos: {str(e)}', 'error')
+            return redirect(url_for('registro'))
 
     return render_template('registro.html')
 
@@ -244,6 +247,36 @@ def logout():
     session.pop('email', None)
     return redirect(url_for('index'))
 
+@app.route('/recuperarContraseña', methods=['GET', 'POST']) 
+def recuperarContraseña():
+    if request.method == 'POST':
+        email = request.form['email']
+        try:
+            config = {
+                    'user': 'root',
+                    'password': 'rootasdeg2324',
+                    'host': 'db',
+                    'port': '3306',
+                    'database': 'usuarios'
+            }
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
+            contraseña = password_generator(8)
+            send_email(email, contraseña)
+            cn = hashAPI.hashear(contraseña)
+            cur.execute('SELECT id, contrasena FROM clientes WHERE email = %s AND contrasena = %s', (email, cn))
+            user = cur.fetchone()
+            cur.execute('UPDATE clientes SET contrasena = %s WHERE email = %s', (cn, email))
+            connection.commit()
+            cur.close()
+            connection.close()
+            return render_template('recuperarContrasena.html', email=email)
+        except Exception as e:
+            return render_template('recuperarContrasena.html')
+    else:
+        return render_template('recuperarContrasena.html')
+
+    
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -362,6 +395,7 @@ def loading():
             return render_template("loading.html")
 
 
+
 @app.route("/results")
 def results():
     if 'food' not in session:
@@ -452,6 +486,30 @@ def infoComida():
 #####################################################################################################################################
 ###################################################### Funciones Auxiliares ##############################################################
 #####################################################################################################################################
+def password_generator(longitud):
+  
+    # Definimos los caracteres y simbolos
+    
+    abc_minusculas = "abcdefghijklmnopqrstuvwxyz"
+    
+    # HACK: upper() transforma las letras de una cadena en mayusculas
+    abc_mayusculas = abc_minusculas.upper() 
+    
+    numeros = "0123456789"
+    simbolos = "{}[]()*;/,_-"
+    
+    # Definimos la secuencia
+    secuencia = abc_minusculas + abc_mayusculas + numeros + simbolos
+    
+    # Llamamos la función sample() utilizando la secuencia, y la longitud
+    password_union = sample(secuencia, longitud)
+    
+    # Con join insertamos los elementos de una lista en una cadena
+    password_result = "".join(password_union)
+    
+    # Retornamos la variables "password_result"
+    return password_result
+
 @app.route('/añadirCalorias', methods=['GET', 'POST'])
 def añadirCalorias():
     if request.method == 'POST':
