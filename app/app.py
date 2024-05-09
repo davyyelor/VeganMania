@@ -481,7 +481,10 @@ def infoComida():
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
-
+    
+@app.route('/articulos', methods=['GET'])
+def articulos():
+    return render_template('articulos.html')
 
 #####################################################################################################################################
 ###################################################### Funciones Auxiliares ##############################################################

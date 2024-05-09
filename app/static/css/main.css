@@ -135,7 +135,7 @@ iframe {
 /*//////////////////////////////////////////////////////////////////
 [ NavBar ]*/
 /* Estilos para el navbar */
-/* Agrega estilos para el navbar */
+/* Estilos para el navbar */
 nav {
   background-color: #57b846;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
@@ -144,7 +144,9 @@ nav {
   z-index: 1000;
   top: 0;
   position: fixed;
+  overflow-x: hidden; /* Agrega esta propiedad para ocultar el desplazamiento horizontal */
 }
+
 
 
 .nav-content ul {
@@ -529,6 +531,8 @@ footer {
   text-align: center;
   background-color: black;
   color: #fff;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 form {
@@ -973,4 +977,47 @@ circle:nth-child(2) {
   cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
   font-family: Ubuntu-Bold, sans-serif; /* Establece la fuente del botón */
   font-size: 16px; /* Tamaño de fuente */
+}
+
+
+ /* div principal */
+ .content-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 50px;
+  
+}
+
+/* article */
+article {
+  background-color: white;
+  text-align: justify;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+  flex: 3;
+  margin: 0 20px;
+  overflow-y: auto;
+  height: auto;
+  margin: 30px;
+}
+
+article dl {
+  font-size: small;
+  margin-bottom: 20px; 
+  border: #111 solid 1px;
+  border-radius: 10px;
+  padding: 10px;
+  background: rgb(80,80,80);
+  background: linear-gradient(90deg, rgba(80,80,80,0.7238979118329467) 0%, rgba(20,20,20,0.7587006960556845) 0%, rgba(143,140,140,1) 0%, rgba(154,154,154,1) 0%, rgba(205,204,204,1) 50%, rgba(148,147,147,1) 100%);
+}
+
+
+article dt {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+article dd {
+    margin-left: 20px;
 }
