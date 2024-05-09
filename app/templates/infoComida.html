@@ -11,6 +11,9 @@
 
         {% if analisis is not none %}
             {% if not analisis.empty %}
+                {% if query %}
+                    <h2 style="text-align: center;">Resultados para: {{ query }}</h2>
+                {% endif %}
                 <div class="info-nutricional">
                     <table class="nutrient-table">
                         <thead>

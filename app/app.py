@@ -10,6 +10,7 @@ import hashAPI
 from datetime import datetime
 from random import sample
 from sendMailAPI import send_email
+import os.path
 
 app = Flask(__name__)
 from flask import render_template, request, flash, url_for, redirect, session
@@ -395,16 +396,14 @@ def loading():
             return render_template("loading.html")
 
 
-
-@app.route("/results")
+@app.route('/results')
 def results():
     if 'food' not in session:
-        # Handle case where 'food' key is not in session
         flash('Please provide a food query.', 'error')
-        return redirect(url_for('index'))  # Redirect to index or another suitable route
+        return redirect(url_for('index'))
     else:
-        # 'food' key exists in session, proceed with processing
-        recipes_list = slow_loading_function(session['food'])
+        food = session.get('food')
+        recipes_list = slow_loading_function(food)
         return render_template('recetas.html', recipes_list=recipes_list)
 
 
@@ -416,6 +415,7 @@ def recetas():
         if request.method == 'POST':
             food = request.form['query']
             if food == '':
+                flash('Por favor, introduce un alimento.', 'error')
                 return render_template('recetas.html')
             else:
                 buscar_receta(food)
@@ -460,10 +460,10 @@ def infoComida():
     if 'email' in session:
         if request.method == 'POST':
             food = request.form['query']
-            food = GoogleTranslator(source='auto', target='en').translate(food)
             if food == '':
-                return render_template('infoComida.html')
+                return render_template('infoComida.html', analisis=None)
             else:
+                food = GoogleTranslator(source='auto', target='en').translate(food)
                 analisis_data = analisisNutricional(food)
                 if analisis_data is not None:
                     analisis = pd.DataFrame(analisis_data)
@@ -472,7 +472,7 @@ def infoComida():
                         if column == 'label':
                             analisis[column] = analisis[column].apply(lambda x: GoogleTranslator(source='auto', target='es').translate(str(x)))
                     flash('¡Análisis nutricional realizado con éxito!', 'success')
-                    return render_template('infoComida.html', analisis=analisis)
+                    return render_template('infoComida.html', analisis=analisis, query = food)
                 flash('¡No se pudo realizar el análisis nutricional!', 'error')
                 return render_template('infoComida.html')
 

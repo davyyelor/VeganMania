@@ -34,6 +34,10 @@
         <button id="volverBtn" style="display: none;" onclick="showAllRecipes()">Volver y ver todas las recetas</button>
         {% endif %}
         
+        {% for message in get_flashed_messages() %}
+            <p>{{ message }}</p>
+        {% endfor %}
+        
     </main>
 </div>
 
