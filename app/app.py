@@ -9,14 +9,22 @@ import re
 import hashAPI
 from datetime import datetime
 from random import sample
-from sendMailAPI import send_email
 import os.path
+from secrets import choice
+from itsdangerous import URLSafeTimedSerializer
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText 
+import ssl
+import string
+
 
 app = Flask(__name__)
 from flask import render_template, request, flash, url_for, redirect, session
 import mysql.connector as mysql
 app.config['SECRET_KEY'] = 'abcd1234@'
-app.config['SESSION_TYPE'] = 'filesystem'  #
+app.config['SESSION_TYPE'] = 'filesystem'  
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 import pandas as pd
 
 from edamamApi import buscar_receta, analisisNutricional
@@ -233,6 +241,9 @@ def registro():
 
                 cur.close()
                 connection.close()
+
+                send_email(email, 1, link=None)
+
                 flash('¡Registro exitoso!', 'success')
                 return redirect(url_for('login'))
 
@@ -248,6 +259,17 @@ def logout():
     session.pop('email', None)
     return redirect(url_for('index'))
 
+@app.route('/recuperarContraseña/<token>')
+def mostrar_contraseña(token):
+    try:
+        correo = serializer.loads(token, max_age=3600)
+        # Aquí deberías permitir al usuario cambiar su contraseña
+        nueva_contraseña = generar_contraseña()
+        return f"Tu nueva contraseña es: {nueva_contraseña}"
+    except:
+        return "El enlace de recuperación de contraseña es inválido o ha expirado."
+
+
 @app.route('/recuperarContraseña', methods=['GET', 'POST']) 
 def recuperarContraseña():
     if request.method == 'POST':
@@ -262,17 +284,31 @@ def recuperarContraseña():
             }
             connection = mysql.connect(**config)
             cur = connection.cursor()
-            contraseña = password_generator(8)
-            send_email(email, contraseña)
-            cn = hashAPI.hashear(contraseña)
-            cur.execute('SELECT id, contrasena FROM clientes WHERE email = %s AND contrasena = %s', (email, cn))
+            
+            cur.execute('SELECT id FROM clientes WHERE email = %s', (email,))
             user = cur.fetchone()
-            cur.execute('UPDATE clientes SET contrasena = %s WHERE email = %s', (cn, email))
-            connection.commit()
-            cur.close()
-            connection.close()
-            return render_template('recuperarContrasena.html', email=email)
+            
+            if user:
+                token = generar_token(email)
+                contraseña = generar_contraseña()
+                enlace = f"http://localhost:5000/recuperarContraseña/{token}"
+                
+                send_email(email, 0, link=enlace)
+    
+                cn = hashAPI.hashear(contraseña)
+    
+                cur.execute('UPDATE clientes SET contrasena = %s WHERE email = %s', (cn, email))
+                connection.commit()
+                cur.close()
+                connection.close()
+                flash('¡Contraseña recuperada con éxito!', 'success')
+                flash(f'El enlace de recuperación de contraseña es: {enlace}', 'info')
+                return render_template('recuperarContrasena.html', email=email)
+            else:
+                flash('No se encontró ningún usuario con ese correo electrónico', 'error')
+                return render_template('recuperarContrasena.html')
         except Exception as e:
+            flash(f'Error al recuperar la contraseña: {str(e)}', 'error')
             return render_template('recuperarContrasena.html')
     else:
         return render_template('recuperarContrasena.html')
@@ -489,29 +525,51 @@ def articulos():
 #####################################################################################################################################
 ###################################################### Funciones Auxiliares ##############################################################
 #####################################################################################################################################
-def password_generator(longitud):
-  
-    # Definimos los caracteres y simbolos
-    
-    abc_minusculas = "abcdefghijklmnopqrstuvwxyz"
-    
-    # HACK: upper() transforma las letras de una cadena en mayusculas
-    abc_mayusculas = abc_minusculas.upper() 
-    
-    numeros = "0123456789"
-    simbolos = "{}[]()*;/,_-"
-    
-    # Definimos la secuencia
-    secuencia = abc_minusculas + abc_mayusculas + numeros + simbolos
-    
-    # Llamamos la función sample() utilizando la secuencia, y la longitud
-    password_union = sample(secuencia, longitud)
-    
-    # Con join insertamos los elementos de una lista en una cadena
-    password_result = "".join(password_union)
-    
-    # Retornamos la variables "password_result"
-    return password_result
+def generar_contraseña():
+    longitud = 12
+    caracteres = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(choice(caracteres) for _ in range(longitud))
+
+def generar_token(correo):
+    token = serializer.dumps(correo)
+    return token
+
+def send_email(email_receiver, opcion, link):
+    password = 'rzxz jhtf lbxf tqus'
+    email_sender = 'veganmaniiaa@gmail.com'
+    if opcion == 0:
+        msg = MIMEMultipart()
+        msg['From'] = email_sender
+        msg['To'] = email_receiver
+        msg['Subject'] = "Recuperación de Contraseña"
+
+        message = render_template('mails/reset_password.html', link=link)
+
+        msg.attach(MIMEText(message, 'html'))
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(email_sender, password)
+        server.sendmail(email_sender, email_receiver, msg.as_string())
+        print("enviado")
+        server.quit()        
+
+    elif opcion == 1:
+        msg = MIMEMultipart()
+        msg['From'] = email_sender
+        msg['To'] = email_receiver
+        msg['Subject'] = "Bienvenido a VeganMania"
+
+        message = render_template('mails/welcomeMail.html')
+
+        msg.attach(MIMEText(message, 'html'))
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(email_sender, password)
+        server.sendmail(email_sender, email_receiver, msg.as_string())
+        print("enviado")
+        server.quit()    
 
 @app.route('/añadirCalorias', methods=['GET', 'POST'])
 def añadirCalorias():

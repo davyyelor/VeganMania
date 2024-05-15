@@ -6,26 +6,8 @@ import ssl
 password = 'rzxz jhtf lbxf tqus'
 email_sender = 'veganmaniiaa@gmail.com'
 destinatario = 'davidelorzag@gmail.com'
-asunto = 'Test'
 
-msg = MIMEMultipart()
-msg['From'] = email_sender
-msg['To'] = destinatario
-msg['Subject'] = asunto
-
-with open('app/prueba.html', 'r') as f:
-    message = f.read()
-
-msg.attach(MIMEText(message, 'html'))
-
-server = smtplib.SMTP('smtp.gmail.com', 587)
-server.starttls()
-server.login(email_sender, password)
-server.sendmail(email_sender, destinatario, msg.as_string())
-print("enviado")
-server.quit()
-
-def send_email(email_receiver, opcion):
+def send_email(email_receiver, opcion, link):
     if opcion == 0:
         msg = MIMEMultipart()
         msg['From'] = email_sender
@@ -35,7 +17,7 @@ def send_email(email_receiver, opcion):
         with open('app/templates/mails/reset_password.html', 'r') as f:
             message = f.read()
 
-        #message = message.replace('link', link)
+        message = message.replace('{{link}}', link)  # Reemplazar {{link}} con el enlace real
         #message = message.replace('nombre', nombre)
 
         msg.attach(MIMEText(message, 'html'))
@@ -51,7 +33,7 @@ def send_email(email_receiver, opcion):
         msg = MIMEMultipart()
         msg['From'] = email_sender
         msg['To'] = email_receiver
-        msg['Subject'] = "Recuperación de Contraseña"
+        msg['Subject'] = "Bienvenido a VeganMania"
 
         with open('app/templates/mails/welcomeMail.html', 'r') as f:
             message = f.read()
@@ -69,4 +51,4 @@ def send_email(email_receiver, opcion):
         server.quit()     
 
 if __name__ == '__main__':
-    send_email('davidelorzag@gmail.com', 0)
+    send_email('davidelorzag@gmail.com', 0, link='http://localhost:5000/recuperarContraseña')
