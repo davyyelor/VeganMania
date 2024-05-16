@@ -6,7 +6,6 @@ services:
       - "5000:5000"
     depends_on:
       - db
-      - elasticsearch
     networks:
       - backend-network
       - frontend-network
@@ -45,24 +44,9 @@ services:
     networks:
       - frontend-network
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
-    container_name: elasticsearch
-    restart: always
-    environment:
-      - discovery.type=single-node
-    ports:
-      - "9200:9200"
-    networks:
-      - backend-network
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-      - ./elasticsearch/init-recipes.sh:/usr/share/elasticsearch/init-recipes.sh
-
 networks:
   backend-network:
   frontend-network:
 
 volumes:
   data:
-  elasticsearch_data:
