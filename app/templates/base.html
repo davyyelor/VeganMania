@@ -33,9 +33,18 @@
                 <li><a href="{{url_for('recetas')}}">Recetas</a></li>
                 <li><a href="{{url_for('infoComida')}}">Info Comida</a></li>
                 <li><a href="{{url_for('articulos')}}">Artículos</a></li>
-                <li><a href="{{url_for('modificarUsuario')}}">Modificar Usuario</a></li>
-                <li><a href="{{ url_for('logout')}}">Cerrar Sesión</a></li>
+                <li><a href="{{url_for('sobreNosotros')}}">Sobre Nosotros</a></li>
             </ul>
+            <div class="user-info" id="user-info">
+                <span id="user-name">David</span>
+                <img src="{{url_for('static', filename='images/icons/icono_usuario.png') }}" alt="User Icon" id="user-icon">
+                <div class="user-menu" id="user-menu">
+                    <ul>
+                        <li><a href="{{url_for('logout')}}">Cerrar Sesión</a></li>
+                        <li><a href="{{url_for('modificarUsuario')}}">Modificar Usuario</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
@@ -49,7 +58,7 @@
         <div class="col-sm-8 col-sm-offset-2 text-center">
             <ul class="list-inline list-social">
                 <li><a href="https://github.com/davyyelor" class="btn btn-link"><i class="fa fa-github fa-fw"></i> Github</a></li>
-                <li><a href="http://linkedin/in/pozhilov" class="btn btn-link"><i class="fa fa-linkedin fa-fw"></i> LinkedIn</a></li>
+                <li><a href="https://www.linkedin.com/in/david-elorza-gabilondo-b5556b29b/" class="btn btn-link"><i class="fa fa-linkedin fa-fw"></i> LinkedIn</a></li>
             </ul>
             &copy; 2024 VeganMania. CC BY-NC-SA 4.0 DEED Atribución-NoComercial-CompartirIgual 4.0 Internacional.
         </div>

@@ -144,10 +144,14 @@ nav {
   z-index: 1000;
   top: 0;
   position: fixed;
-  overflow-x: hidden; /* Agrega esta propiedad para ocultar el desplazamiento horizontal */
+  overflow-x: hidden; 
 }
 
-
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}  
 
 .nav-content ul {
   display: flex;
@@ -173,10 +177,9 @@ nav {
   text-decoration: none;
 }
 
-/* Mantener el logotipo en su posición original */
 .nav-brand {
-  margin-right: auto; /* Mueve el logo a la izquierda */
-  margin-left: 0; /* Añadido para quitar el margen izquierdo predeterminado */
+  margin-right: auto;
+  margin-left: 0; 
 }
 
 .nav-brand a {
@@ -190,6 +193,52 @@ nav {
   text-decoration: none;
   color: black;
 }
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+.user-info img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+.user-info span {
+  color: black;
+  text-decoration: none;
+  font-family: Ubuntu-Regular, sans-serif;
+  text-transform: uppercase;
+}
+
+.user-menu {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 10px;
+  z-index: 1001;
+}
+
+.user-menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-menu ul li {
+  margin-bottom: 10px;
+}
+
+.user-menu ul li a {
+  color: #333;
+  text-decoration: none;
+  font-family: Ubuntu-Regular, sans-serif;
+}
+
+.user-info:hover .user-menu {
+  display: block;
+}
+
 
 /*//////////////////////////////////////////////////////////////////
 [ Main ]*/
