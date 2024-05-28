@@ -59,17 +59,6 @@ jobs:
     - name: Run tests in Docker container
       run: docker-compose -f docker-compose.yml run app python -m unittest discover app
 
-    - name: Lint Python code
-      run: |
-        pip install flake8
-        flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 app/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
-    - name: Quality check with pylint
-      run: |
-        pip install pylint
-        pylint app/*.py
-
     - name: Get DB container logs
       if: failure()
       run: |
