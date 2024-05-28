@@ -63,7 +63,8 @@ try:
 
 except Exception as e:
     print(f"Ocurrió un error: {e}")
-
 finally:
     # Cerrar el navegador
+    print("Cerrando el navegador...")
     driver.quit()
+print("Proceso completado.")
