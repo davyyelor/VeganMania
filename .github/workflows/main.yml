@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -15,10 +15,14 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        env:
+          POSTGRES_DB: mydatabase
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
 
     steps:
     - name: Checkout code
@@ -34,15 +38,26 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r app/requirements.txt
 
+    - name: Wait for DB to be ready
+      run: |
+        echo "Waiting for PostgreSQL to be ready..."
+        sleep 30
+
     - name: Test Python code
       run: |
         python -m unittest discover app
 
-    - name: Build and test Dockerfiles
-      run: |
-        docker-compose -f docker-compose.yml build
-        docker-compose -f docker-compose.yml up -d
-        docker-compose -f docker-compose.yml run app python -m unittest discover app
+    - name: Build Docker images
+      run: docker-compose -f docker-compose.yml build
+
+    - name: Run Docker containers
+      run: docker-compose -f docker-compose.yml up -d
+
+    - name: Wait for services to be ready
+      run: sleep 30
+
+    - name: Run tests in Docker container
+      run: docker-compose -f docker-compose.yml run app python -m unittest discover app
 
     - name: Lint Python code
       run: |
@@ -54,3 +69,7 @@ jobs:
       run: |
         pip install pylint
         pylint app/*.py
+
+    - name: Get DB container logs
+      if: failure()
+      run: docker logs $(docker ps -q -f name=db)
