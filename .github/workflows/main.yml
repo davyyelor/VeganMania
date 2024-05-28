@@ -72,4 +72,6 @@ jobs:
 
     - name: Get DB container logs
       if: failure()
-      run: docker logs $(docker ps-q -f name=db)
+      run: |
+        echo "Fetching logs for DB container"
+        docker logs $(docker ps -q --filter name=db)
