@@ -2,11 +2,13 @@
 ###################################################### Importaciones ##############################################################
 #####################################################################################################################################
 from deep_translator import GoogleTranslator
-from flask import Flask, render_template, request, flash, url_for, redirect, session
+from flask import Flask
 import hashlib
 import datetime
 import re
 import hashAPI
+from datetime import datetime
+from random import sample
 import os.path
 from secrets import choice
 from itsdangerous import URLSafeTimedSerializer
@@ -15,24 +17,26 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText 
 import ssl
 import string
+
+
+app = Flask(__name__)
+from flask import render_template, request, flash, url_for, redirect, session
 import mysql.connector as mysql
+app.config['SECRET_KEY'] = 'abcd1234@'
+app.config['SESSION_TYPE'] = 'filesystem'  
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 import pandas as pd
 
 from edamamApi import buscar_receta, analisisNutricional
 
-#####################################################################################################################################
-###################################################### Configuración ##############################################################
-#####################################################################################################################################
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'abcd1234@'
-app.config['SESSION_TYPE'] = 'filesystem'  
-serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
-
+global recipes_list
 recipes_list = []
+
 
 #####################################################################################################################################
 ###################################################### Index ##############################################################
 #####################################################################################################################################
+
 @app.route('/')
 def index():
     session.pop('email', None)
@@ -61,10 +65,7 @@ def eliminarCuenta():
                 cliente_id = cliente_id[0]
 
                 # Eliminar los registros asociados en registro_calorias_diario
-                cur.execute(
-                    'DELETE FROM registro_calorias_diario WHERE cliente_id = %s',
-                    (cliente_id,)
-                )
+                cur.execute('DELETE FROM registro_calorias_diario WHERE cliente_id = %s', (cliente_id,))
                 connection.commit()
 
                 # Eliminar la cuenta de usuario
@@ -79,15 +80,19 @@ def eliminarCuenta():
                 flash('¡Cuenta eliminada correctamente!', 'success')
                 return redirect(url_for('index'))
 
-            flash('No se encontró al usuario en la base de datos.', 'error')
-            return redirect(url_for('modificarUsuario'))
+            else:
+                flash('No se encontró al usuario en la base de datos.', 'error')
+                return redirect(url_for('modificarUsuario'))
 
         except Exception as e:
             flash(f'Error al eliminar la cuenta: {str(e)}', 'error')
             return redirect(url_for('modificarUsuario'))
 
-    flash('No se pudo encontrar la sesión del usuario.', 'error')
-    return redirect(url_for('modificarUsuario'))
+    else:
+        flash('No se pudo encontrar la sesión del usuario.', 'error')
+        return redirect(url_for('modificarUsuario'))
+
+
 
 @app.route('/modificarUsuario', methods=['GET', 'POST'])
 def modificarUsuario():
@@ -122,46 +127,22 @@ def modificarUsuario():
 
             if user:
                 if nombre:
-                    cur.execute(
-                        'UPDATE clientes SET nombre = %s WHERE email = %s', 
-                        (nombre, email)
-                    )
+                    cur.execute('UPDATE clientes SET nombre = %s WHERE email = %s', (nombre, email))
                 if usuario:
-                    cur.execute(
-                        'UPDATE clientes SET usuario = %s WHERE email = %s', 
-                        (usuario, email)
-                    )
+                    cur.execute('UPDATE clientes SET usuario = %s WHERE email = %s', (usuario, email))
                 if contrasena:
                     hashed_password = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
-                    cur.execute(
-                        'UPDATE clientes SET contrasena = %s WHERE email = %s', 
-                        (hashed_password, email)
-                    )
+                    cur.execute('UPDATE clientes SET contrasena = %s WHERE email = %s', (hashed_password, email))
                 if fechaNacimiento:
-                    cur.execute(
-                        'UPDATE clientes SET fechaNacimiento = %s WHERE email = %s', 
-                        (fechaNacimiento, email)
-                    )
+                    cur.execute('UPDATE clientes SET fechaNacimiento = %s WHERE email = %s', (fechaNacimiento, email))
                 if peso:
-                    cur.execute(
-                        'UPDATE clientes SET peso = %s WHERE email = %s', 
-                        (peso, email)
-                    )
+                    cur.execute('UPDATE clientes SET peso = %s WHERE email = %s', (peso, email))
                 if altura:
-                    cur.execute(
-                        'UPDATE clientes SET altura = %s WHERE email = %s', 
-                        (altura, email)
-                    )
+                    cur.execute('UPDATE clientes SET altura = %s WHERE email = %s', (altura, email))
                 if genero:
-                    cur.execute(
-                        'UPDATE clientes SET genero = %s WHERE email = %s', 
-                        (genero, email)
-                    )
+                    cur.execute('UPDATE clientes SET genero = %s WHERE email = %s', (genero, email))
                 if actividad:
-                    cur.execute(
-                        'UPDATE clientes SET actividad = %s WHERE email = %s', 
-                        (actividad, email)
-                    )
+                    cur.execute('UPDATE clientes SET actividad = %s WHERE email = %s', (actividad, email))
 
                 connection.commit()
                 flash('¡Usuario modificado correctamente!', 'success')
@@ -183,27 +164,25 @@ def modificarUsuario():
             connection = mysql.connect(**config)
             cur = connection.cursor()
 
-            cur.execute(
-                'SELECT nombre, contrasena, fechaNacimiento, peso, altura, genero, actividad FROM clientes WHERE email = %s', 
-                (email,)
-            )
+            cur.execute('SELECT nombre, contrasena, fechaNacimiento, peso, altura, genero, actividad FROM clientes WHERE email = %s', (email,))
             user_data = cur.fetchone()
             cur.close()
             connection.close()
 
             # Pasar los datos actuales del usuario a la plantilla
             if user_data:
-                return render_template(
-                    'modificarUsuario.html', 
-                    nombre_actual=user_data[0], 
-                    fechaNacimiento_actual=user_data[2], 
-                    peso_actual=user_data[3], 
-                    altura_actual=user_data[4], 
-                    genero_actual=user_data[5], 
-                    actividad_actual=user_data[6]
-                )
-            flash('No se encontró al usuario en la base de datos.', 'error')
-            return redirect(url_for('modificarUsuario'))
+                nombre_actual = user_data[0]
+                fechaNacimiento_actual = user_data[2]
+                peso_actual = user_data[3]
+                altura_actual = user_data[4]
+                genero_actual = user_data[5]
+                actividad_actual = user_data[6]
+
+                # Puedes seguir extrayendo los otros campos de usuario aquí
+                return render_template('modificarUsuario.html', nombre_actual=nombre_actual, fechaNacimiento_actual=fechaNacimiento_actual, peso_actual=peso_actual, altura_actual=altura_actual, genero_actual=genero_actual, actividad_actual=actividad_actual)
+            else:
+                flash('No se encontró al usuario en la base de datos.', 'error')
+                return redirect(url_for('modificarUsuario'))
 
         except Exception as e:
             flash(f'Error al obtener los datos del usuario: {str(e)}', 'error')
@@ -246,10 +225,8 @@ def registro():
 
             hashed_password = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
 
-            cur.execute(
-                'INSERT INTO clientes (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero, actividad) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', 
-                (nombre, usuario, email, hashed_password, fechaNacimiento, peso, altura, genero, actividad)
-            )
+
+            cur.execute('INSERT INTO clientes (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero, actividad) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (nombre, usuario, email, hashed_password, fechaNacimiento, peso, altura, genero, actividad))
             connection.commit()
 
             cur.execute('SELECT id FROM clientes WHERE email = %s', (email,))
@@ -259,10 +236,7 @@ def registro():
                 cliente_id = cliente_id[0]
 
                 fecha_actual = datetime.now().date()
-                cur.execute(
-                    'INSERT INTO registro_calorias_diario (cliente_id, calorias_consumidas, fecha_consumo) VALUES (%s, %s, %s)', 
-                    (cliente_id, 0, fecha_actual)
-                )
+                cur.execute('INSERT INTO registro_calorias_diario (cliente_id, calorias_consumidas, fecha_consumo) VALUES (%s, %s, %s)', (cliente_id, 0, fecha_actual))
                 connection.commit()
 
                 cur.close()
