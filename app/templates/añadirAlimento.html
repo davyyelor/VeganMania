@@ -6,8 +6,7 @@
     <form class="añadir-alimento-form" method="post" id="añadirForm">
         <div class="form-group">
             <label for="nombre">Nombre del Alimento:</label>
-            <input type="text" id="nombre Alimento" name="Nombre del Alimento" placeholder="Nombre del Alimento">
-
+            <input type="text" id="nombre" name="query" placeholder="Nombre del Alimento">
         </div>
         <div class="form-group">
             <label for="descripcion">Descripción:</label>
@@ -16,10 +15,10 @@
         <div class="form-group">
             <label for="comida">Comida:</label>
             <select name="comida" id="comida">
-                <option value="desayuno">Comida1</option>
-                <option value="almuerzo">Comida2</option>
-                <option value="cena">Comida3</option>
-                <option value="añadir">Añadir comida...</option>
+                <option value="desayuno">Desayuno</option>
+                <option value="almuerzo">Almuerzo</option>
+                <option value="cena">Cena</option>
+                <option value="añadir" class="opcion-añadir">Añadir comida...</option>
             </select>
         </div>
         <div class="form-group">
@@ -36,23 +35,24 @@
         </div>
         <div class="notification" id="toastNotification" style="display: none;">
             <div class="notification__body">
-                <img
-                    src="{{url_for('static', filename='images/icons/check-circle.svg')}}"
-                    alt="Success"
-                    class="notification__icon"
-                >
+                <img src="{{url_for('static', filename='images/icons/check-circle.svg')}}" alt="Success" class="notification__icon">
                 Alimento añadido! &#128640; 
             </div>
             <div class="notification__progress"></div>
         </div>
     </form>
-
-    
 </section>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var añadirForm = document.getElementById('añadirForm');
         var toastNotification = document.getElementById('toastNotification');
+        var selectComida = document.getElementById('comida');
+
+        selectComida.addEventListener('change', function() {
+            if (selectComida.value === 'añadir') {
+                window.location.href = "{{ url_for('añadirComida') }}";
+            }
+        });
 
         añadirForm.addEventListener('submit', function(event) {
             event.preventDefault(); // Evitar el envío del formulario

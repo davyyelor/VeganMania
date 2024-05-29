@@ -472,23 +472,35 @@ def recetas():
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
-
-
+    
 @app.route('/añadirComida', methods=['GET', 'POST'])
 def añadirComida():
     if 'email' in session:
         if request.method == 'POST':
-            # Lógica para procesar los datos del formulario y añadir la comida
-            # a la base de datos debería ir aquí
-            flash('Comida añadida con éxito!', 'success')
-            return redirect(url_for('añadirComida'))  # Redireccionar a la página principal, por ejemplo
-        else:
-            # Mostrar el formulario para añadir comida
-            return render_template('añadirAlimento.html')
+            print('hola')
+        return render_template('añadirComida.html')
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
 
+
+@app.route('/añadirAlimento', methods=['GET', 'POST'])
+def añadirAlimento():
+    if 'email' in session:
+        if request.method == 'POST':
+            food = request.form['query']
+            if food == '':
+                flash('Por favor, introduce un alimento.', 'error')
+                return render_template('añadirAlimento.html')
+            else:
+                analisis = analisisNutricional(food)
+                if analisis is not None:
+                    flash('¡Análisis nutricional realizado con éxito!', 'success')
+                    return render_template('añadirAlimento.html', analisis=analisis)
+        else:
+            return render_template('añadirAlimento.html')
+    else:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
 
 
 

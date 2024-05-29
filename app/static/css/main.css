@@ -319,6 +319,11 @@ section h1 {
   color: #57b846;
 }
 
+.opcion-añadir {
+  background-color: #57b846;
+  color: white;
+}
+
 .container .main-content {
   margin-top: 100px;
 
