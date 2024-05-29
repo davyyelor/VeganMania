@@ -57,19 +57,23 @@ def eliminarCuenta():
             connection = mysql.connect(**config)
             cur = connection.cursor()
 
-            # Obtener el ID del cliente
-            cur.execute('SELECT id FROM clientes WHERE email = %s', (email,))
+            # Obtener el id_cliente del cliente
+            cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
             cliente_id = cur.fetchone()
 
             if cliente_id:
                 cliente_id = cliente_id[0]
 
-                # Eliminar los registros asociados en registro_calorias_diario
-                cur.execute('DELETE FROM registro_calorias_diario WHERE cliente_id = %s', (cliente_id,))
+                # Eliminar los registros asociados al consumo
+                cur.execute('DELETE FROM consume WHERE id_cliente = %s', (cliente_id,))
+                connection.commit()
+
+                # Eliminar los registros asociados al consumo
+                cur.execute('DELETE FROM tiene_objetivo WHERE id_cliente = %s', (cliente_id,))
                 connection.commit()
 
                 # Eliminar la cuenta de usuario
-                cur.execute('DELETE FROM clientes WHERE email = %s', (email,))
+                cur.execute('DELETE FROM Cliente WHERE email = %s', (email,))
                 connection.commit()
 
                 cur.close()
@@ -105,7 +109,7 @@ def modificarUsuario():
         usuario = request.form.get('usuario')
         email = session.get('email')
         contrasena = request.form.get('contrasena')
-        fechaNacimiento = request.form.get('fechaNacimiento')
+        fecha_nacimiento = request.form.get('fechaNacimiento')
         peso = request.form.get('peso')
         altura = request.form.get('altura')
         genero = request.form.get('genero')
@@ -122,35 +126,39 @@ def modificarUsuario():
             connection = mysql.connect(**config)
             cur = connection.cursor()
 
-            cur.execute('SELECT * FROM clientes WHERE email = %s', (email,))
+            cur.execute('SELECT * FROM Cliente WHERE email = %s', (email,))
             user = cur.fetchone()
 
             if user:
                 if nombre:
-                    cur.execute('UPDATE clientes SET nombre = %s WHERE email = %s', (nombre, email))
+                    cur.execute('UPDATE Cliente SET nombre = %s WHERE email = %s', (nombre, email))
                 if usuario:
-                    cur.execute('UPDATE clientes SET usuario = %s WHERE email = %s', (usuario, email))
+                    cur.execute('UPDATE Cliente SET usuario = %s WHERE email = %s', (usuario, email))
                 if contrasena:
                     hashed_password = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
-                    cur.execute('UPDATE clientes SET contrasena = %s WHERE email = %s', (hashed_password, email))
-                if fechaNacimiento:
-                    cur.execute('UPDATE clientes SET fechaNacimiento = %s WHERE email = %s', (fechaNacimiento, email))
+                    cur.execute('UPDATE Cliente SET contrasena = %s WHERE email = %s', (hashed_password, email))
+                if fecha_nacimiento:
+                    cur.execute('UPDATE Cliente SET fecha_nacimiento = %s WHERE email = %s', (fecha_nacimiento, email))
                 if peso:
-                    cur.execute('UPDATE clientes SET peso = %s WHERE email = %s', (peso, email))
+                    cur.execute('UPDATE Cliente SET peso = %s WHERE email = %s', (peso, email))
                 if altura:
-                    cur.execute('UPDATE clientes SET altura = %s WHERE email = %s', (altura, email))
+                    cur.execute('UPDATE Cliente SET altura = %s WHERE email = %s', (altura, email))
                 if genero:
-                    cur.execute('UPDATE clientes SET genero = %s WHERE email = %s', (genero, email))
+                    cur.execute('UPDATE Cliente SET genero = %s WHERE email = %s', (genero, email))
                 if actividad:
-                    cur.execute('UPDATE clientes SET actividad = %s WHERE email = %s', (actividad, email))
+                    cur.execute('UPDATE Cliente SET actividad = %s WHERE email = %s', (actividad, email))
 
                 connection.commit()
                 flash('¡Usuario modificado correctamente!', 'success')
+                return redirect(url_for('modificarUsuario'))
+
             else:
                 flash('¡No se encontró un usuario con ese email!', 'error')
+                return redirect(url_for('modificarUsuario'))
 
         except Exception as e:
             flash(f'¡Error al modificar el usuario: {str(e)}', 'error')
+            return redirect(url_for('modificarUsuario'))
     else:
         email = session['email']
         try:
@@ -164,7 +172,7 @@ def modificarUsuario():
             connection = mysql.connect(**config)
             cur = connection.cursor()
 
-            cur.execute('SELECT nombre, contrasena, fechaNacimiento, peso, altura, genero, actividad FROM clientes WHERE email = %s', (email,))
+            cur.execute('SELECT nombre, contrasena, fecha_nacimiento, peso, altura, genero, actividad FROM Cliente WHERE email = %s', (email,))
             user_data = cur.fetchone()
             cur.close()
             connection.close()
@@ -216,7 +224,7 @@ def registro():
             connection = mysql.connect(**config)
             cur = connection.cursor()
 
-            cur.execute('SELECT * FROM clientes WHERE email = %s', (email,))
+            cur.execute('SELECT * FROM Cliente WHERE email = %s', (email,))
             user = cur.fetchone()
 
             if user:
@@ -225,24 +233,27 @@ def registro():
 
             hashed_password = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
 
-
-            cur.execute('INSERT INTO clientes (nombre, usuario, email, contrasena, fechaNacimiento, peso, altura, genero, actividad) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (nombre, usuario, email, hashed_password, fechaNacimiento, peso, altura, genero, actividad))
+            # Insertar datos del nuevo cliente
+            cur.execute('INSERT INTO Cliente (nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (nombre, usuario, email, hashed_password, peso, altura, genero, actividad, fechaNacimiento))
             connection.commit()
 
-            cur.execute('SELECT id FROM clientes WHERE email = %s', (email,))
-            cliente_id = cur.fetchone()
+            # Obtener el id_cliente del nuevo cliente
+            cliente_id = cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
+            cliente_id = cur.fetchone()[0]
 
             if cliente_id:
-                cliente_id = cliente_id[0]
+                # Insertar registros en la tabla consume para todos los nutrientes con cantidad 0
+                cur.execute('INSERT INTO consume (id_cliente, id_nutriente, fecha_consumo, cantidad) SELECT %s, n.id_nutriente, CURDATE(), 0 FROM Nutriente n', (cliente_id,))
+                connection.commit()
 
-                fecha_actual = datetime.now().date()
-                cur.execute('INSERT INTO registro_calorias_diario (cliente_id, calorias_consumidas, fecha_consumo) VALUES (%s, %s, %s)', (cliente_id, 0, fecha_actual))
+                # Establecer un objetivo de 2000 para todos los nutrientes para el nuevo cliente
+                cur.execute('INSERT INTO tiene_objetivo (id_cliente, id_nutriente, cantidad) SELECT %s, id_nutriente, 2000 FROM Nutriente', (cliente_id,))
                 connection.commit()
 
                 cur.close()
                 connection.close()
 
-                send_email(email, 1, link=None)
+                # Envío de correo electrónico, etc.
 
                 flash('¡Registro exitoso!', 'success')
                 return redirect(url_for('login'))
@@ -252,6 +263,11 @@ def registro():
             return redirect(url_for('registro'))
 
     return render_template('registro.html')
+
+
+
+
+
 
 
 @app.route('/logout')
@@ -285,7 +301,7 @@ def recuperarContraseña():
             connection = mysql.connect(**config)
             cur = connection.cursor()
             
-            cur.execute('SELECT id FROM clientes WHERE email = %s', (email,))
+            cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
             user = cur.fetchone()
             
             if user:
@@ -297,7 +313,7 @@ def recuperarContraseña():
     
                 cn = hashAPI.hashear(contraseña)
     
-                cur.execute('UPDATE clientes SET contrasena = %s WHERE email = %s', (cn, email))
+                cur.execute('UPDATE Cliente SET contrasena = %s WHERE email = %s', (cn, email))
                 connection.commit()
                 cur.close()
                 connection.close()
@@ -332,21 +348,12 @@ def login():
             connection = mysql.connect(**config)
             cur = connection.cursor()
             cn = hashAPI.hashear(contrasena)
-            cur.execute('SELECT id, contrasena FROM clientes WHERE email = %s AND contrasena = %s', (email, cn))
+            cur.execute('SELECT id_cliente, contrasena FROM Cliente WHERE email = %s AND contrasena = %s', (email, cn))
             user = cur.fetchone()
 
             if user and user[1] == cn:
                 session['email'] = email
                 flash('¡Inicio de sesión exitoso!', 'success')
-                cliente_id = user[0]
-
-                cur.execute('SELECT id FROM registro_calorias_diario WHERE cliente_id = %s AND fecha_consumo = CURDATE()', (cliente_id,))
-                registro_hoy = cur.fetchone()
-
-                if not registro_hoy:  
-                    cur.execute('INSERT INTO registro_calorias_diario (cliente_id, calorias_consumidas, fecha_consumo) VALUES (%s, %s, %s)', (cliente_id, 0, datetime.now().date()))
-                    connection.commit()
-                    flash('¡Registro de calorías diario creado!', 'success')
 
                 cur.close()
                 connection.close()
@@ -359,6 +366,7 @@ def login():
             flash(f'Error al iniciar sesión: {str(e)}', 'error')
 
     return render_template('login.html')
+
 
 
 #####################################################################################################################################
@@ -378,20 +386,13 @@ def inicioUsu():
             }
             connection = mysql.connect(**config)
             cur = connection.cursor()
-
-            fecha_actual = datetime.now().date()
-            cur.execute('SELECT clientes.nombre, clientes.calorias_objetivo, registro_calorias_diario.calorias_consumidas FROM clientes INNER JOIN registro_calorias_diario ON clientes.id = registro_calorias_diario.cliente_id WHERE clientes.email = %s AND registro_calorias_diario.fecha_consumo = %s', (email, fecha_actual))
+            cur.execute('SELECT id_cliente, nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento FROM Cliente WHERE email = %s', (email,))
             data = cur.fetchone()
             cur.close()
             connection.close()
 
             if data:
-                nombre = data[0]
-                calorias_objetivo = data[1]
-                calorias_consumidas = data[2]
-                calorias_restantes = calorias_objetivo - calorias_consumidas
-
-                return render_template('inicioUsu.html', nombre=nombre, calorias_objetivo=calorias_objetivo, calorias_consumidas=calorias_consumidas, calorias_restantes=calorias_restantes)
+                return render_template('inicioUsu.html')
 
         except Exception as e:
             flash(f'Error al cargar la página de inicio: {str(e)}', 'error')
@@ -591,7 +592,7 @@ def añadirCalorias():
             connection = mysql.connect(**config)
             cur = connection.cursor()
 
-            cur.execute('UPDATE registro_calorias_diario SET calorias_consumidas = calorias_consumidas + %s WHERE cliente_id = (SELECT id FROM clientes WHERE email = %s) AND fecha_consumo = CURDATE()', (calorias, session['email']))
+            cur.execute('UPDATE registro_calorias_diario SET calorias_consumidas = calorias_consumidas + %s WHERE cliente_id = (SELECT id_cliente FROM Cliente WHERE email = %s) AND fecha_consumo = CURDATE()', (calorias, session['email']))
             connection.commit()
 
             cur.close()
