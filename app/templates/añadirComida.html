@@ -1,43 +1,63 @@
+
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="añadir-comida">
+<section class="añadir-alimento">
     <h1>Añadir Comida</h1>
-    <form class="añadir-comida-form" method="post" id="añadirComidaForm">
+    <form class="añadir-alimento-form" method="post" id="añadirComidaForm">
         <div class="form-group">
             <label for="nombreComida">Nombre de la Comida:</label>
-            <input type="text" id="nombreComida" name="nombreComida" placeholder="Nombre de la Comida" required>
+            <div class="input-box">
+                <input type="text" id="nombreComida" name="nombreComida" placeholder="Nombre de la Comida" required>
+            </div>
         </div>
         <div class="form-group">
             <label for="tipoComida">Tipo de Comida:</label>
-            <input type="text" id="tipoComida" name="tipoComida" placeholder="Tipo de Comida" required>
+            <select id="tipoComida" name="tipoComida" required>
+                <option value="" disabled selected>Selecciona el tipo de comida</option>
+                <option value="Desayuno">Desayuno</option>
+                <option value="Almuerzo">Almuerzo</option>
+                <option value="Comida">Comida</option>
+                <option value="Merienda">Merienda</option>
+                <option value="Cena">Cena</option>
+            </select>
         </div>
         <div class="form-group">
             <label for="descripcion">Descripción:</label>
-            <textarea id="descripcion" name="descripcion" placeholder="Descripción" required></textarea>
+            <div class="input-box">
+                <textarea id="descripcion" name="descripcion" placeholder="Descripción" required></textarea>
+            </div>
         </div>
         <div class="form-group">
             <label for="fecha">Fecha:</label>
             <input type="date" id="fecha" name="fecha" required>
         </div>
         <div class="form-group">
-            <button type="submit" id="btnAñadirComida">Añadir</button>
+            <button type="submit" method="post" action="{{ url_for('añadirComida') }}" id="btnAñadirComida">Añadir</button>
         </div>
         <div class="notification" id="toastNotification" style="display: none;">
             <div class="notification__body">
                 <img src="{{url_for('static', filename='images/icons/check-circle.svg')}}" alt="Success" class="notification__icon">
-                Comida añadida! &#128640; 
+                Alimento añadido! &#128640; 
             </div>
             <div class="notification__progress"></div>
         </div>
+
     </form>
 </section>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var añadirComidaForm = document.getElementById('añadirComidaForm');
+        var añadirForm = document.getElementById('añadirForm');
         var toastNotification = document.getElementById('toastNotification');
+        var selectComida = document.getElementById('comida');
 
-        añadirComidaForm.addEventListener('submit', function(event) {
+        selectComida.addEventListener('change', function() {
+            if (selectComida.value === 'añadir') {
+                window.location.href = "{{ url_for('añadirComida') }}";
+            }
+        });
+
+        añadirForm.addEventListener('submit', function(event) {
             event.preventDefault(); // Evitar el envío del formulario
             toastNotification.style.display = 'block';
             setTimeout(function() {
@@ -46,4 +66,5 @@
         });
     });
 </script>
+
 {% endblock %}

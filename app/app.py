@@ -477,11 +477,50 @@ def recetas():
 def añadirComida():
     if 'email' in session:
         if request.method == 'POST':
-            print('hola')
-        return render_template('añadirComida.html')
+            nombreComida = request.form['nombreComida']
+            tipoComida = request.form['tipoComida']
+            descripcion = request.form['descripcion']
+            fecha = request.form['fecha']
+
+            try:
+                config = {
+                    'user': 'root',
+                    'password': 'rootasdeg2324',
+                    'host': 'db',
+                    'port': '3306',
+                    'database': 'usuarios'
+                }
+                connection = mysql.connect(**config)
+                cur = connection.cursor()
+
+                cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (session['email'],))
+                cliente_id = cur.fetchone()
+
+                if cliente_id:
+                    cliente_id = cliente_id[0]
+                    cur.execute('INSERT INTO Comida (nombreComida, tipoComida, descripcion, fecha, id_cliente) VALUES (%s, %s, %s, %s, %s)', (nombreComida, tipoComida, descripcion, fecha, cliente_id))
+                    connection.commit()
+
+                    cur.close()
+                    connection.close()
+                    flash('¡Comida añadida correctamente!', 'success')
+
+                    return redirect(url_for('añadirComida'))
+                else:
+                    flash('No se encontró al usuario en la base de datos.', 'error')
+                    return redirect(url_for('añadirComida'))
+            except Exception as e:
+                flash(f'Error al cargar la página de inicio: {str(e)}', 'error')
+                return redirect(url_for('añadirComida'))
+                
+        else:
+            flash('¡Por favor, rellena todos los campos!', 'error')
+            return render_template('añadirComida.html')
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
+    
+
 
 
 @app.route('/añadirAlimento', methods=['GET', 'POST'])
@@ -588,34 +627,7 @@ def send_email(email_receiver, opcion, link):
         print("enviado")
         server.quit()    
 
-@app.route('/añadirCalorias', methods=['GET', 'POST'])
-def añadirCalorias():
-    if request.method == 'POST':
-        calorias = request.form['calorias']
 
-        try:
-            config = {
-                'user': 'root',
-                'password': 'rootasdeg2324',
-                'host': 'db',
-                'port': '3306',
-                'database': 'usuarios'
-            }
-            connection = mysql.connect(**config)
-            cur = connection.cursor()
-
-            cur.execute('UPDATE registro_calorias_diario SET calorias_consumidas = calorias_consumidas + %s WHERE cliente_id = (SELECT id_cliente FROM Cliente WHERE email = %s) AND fecha_consumo = CURDATE()', (calorias, session['email']))
-            connection.commit()
-
-            cur.close()
-            connection.close()
-            flash('¡Calorías añadidas correctamente!', 'success')
-
-            return redirect(url_for('inicioUsu'))
-        except Exception as e:
-            flash(f'¡Error al añadir las calorías: {str(e)}', 'error')
-
-    return render_template('BuenHome.html')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

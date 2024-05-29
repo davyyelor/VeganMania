@@ -324,6 +324,30 @@ section h1 {
   color: white;
 }
 
+.añadir-alimento-form .input-box {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px;
+  margin-top: 5px;
+}
+
+.añadir-alimento-form .input-box input[type="text"],
+.añadir-alimento-form .input-box textarea,
+.añadir-alimento-form input[type="number"],
+.añadir-alimento-form select,
+.añadir-alimento-form input[type="date"],
+.añadir-alimento-form input[type="time"] {
+  width: 100%;
+  height: 40px;
+  padding: 8px;
+  border: none;
+  outline: none;
+}
+
+.añadir-alimento-form .input-box textarea {
+  height: auto;
+}
+
 .container .main-content {
   margin-top: 100px;
 
