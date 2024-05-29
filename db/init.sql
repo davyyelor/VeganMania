@@ -21,18 +21,20 @@ CREATE TABLE IF NOT EXISTS Cliente (
 CREATE TABLE IF NOT EXISTS Alimento (
   id_alimento INT AUTO_INCREMENT PRIMARY KEY,
   nombreAlimento VARCHAR(255) NOT NULL,
-  descripcion TEXT NOT NULL,
-  unidad VARCHAR(50) NOT NULL
+  descripcion TEXT NOT NULL
 );
 
 -- Tabla Comida
 CREATE TABLE IF NOT EXISTS Comida (
   id_comida INT AUTO_INCREMENT PRIMARY KEY,
+  id_cliente INT,
   nombreComida VARCHAR(255) NOT NULL,
   tipoComida VARCHAR(255) NOT NULL,
   descripcion TEXT NOT NULL,
-  fecha DATE NOT NULL
+  fecha DATE NOT NULL,
+  FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente)
 );
+
 
 -- Tabla Nutriente
 CREATE TABLE IF NOT EXISTS Nutriente (
@@ -57,6 +59,7 @@ CREATE TABLE IF NOT EXISTS tiene_alergia (
 CREATE TABLE IF NOT EXISTS incluye (
   id_comida INT,
   id_alimento INT,
+  unidad VARCHAR(50) NOT NULL,
   cantidad DECIMAL(8,2) NOT NULL,
   PRIMARY KEY (id_comida, id_alimento),
   FOREIGN KEY (id_comida) REFERENCES Comida(id_comida),
