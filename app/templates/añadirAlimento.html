@@ -5,6 +5,24 @@
     <h1>Añadir Alimento</h1>
     <form class="añadir-alimento-form" method="post" id="añadirForm">
         <div class="form-group">
+            <label for="nombre">Nombre del Alimento:</label>
+            <input type="text" id="nombre Alimento" name="Nombre del Alimento" placeholder="Nombre del Alimento">
+
+        </div>
+        <div class="form-group">
+            <label for="descripcion">Descripción:</label>
+            <textarea id="descripcion" name="descripcion" placeholder="Descripción"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="comida">Comida:</label>
+            <select name="comida" id="comida">
+                <option value="desayuno">Comida1</option>
+                <option value="almuerzo">Comida2</option>
+                <option value="cena">Comida3</option>
+                <option value="añadir">Añadir comida...</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label for="cantidad">Cantidad:</label>
             <input type="number" id="cantidad" name="cantidad" placeholder="Cantidad">
             <select name="unidad">
@@ -12,14 +30,6 @@
                 <option value="mg">mg</option>
                 <option value="nanogr">nanogr</option>
             </select>
-        </div>
-        <div class="form-group">
-            <label for="fecha">Fecha:</label>
-            <input type="date" id="fecha" name="fecha">
-        </div>
-        <div class="form-group">
-            <label for="hora">Hora:</label>
-            <input type="time" id="hora" name="hora">
         </div>
         <div class="form-group">
             <button type="submit" id="btnAñadir">Añadir</button>

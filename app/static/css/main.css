@@ -20,6 +20,65 @@
   src: url('../fonts/JosefinSans/JosefinSans-Bold.ttf'); 
 }
 
+/* Estilos para el contenedor de botones adicionales */
+.botones-adicionales {
+  display: flex;
+  justify-content: space-between;
+  width: 200px; /* Ajusta el ancho según sea necesario */
+}
+
+/* Estilos para el botón "Añadir..." */
+.btn-anadir-comidas,
+.btn-dropdown {
+  background-color: #4CAF50; /* Color de fondo */
+  color: white; /* Color del texto */
+  padding: 10px 15px; /* Espaciado interno (modificado) */
+  border: none; /* Quita el borde */
+  border-radius: 5px; /* Bordes redondeados */
+  cursor: pointer; /* Cursor de puntero */
+  transition: background-color 0.3s; /* Transición suave del color de fondo */
+}
+
+/* Estilos para el botón "Frecuencia" */
+.btn-dropdown {
+  background-color: #008CBA; /* Otro color de fondo */
+}
+
+/* Estilos para los enlaces dentro del dropdown */
+.dropdown-content a {
+  color: black; /* Color del texto de los enlaces */
+  padding: 12px 16px; /* Espaciado interno */
+  text-decoration: none; /* Quita la subrayado de los enlaces */
+  display: block; /* Convierte los enlaces en bloques para ocupar todo el ancho del dropdown */
+  transition: background-color 0.3s; /* Transición suave del color de fondo */
+}
+
+/* Estilos para cambiar el color de fondo de los enlaces cuando se pasa el ratón por encima */
+.dropdown-content a:hover {
+  background-color: #f1f1f1; /* Color de fondo al pasar el ratón */
+}
+
+/* Estilos para el contenedor del dropdown */
+.dropdown {
+  position: relative; /* Posición relativa para posicionar correctamente el dropdown */
+  display: inline-block; /* Hace que el dropdown se muestre en línea con el botón */
+}
+
+/* Estilos para el contenidore del dropdown */
+.dropdown-content {
+  display: none; /* Oculta el contenido por defecto */
+  position: absolute; /* Posición absoluta para que se ajuste correctamente al botón */
+  background-color: #f9f9f9; /* Color de fondo del dropdown */
+  min-width: 160px; /* Ancho mínimo */
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); /* Sombra */
+  z-index: 1; /* Posicionamiento z */
+}
+
+/* Estilos para mostrar el contenido del dropdown cuando se pasa el ratón por encima del botón */
+.dropdown:hover .dropdown-content {
+  display: block; /* Muestra el contenido cuando se pasa el ratón por encima del botón */
+}
+
 
 
 /*//////////////////////////////////////////////////////////////////
@@ -217,6 +276,7 @@ nav {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   padding: 10px;
   z-index: 1001;
+  flex-direction: column; /* Added to make the menu display vertically */
 }
 
 .user-menu ul {
@@ -233,6 +293,10 @@ nav {
   color: #333;
   text-decoration: none;
   font-family: Ubuntu-Regular, sans-serif;
+}
+
+.user-menu ul li a:hover {
+  transform: scale(1.1); /* Added to create a zoom effect on hover */
 }
 
 .user-info:hover .user-menu {
@@ -979,7 +1043,7 @@ circle:nth-child(2) {
   }
 }
 .añadir-alimento {
-  margin-top: 100px; /* Ajusta el margen superior del contenedor según sea necesario */
+  margin-top: 100px;
 }
 
 .añadir-alimento h1 {
