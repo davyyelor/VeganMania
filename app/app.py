@@ -578,6 +578,14 @@ def articulos():
 def sobreNosotros():
     return render_template('sobreNosotros.html')
 
+
+@app.route('/articulosDeTemporada', methods=['GET'])
+def articulosDeTemporada():
+    in_season_images = os.listdir('./static/images/products/in_season')
+    out_of_season_images = os.listdir('./static/images/products/out_of_season')
+    start_of_season_images = os.listdir('./static/images/products/start_of_season')
+    return render_template('articulosDeTemporada.html', in_season_images=in_season_images, out_of_season_images=out_of_season_images, start_of_season_images=start_of_season_images)
+
 #####################################################################################################################################
 ###################################################### Funciones Auxiliares ##############################################################
 #####################################################################################################################################
