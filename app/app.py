@@ -527,15 +527,46 @@ def añadirComida():
 def añadirAlimento():
     if 'email' in session:
         if request.method == 'POST':
-            food = request.form['query']
-            if food == '':
-                flash('Por favor, introduce un alimento.', 'error')
-                return render_template('añadirAlimento.html')
-            else:
-                analisis = analisisNutricional(food)
-                if analisis is not None:
-                    flash('¡Análisis nutricional realizado con éxito!', 'success')
-                    return render_template('añadirAlimento.html', analisis=analisis)
+            try:
+                config = {
+                    'user': 'root',
+                    'password': 'rootasdeg2324',
+                    'host': 'db',
+                    'port': '3306',
+                    'database': 'usuarios'
+                }
+
+                # Conectarse a la base de datos
+                connection = mysql.connect(**config)
+                cur = connection.cursor()
+
+                # Obtener los datos del formulario
+                nombre_alimento = request.form['query']
+                descripcion_alimento = request.form['descripcion']
+                comida_id = request.form['comida']
+                cantidad = request.form['cantidad']
+                unidad = request.form['unidad']
+
+                # Insertar el alimento en la tabla Alimento
+                insert_alimento_query = "INSERT INTO Alimento (nombreAlimento, descripcion) VALUES (%s, %s)"
+                cur.execute(insert_alimento_query, (nombre_alimento, descripcion_alimento))
+                alimento_id = cur.lastrowid  # Obtener el ID del alimento insertado
+
+                # Insertar la relación en la tabla incluye
+                insert_incluye_query = "INSERT INTO incluye (id_comida, id_alimento, unidad, cantidad) VALUES (%s, %s, %s, %s)"
+                cur.execute(insert_incluye_query, (comida_id, alimento_id, unidad, cantidad))
+
+                # Guardar los cambios en la base de datos
+                connection.commit()
+
+                flash('Alimento añadido correctamente.', 'success')
+                return redirect(url_for('añadirAlimento'))
+            except Exception as e:
+                flash(f'Error al añadir el alimento: {str(e)}', 'error')
+                return redirect(url_for('añadirAlimento'))
+            finally:
+                cur.close()
+                connection.close()
         else:
             try:
                 config = {
@@ -559,15 +590,13 @@ def añadirAlimento():
                 comidas_dict = {row[1]: row[2] for row in data}
 
                 return render_template('añadirAlimento.html', data=comidas_dict)
-
-
-
             except Exception as e:
                 flash(f'Error al cargar la página de inicio: {str(e)}', 'error')
                 return redirect(url_for('añadirAlimento'))
-            
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('login'))
+
 
 
 

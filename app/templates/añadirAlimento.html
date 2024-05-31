@@ -3,7 +3,7 @@
 {% block content %}
 <section class="añadir-alimento">
     <h1>Añadir Alimento</h1>
-    <form class="añadir-alimento-form" method="post" id="añadirForm">
+    <form class="añadir-alimento-form" method="post" id="añadirForm" action="{{ url_for('añadirAlimento') }}">
         <div class="form-group">
             <label for="nombre">Nombre del Alimento:</label>
             <div class="input-box">
@@ -59,7 +59,6 @@
         });
 
         añadirForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Evitar el envío del formulario
             toastNotification.style.display = 'block';
             setTimeout(function() {
                 toastNotification.style.display = 'none';
