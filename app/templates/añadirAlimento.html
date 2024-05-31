@@ -19,9 +19,9 @@
         <div class="form-group">
             <label for="comida">Comida:</label>
             <select name="comida" id="comida">
-                <option value="desayuno">Desayuno</option>
-                <option value="almuerzo">Almuerzo</option>
-                <option value="cena">Cena</option>
+                {% for id_comida, nombre_comida in data.items() %}
+                    <option value="{{ id_comida }}">{{ nombre_comida }}</option>
+                {% endfor %}
                 <option value="añadir" class="opcion-añadir">Añadir comida...</option>
             </select>
         </div>

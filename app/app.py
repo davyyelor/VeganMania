@@ -537,7 +537,35 @@ def añadirAlimento():
                     flash('¡Análisis nutricional realizado con éxito!', 'success')
                     return render_template('añadirAlimento.html', analisis=analisis)
         else:
-            return render_template('añadirAlimento.html')
+            try:
+                config = {
+                    'user': 'root',
+                    'password': 'rootasdeg2324',
+                    'host': 'db',
+                    'port': '3306',
+                    'database': 'usuarios'
+                }
+
+                connection = mysql.connect(**config)
+                cur = connection.cursor()
+
+                cur.execute('SELECT Cliente.id_cliente, Comida.id_comida, Comida.nombreComida FROM Cliente JOIN Comida ON Cliente.id_cliente = Comida.id_cliente WHERE Cliente.email = %s', (session['email'],))
+
+                data = cur.fetchall()
+                cur.close()
+                connection.close()
+
+                # Transformar los resultados en un diccionario
+                comidas_dict = {row[1]: row[2] for row in data}
+
+                return render_template('añadirAlimento.html', data=comidas_dict)
+
+
+
+            except Exception as e:
+                flash(f'Error al cargar la página de inicio: {str(e)}', 'error')
+                return redirect(url_for('añadirAlimento'))
+            
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
 
@@ -570,9 +598,9 @@ def infoComida():
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
     
-@app.route('/articulos', methods=['GET'])
+@app.route('/blog', methods=['GET'])
 def articulos():
-    return render_template('articulos.html')
+    return render_template('blog.html')
 
 @app.route('/sobreNosotros', methods=['GET'])
 def sobreNosotros():
