@@ -692,6 +692,52 @@ def articulos():
 def sobreNosotros():
     return render_template('sobreNosotros.html')
 
+@app.route('/verComida/<int:id_comida>', methods=['GET'])
+def verComida(id_comida):
+    if 'email' in session:
+        email = session['email']
+        config = {
+            'user': 'root',
+            'password': 'rootasdeg2324',
+            'host': 'db',
+            'port': '3306',
+            'database': 'usuarios'
+        }
+
+        connection = mysql.connect(**config)
+        cur = connection.cursor()
+
+        # Obtener información de la comida
+        cur.execute("SELECT * FROM Comida WHERE id_comida = %s", [id_comida])
+        comida = cur.fetchone()
+
+        if comida:
+            # Obtener alimentos y nutrientes asociados con la comida
+            cur.execute("""
+                SELECT A.nombreAlimento, A.descripcion, N.nombreNutriente, C.cantidad, N.unidad
+                FROM incluye I
+                JOIN Alimento A ON I.id_alimento = A.id_alimento
+                JOIN contiene C ON A.id_alimento = C.id_alimento
+                JOIN Nutriente N ON C.id_nutriente = N.id_nutriente
+                WHERE I.id_comida = %s
+            """, [id_comida])
+            alimentos_nutrientes = cur.fetchall()
+
+            cur.close()
+            connection.close()
+
+            return render_template('verComida.html', comida=comida, alimentos_nutrientes=alimentos_nutrientes)
+        else:
+            cur.close()
+            connection.close()
+            flash('No se encontró la comida especificada.', 'error')
+            return redirect(url_for('misComidas'))
+    else:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('index'))
+
+
+
 @app.route('/misComidas', methods=['GET'])
 def misComidas():
     if 'email' in session:

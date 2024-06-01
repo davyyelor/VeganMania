@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="main-content">
+        <section>
+            <h1 class="tuSeguimiento">Alimentos y Nutrientes</h1>
+
+            <div class="alimentos-nutrientes-list">
+                {% if alimentos_nutrientes %}
+                    {% for alimento, descripcion, nutriente, cantidad, unidad in alimentos_nutrientes %}
+                    <article class="alimento-nutriente">
+                        <h2>{{ alimento }}</h2>
+                        <p><strong>Descripción del Alimento:</strong> {{ descripcion }}</p>
+                        <p><strong>Nutriente:</strong> {{ nutriente }}</p>
+                        <p><strong>Cantidad:</strong> {{ cantidad }} {{ unidad }}</p>
+                        <!-- Agregar botones -->
+                        <div class="botones-alimento">
+                            <form action="{{ url_for('borrarAlimento', id_alimento=alimento[0]) }}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-danger">Borrar Alimento</button>
+                            </form>
+                            <a href="{{ url_for('verAlimento', id_alimento=alimento[0]) }}" class="btn btn-info">Ver Alimento</a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                {% else %}
+                    <div class="alimento">
+                        <p>No se encontraron alimentos ni nutrientes para esta comida.</p>
+                        <a href="{{ url_for('añadirAlimento') }}" class="btn btn-primary">Añadir Alimento</a>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
