@@ -692,6 +692,41 @@ def articulos():
 def sobreNosotros():
     return render_template('sobreNosotros.html')
 
+@app.route('/misComidas', methods=['GET'])
+def misComidas():
+    if 'email' in session:
+        email = session['email']
+        config = {
+            'user': 'root',
+            'password': 'rootasdeg2324',
+            'host': 'db',
+            'port': '3306',
+            'database': 'usuarios'
+        }
+
+        connection = mysql.connect(**config)
+        cur = connection.cursor()
+
+        cur.execute("SELECT id_cliente FROM Cliente WHERE email = %s", [email])
+
+        cliente = cur.fetchall()
+        if cliente:
+            cliente = cliente[0][0]
+            cur.execute("SELECT * FROM Comida WHERE id_cliente = %s", [cliente])
+            comidas = cur.fetchall()
+            cur.close()
+            connection.close()
+            flash('¡Comidas cargadas correctamente!', 'success')
+            return render_template('misComidas.html', comidas=comidas)
+        else:
+            cur.close()
+            connection.close()
+            flash('No se encontró al usuario en la base de datos.', 'error')
+            return render_template('inicioUsu.html')
+    else:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('index'))
+
 
 @app.route('/articulosDeTemporada', methods=['GET'])
 def articulosDeTemporada():

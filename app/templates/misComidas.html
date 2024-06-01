@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="main-content">
+        <section>
+            <h1 class="tuSeguimiento">Tus Comidas</h1>
+
+            <div class="comidas-list">
+                {% if comidas %}
+                    {% for comida in comidas %}
+                    <article class="comida">
+                        <h2>{{ comida[2] }}</h2>
+                        <p><strong>Tipo:</strong> {{ comida[3] }}</p>
+                        <p><strong>Descripción:</strong> {{ comida[4] }}</p>
+                        <p><strong>Fecha:</strong> {{ comida[5] }}</p>
+                        <!-- Agregar botones -->
+                        <div class="botones-comida">
+                            <a href="#" class="btn btn-danger">Borrar Comida</a>
+                            <a href="#" class="btn btn-info">Ver Comida</a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                {% else %}
+                    <div class="comida">
+                        <p>Todavía no has añadido ninguna comida. ¡Añade tu primera comida ahora!</p>
+                        <a href="{{ url_for('añadirComida') }}" class="btn btn-primary">Añadir Comida</a>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

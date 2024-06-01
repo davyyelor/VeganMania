@@ -21,15 +21,29 @@
 }
 
 /* Estilos para el contenedor de botones adicionales */
+/* Estilos para el botón "Ver Comidas" */
+.btn-ver-comidas {
+  background-color: #4CAF50; /* Color de fondo */
+  color: white; /* Color del texto */
+  padding: 10px 15px; /* Espaciado interno (modificado) */
+  border: none; /* Quita el borde */
+  border-radius: 5px; /* Bordes redondeados */
+  cursor: pointer; /* Cursor de puntero */
+  transition: background-color 0.3s; /* Transición suave del color de fondo */
+}
+
+/* Aumentar el espacio entre los botones */
 .botones-adicionales {
   display: flex;
-  justify-content: space-between;
-  width: 200px; /* Ajusta el ancho según sea necesario */
+  justify-content: space-around; /* Cambiado a space-around para más espacio */
+  width: 300px; /* Ajusta el ancho según sea necesario */
 }
+
 
 /* Estilos para el botón "Añadir..." */
 .btn-anadir-comidas,
-.btn-dropdown {
+.btn-dropdown
+.btn-ver-comidas {
   background-color: #4CAF50; /* Color de fondo */
   color: white; /* Color del texto */
   padding: 10px 15px; /* Espaciado interno (modificado) */
