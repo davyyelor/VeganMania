@@ -265,11 +265,6 @@ def registro():
     return render_template('registro.html')
 
 
-
-
-
-
-
 @app.route('/logout')
 def logout():
     session.pop('email', None)
@@ -372,11 +367,12 @@ def login():
 #####################################################################################################################################
 ###################################################### Inicio Usu ##############################################################
 #####################################################################################################################################
-@app.route('/inicioUsu')
+@app.route('/inicioUsu', methods=['GET', 'POST'])
 def inicioUsu():
     if 'email' in session:
         try:
             email = session['email']
+            frecuencia = request.args.get('frecuencia', 'diario')  # Obtener la frecuencia seleccionada
             config = {
                 'user': 'root',
                 'password': 'rootasdeg2324',
@@ -386,13 +382,59 @@ def inicioUsu():
             }
             connection = mysql.connect(**config)
             cur = connection.cursor()
-            cur.execute('SELECT id_cliente, nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento FROM Cliente WHERE email = %s', (email,))
-            data = cur.fetchone()
-            cur.close()
-            connection.close()
 
-            if data:
-                return render_template('inicioUsu.html')
+            # Obtener datos del cliente
+            cur.execute('SELECT id_cliente, nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento FROM Cliente WHERE email = %s', (email,))
+            cliente = cur.fetchone()
+
+            if cliente:
+                id_cliente = cliente[0]
+
+                # Establecer los días según la frecuencia
+                if frecuencia == 'semanal':
+                    dias = 7
+                    cur.execute('''
+                        SELECT n.nombreNutriente, n.descripcion, n.unidad, IFNULL(SUM(c.cantidad), 0) as consumido, o.cantidad * 7 as objetivo, n.categoria
+                        FROM Nutriente n
+                        LEFT JOIN consume c ON n.id_nutriente = c.id_nutriente AND c.id_cliente = %s AND YEARWEEK(c.fecha_consumo, 1) = YEARWEEK(CURDATE(), 1)
+                        LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
+                        GROUP BY n.id_nutriente, o.cantidad, n.categoria
+                    ''', (id_cliente, id_cliente))
+                elif frecuencia == 'mensual':
+                    cur.execute('SELECT DAY(LAST_DAY(CURDATE()))')
+                    dias_en_mes = cur.fetchone()[0]
+                    dias = dias_en_mes
+                    cur.execute('''
+                        SELECT n.nombreNutriente, n.descripcion, n.unidad, IFNULL(SUM(c.cantidad), 0) as consumido, o.cantidad * %s as objetivo, n.categoria
+                        FROM Nutriente n
+                        LEFT JOIN consume c ON n.id_nutriente = c.id_nutriente AND c.id_cliente = %s AND MONTH(c.fecha_consumo) = MONTH(CURDATE()) AND YEAR(c.fecha_consumo) = YEAR(CURDATE())
+                        LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
+                        GROUP BY n.id_nutriente, o.cantidad, n.categoria
+                    ''', (dias_en_mes, id_cliente, id_cliente))
+                else:  # Por defecto, diario
+                    dias = 1
+                    cur.execute('''
+                        SELECT n.nombreNutriente, n.descripcion, n.unidad, IFNULL(SUM(c.cantidad), 0) as consumido, o.cantidad as objetivo, n.categoria
+                        FROM Nutriente n
+                        LEFT JOIN consume c ON n.id_nutriente = c.id_nutriente AND c.id_cliente = %s AND c.fecha_consumo = CURDATE()
+                        LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
+                        GROUP BY n.id_nutriente, o.cantidad, n.categoria
+                    ''', (id_cliente, id_cliente))
+
+                nutrientes = cur.fetchall()
+
+                cur.close()
+                connection.close()
+
+                # Agrupar los nutrientes por categoría
+                nutrientes_por_categoria = {}
+                for nutriente in nutrientes:
+                    categoria = nutriente[5]
+                    if categoria not in nutrientes_por_categoria:
+                        nutrientes_por_categoria[categoria] = []
+                    nutrientes_por_categoria[categoria].append(nutriente)
+
+                return render_template('inicioUsu.html', nutrientes_por_categoria=nutrientes_por_categoria, frecuencia=frecuencia)
 
         except Exception as e:
             flash(f'Error al cargar la página de inicio: {str(e)}', 'error')
@@ -402,6 +444,9 @@ def inicioUsu():
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
+
+
+
 
 
 
@@ -526,6 +571,7 @@ def añadirComida():
 @app.route('/añadirAlimento', methods=['GET', 'POST'])
 def añadirAlimento():
     if 'email' in session:
+        
         if request.method == 'POST':
             try:
                 config = {
@@ -541,26 +587,37 @@ def añadirAlimento():
                 cur = connection.cursor()
 
                 # Obtener los datos del formulario
-                nombre_alimento = request.form['query']
+                nombre_alimento = request.form['nombreAlimento']
                 descripcion_alimento = request.form['descripcion']
                 comida_id = request.form['comida']
                 cantidad = request.form['cantidad']
                 unidad = request.form['unidad']
 
-                # Insertar el alimento en la tabla Alimento
-                insert_alimento_query = "INSERT INTO Alimento (nombreAlimento, descripcion) VALUES (%s, %s)"
-                cur.execute(insert_alimento_query, (nombre_alimento, descripcion_alimento))
-                alimento_id = cur.lastrowid  # Obtener el ID del alimento insertado
+                alimento = "100 gr de " + nombre_alimento
 
-                # Insertar la relación en la tabla incluye
-                insert_incluye_query = "INSERT INTO incluye (id_comida, id_alimento, unidad, cantidad) VALUES (%s, %s, %s, %s)"
-                cur.execute(insert_incluye_query, (comida_id, alimento_id, unidad, cantidad))
+                print("Buscando receta para:", alimento)
+                food = GoogleTranslator(source='auto', target='en').translate(alimento)
+                analisis_data = analisisNutricional(food)
+                analisis_data = pd.DataFrame(analisis_data)
+                if analisis_data.empty:
+                    flash('No se pudo realizar el análisis nutricional.', 'error')
+                    return redirect(url_for('añadirAlimento'))
+                else:
+                    insert_alimento_query = "INSERT INTO Alimento (nombreAlimento, descripcion) VALUES (%s, %s)"
+                    cur.execute(insert_alimento_query, (nombre_alimento, descripcion_alimento))
+                    alimento_id = cur.lastrowid  # Obtener el ID del alimento insertado
 
-                # Guardar los cambios en la base de datos
-                connection.commit()
+                    # Insertar la relación en la tabla incluye
+                    insert_incluye_query = "INSERT INTO incluye (id_comida, id_alimento, unidad, cantidad) VALUES (%s, %s, %s, %s)"
+                    cur.execute(insert_incluye_query, (comida_id, alimento_id, unidad, cantidad))
 
-                flash('Alimento añadido correctamente.', 'success')
-                return redirect(url_for('añadirAlimento'))
+                    # Guardar los cambios en la base de datos
+                    connection.commit()
+
+
+
+                    flash('Alimento añadido correctamente.', 'success')
+                    return redirect(url_for('añadirAlimento'))
             except Exception as e:
                 flash(f'Error al añadir el alimento: {str(e)}', 'error')
                 return redirect(url_for('añadirAlimento'))
