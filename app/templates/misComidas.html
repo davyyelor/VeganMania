@@ -16,7 +16,9 @@
                         <p><strong>Fecha:</strong> {{ comida[5] }}</p>
                         <!-- Agregar botones -->
                         <div class="botones-comida">
-                            <a href="#" class="btn btn-danger">Borrar Comida</a>
+                            <form action="{{ url_for('borrarComida', id_comida=comida[0]) }}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-danger">Borrar Comida</button>
+                            </form>
                             <a href="#" class="btn btn-info">Ver Comida</a>
                         </div>
                     </article>

@@ -726,6 +726,43 @@ def misComidas():
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
+    
+@app.route('/borrarComida/<int:id_comida>', methods=['POST'])
+def borrarComida(id_comida):
+    if 'email' in session:
+        email = session['email']
+        config = {
+            'user': 'root',
+            'password': 'rootasdeg2324',
+            'host': 'db',
+            'port': '3306',
+            'database': 'usuarios'
+        }
+        
+        connection = mysql.connect(**config)
+        cur = connection.cursor()
+        
+        try:
+            # Primero eliminar los registros en la tabla incluye
+            cur.execute("DELETE FROM incluye WHERE id_comida = %s", [id_comida])
+            
+            # Luego eliminar la comida en sí
+            cur.execute("DELETE FROM Comida WHERE id_comida = %s", [id_comida])
+            
+            connection.commit()
+            flash('¡Comida eliminada correctamente!', 'success')
+        except Exception as e:
+            connection.rollback()
+            flash(f'Error al eliminar la comida: {e}', 'error')
+        finally:
+            cur.close()
+            connection.close()
+        
+        return redirect(url_for('misComidas'))
+    else:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('index'))
+
 
 
 @app.route('/articulosDeTemporada', methods=['GET'])
