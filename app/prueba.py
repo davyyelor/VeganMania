@@ -47,6 +47,8 @@ try:
             product_image_url = item.find_element(By.TAG_NAME, "img").get_attribute("src")
             season_class = item.get_attribute("class")
 
+            print(f"Procesando: {product_title}")
+
             if "in-season" in season_class:
                 in_season.append((product_title, product_image_url))
             elif "start-of-season" in season_class:

@@ -817,19 +817,17 @@ def verComida(id_comida):
         if comida:
             # Obtener alimentos y nutrientes asociados con la comida
             cur.execute("""
-                SELECT A.nombreAlimento, A.descripcion, N.nombreNutriente, C.cantidad, N.unidad
+                SELECT A.nombreAlimento, A.descripcion, I.cantidad, I.unidad
                 FROM incluye I
                 JOIN Alimento A ON I.id_alimento = A.id_alimento
-                JOIN contiene C ON A.id_alimento = C.id_alimento
-                JOIN Nutriente N ON C.id_nutriente = N.id_nutriente
                 WHERE I.id_comida = %s
             """, [id_comida])
-            alimentos_nutrientes = cur.fetchall()
+            alimentos = cur.fetchall()
 
             cur.close()
             connection.close()
 
-            return render_template('verComida.html', comida=comida, alimentos_nutrientes=alimentos_nutrientes)
+            return render_template('verComida.html', comida=comida, alimentos=alimentos)
         else:
             cur.close()
             connection.close()
@@ -838,6 +836,7 @@ def verComida(id_comida):
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
+
 
 
 

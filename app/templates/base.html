@@ -37,7 +37,8 @@
                 <li><a href="{{url_for('sobreNosotros')}}">Sobre Nosotros</a></li>
             </ul>
             <div class="user-info" id="user-info">
-                <span id="user-name">David</span>
+                <span id="user-name">{{ session['email'] }}</span>
+
                 <img src="{{url_for('static', filename='images/icons/icono_usuario.png') }}" alt="User Icon" id="user-icon">
                 <div class="user-menu" id="user-menu">
                     <ul>

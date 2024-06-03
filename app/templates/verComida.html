@@ -4,30 +4,44 @@
 <div class="container">
     <div class="main-content">
         <section>
-            <h1 class="tuSeguimiento">Alimentos y Nutrientes</h1>
+            <h1 class="tuSeguimiento">Detalles de la Comida</h1>
 
-            <div class="alimentos-nutrientes-list">
-                {% if alimentos_nutrientes %}
-                    {% for alimento, descripcion, nutriente, cantidad, unidad in alimentos_nutrientes %}
-                    <article class="alimento-nutriente">
-                        <h2>{{ alimento }}</h2>
-                        <p><strong>Descripción del Alimento:</strong> {{ descripcion }}</p>
-                        <p><strong>Nutriente:</strong> {{ nutriente }}</p>
-                        <p><strong>Cantidad:</strong> {{ cantidad }} {{ unidad }}</p>
-                        <!-- Agregar botones -->
-                        <div class="botones-alimento">
-                            <form action="#" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-danger">Borrar Alimento</button>
-                            </form>
-                            <a href="#" class="btn btn-info">Ver Alimento</a>
-                        </div>
-                    </article>
-                    {% endfor %}
+            <div class="comidas-list">
+                {% if comida %}
+                    <ul class="lista-comidas">
+                        <li class="comida-item">
+                            <h2>{{ comida[2] }}</h2> <!-- nombreComida -->
+                            <p><strong>Descripción:</strong> {{ comida[3] }}</p> <!-- descripcion -->
+                            <p><strong>Fecha:</strong> {{ comida[4] }}</p> <!-- fecha -->
+
+                            <h3>Alimentos Incluidos</h3>
+                            {% if alimentos %}
+                                <ul class="lista-alimentos">
+                                    {% for alimento in alimentos %}
+                                        <li class="alimento-item">
+                                            <article class="alimento">
+                                                <h4>{{ alimento[0] }}</h4> <!-- nombreAlimento -->
+                                                <p><strong>Descripción:</strong> {{ alimento[1] }}</p> <!-- descripcion -->
+                                                <p><strong>Cantidad:</strong> {{ alimento[2] }} {{ alimento[3] }}</p> <!-- cantidad, unidad -->
+                                                <!-- Agregar botones -->
+                                                <div class="botones-alimento">
+                                                    <form action="#" method="post" style="display:inline;">
+                                                        <button type="submit" class="btn btn-danger">Eliminar Alimento</button>
+                                                    </form>
+                                                    <a href="#" class="btn btn-info">Ver Alimento</a>
+                                                </div>
+                                            </article>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p>No se encontraron alimentos para esta comida.</p>
+                                <a href="{{ url_for('añadirAlimento') }}" class="btn btn-primary">Añadir Alimento</a>
+                            {% endif %}
+                        </li>
+                    </ul>
                 {% else %}
-                    <div class="alimento">
-                        <p>No se encontraron alimentos ni nutrientes para esta comida.</p>
-                        <a href="{{ url_for('añadirAlimento') }}" class="btn btn-primary">Añadir Alimento</a>
-                    </div>
+                    <p>No se encontró la comida especificada.</p>
                 {% endif %}
             </div>
         </section>
