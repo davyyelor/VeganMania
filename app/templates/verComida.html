@@ -16,10 +16,10 @@
                         <p><strong>Cantidad:</strong> {{ cantidad }} {{ unidad }}</p>
                         <!-- Agregar botones -->
                         <div class="botones-alimento">
-                            <form action="{{ url_for('borrarAlimento', id_alimento=alimento[0]) }}" method="post" style="display:inline;">
+                            <form action="#" method="post" style="display:inline;">
                                 <button type="submit" class="btn btn-danger">Borrar Alimento</button>
                             </form>
-                            <a href="{{ url_for('verAlimento', id_alimento=alimento[0]) }}" class="btn btn-info">Ver Alimento</a>
+                            <a href="#" class="btn btn-info">Ver Alimento</a>
                         </div>
                     </article>
                     {% endfor %}

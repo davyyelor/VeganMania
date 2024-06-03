@@ -611,10 +611,53 @@ def añadirAlimento():
                     insert_incluye_query = "INSERT INTO incluye (id_comida, id_alimento, unidad, cantidad) VALUES (%s, %s, %s, %s)"
                     cur.execute(insert_incluye_query, (comida_id, alimento_id, unidad, cantidad))
 
+                    # Insertar nutrientes en la tabla contiene
+                    nutrientes = {
+                        'ENERC_KCAL': 'Energia',
+                        'FAT': 'Lipidos totales (grasas)',
+                        'FASAT': 'Acidos grasos, saturados totales',
+                        'FATRN': 'Acidos grasos, trans totales',
+                        'FAMS': 'Acidos grasos monoinsaturados totales',
+                        'FAPU': 'Acidos grasos poliinsaturados totales',
+                        'CHOCDF': 'Carbohidratos, por diferencia',
+                        'FIBTG': 'Fibra dietetica total',
+                        'SUGAR': 'Azucares, total incluyendo NLEA',
+                        'PROCNT': 'Proteina',
+                        'CHOLE': 'Colesterol',
+                        'NA': 'Sodio Na',
+                        'CA': 'Calcio',
+                        'MG': 'Magnesio, Mg',
+                        'K': 'Potasio, K',
+                        'FE': 'Hierro, Fe',
+                        'ZN': 'Zinc, Zn',
+                        'P': 'Fosforo, P',
+                        'VITA_RAE': 'Vitamina A, RAE',
+                        'VITC': 'Vitamina C, acido ascorbico total',
+                        'THIA': 'Tiamina',
+                        'RIBF': 'Riboflavina',
+                        'NIA': 'Niacina',
+                        'VITB6A': 'Vitamina B-6',
+                        'FOLDFE': 'Folato, DFE',
+                        'FOLFD': 'Folato, comida',
+                        'FOLAC': 'Acido folico',
+                        'VITB12': 'Vitamina B12',
+                        'VITD': 'Vitamina D (D2 + D3)',
+                        'TOCPHA': 'Vitamina E (alfa-tocoferol)',
+                        'VITK1': 'Vitamina K (filoquinona)',
+                        'WATER': 'Agua'
+                    }
+
+                    for key, nutriente in nutrientes.items():
+                        if key in analisis_data.index:
+                            cantidad_nutriente = analisis_data.at[key, 'quantity']
+                            unidad_nutriente = analisis_data.at[key, 'unit']
+                            cur.execute("SELECT id_nutriente FROM Nutriente WHERE nombreNutriente = %s", (nutriente,))
+                            id_nutriente = cur.fetchone()[0]
+                            insert_contiene_query = "INSERT INTO contiene (id_alimento, id_nutriente, cantidad) VALUES (%s, %s, %s)"
+                            cur.execute(insert_contiene_query, (alimento_id, id_nutriente, cantidad_nutriente))
+
                     # Guardar los cambios en la base de datos
                     connection.commit()
-
-
 
                     flash('Alimento añadido correctamente.', 'success')
                     return redirect(url_for('añadirAlimento'))
@@ -653,6 +696,7 @@ def añadirAlimento():
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('login'))
+
 
 
 
