@@ -28,30 +28,34 @@
                 </div>
             </div>
 
-            {% for categoria, nutrientes in nutrientes_por_categoria.items() %}
-            <h1>{{ categoria }}</h1>
-            {% for nutrient in nutrientes %}
-            <!-- Sección de nutrientes -->
-            <article>
-                <h2>{{ nutrient[0] }}</h2>
-                <div class="contenido">
-                    <ul>{{ nutrient[1] }}: {{ nutrient[3] }} {{ nutrient[2] }}</ul>
-                </div>
-                <div class="porcentajes">
-                    {% set porcentaje = (nutrient[3] / nutrient[4]) * 100 if nutrient[4] > 0 else 0 %}
-                    {% set color = "green" if porcentaje >= 75 else "orange" if porcentaje >= 50 else "red" %}
-                    <div class='porcentajes' style="--porcentaje: {{ porcentaje }}; --color: {{ color }}">
-                        <span class="spanP">{{ porcentaje | round(0) }}%</span>
-                        <svg width="150" height="150">
-                            <circle r="65" cx="50%" cy="50%" pathlength="100"></circle>
-                            <circle r="65" cx="50%" cy="50%" pathlength="100"></circle>
-                        </svg>
-                        <span class="spanN">{{ nutrient[3] }}/{{ nutrient[4] }} {{ nutrient[2] }}</span>
+            {% if nutrientes_por_categoria %}
+                {% for categoria, nutrientes in nutrientes_por_categoria.items() %}
+                <h1>{{ categoria }}</h1>
+                {% for nutrient in nutrientes %}
+                <!-- Sección de nutrientes -->
+                <article>
+                    <h2>{{ nutrient[0] }}</h2>
+                    <div class="contenido">
+                        <ul>{{ nutrient[1] }}: {{ nutrient[3] }} {{ nutrient[2] }}</ul>
                     </div>
-                </div>
-            </article>
-            {% endfor %}
-            {% endfor %}
+                    <div class="porcentajes">
+                        {% set porcentaje = (nutrient[3] / nutrient[4]) * 100 if nutrient[4] > 0 else 0 %}
+                        {% set color = "green" if porcentaje >= 75 else "orange" if porcentaje >= 50 else "red" %}
+                        <div class='porcentajes' style="--porcentaje: {{ porcentaje }}; --color: {{ color }}">
+                            <span class="spanP">{{ porcentaje | round(0) }}%</span>
+                            <svg width="150" height="150">
+                                <circle r="65" cx="50%" cy="50%" pathlength="100"></circle>
+                                <circle r="65" cx="50%" cy="50%" pathlength="100"></circle>
+                            </svg>
+                            <span class="spanN">{{ nutrient[3] }}/{{ nutrient[4] }} {{ nutrient[2] }}</span>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+                {% endfor %}
+            {% else %}
+                <p>Todavía no has introducido datos para este día/mes/semana.</p>
+            {% endif %}
         </section>
     </div>
 </div>

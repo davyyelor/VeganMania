@@ -394,32 +394,71 @@ def inicioUsu():
                 if frecuencia == 'semanal':
                     dias = 7
                     cur.execute('''
-                        SELECT n.nombreNutriente, n.descripcion, n.unidad, IFNULL(SUM(c.cantidad), 0) as consumido, o.cantidad * 7 as objetivo, n.categoria
+                        SELECT n.nombreNutriente, n.descripcion, n.unidad, 
+                               IFNULL(SUM(cn.cantidad), 0) as consumido, 
+                               o.cantidad * 7 as objetivo, 
+                               n.categoria
                         FROM Nutriente n
-                        LEFT JOIN consume c ON n.id_nutriente = c.id_nutriente AND c.id_cliente = %s AND YEARWEEK(c.fecha_consumo, 1) = YEARWEEK(CURDATE(), 1)
+                        LEFT JOIN contiene c ON n.id_nutriente = c.id_nutriente
+                        LEFT JOIN incluye i ON c.id_alimento = i.id_alimento
+                        LEFT JOIN Comida m ON i.id_comida = m.id_comida
+                        LEFT JOIN Cliente cl ON m.id_cliente = cl.id_cliente
+                        LEFT JOIN (
+                            SELECT id_cliente, id_nutriente, SUM(cantidad) as cantidad
+                            FROM consume
+                            WHERE id_cliente = %s AND YEARWEEK(fecha_consumo, 1) = YEARWEEK(CURDATE(), 1)
+                            GROUP BY id_cliente, id_nutriente
+                        ) cn ON n.id_nutriente = cn.id_nutriente
                         LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
+                        WHERE cl.id_cliente = %s AND YEARWEEK(m.fecha, 1) = YEARWEEK(CURDATE(), 1)
                         GROUP BY n.id_nutriente, o.cantidad, n.categoria
-                    ''', (id_cliente, id_cliente))
+                    ''', (id_cliente, id_cliente, id_cliente))
                 elif frecuencia == 'mensual':
                     cur.execute('SELECT DAY(LAST_DAY(CURDATE()))')
                     dias_en_mes = cur.fetchone()[0]
                     dias = dias_en_mes
                     cur.execute('''
-                        SELECT n.nombreNutriente, n.descripcion, n.unidad, IFNULL(SUM(c.cantidad), 0) as consumido, o.cantidad * %s as objetivo, n.categoria
+                        SELECT n.nombreNutriente, n.descripcion, n.unidad, 
+                               IFNULL(SUM(cn.cantidad), 0) as consumido, 
+                               o.cantidad * %s as objetivo, 
+                               n.categoria
                         FROM Nutriente n
-                        LEFT JOIN consume c ON n.id_nutriente = c.id_nutriente AND c.id_cliente = %s AND MONTH(c.fecha_consumo) = MONTH(CURDATE()) AND YEAR(c.fecha_consumo) = YEAR(CURDATE())
+                        LEFT JOIN contiene c ON n.id_nutriente = c.id_nutriente
+                        LEFT JOIN incluye i ON c.id_alimento = i.id_alimento
+                        LEFT JOIN Comida m ON i.id_comida = m.id_comida
+                        LEFT JOIN Cliente cl ON m.id_cliente = cl.id_cliente
+                        LEFT JOIN (
+                            SELECT id_cliente, id_nutriente, SUM(cantidad) as cantidad
+                            FROM consume
+                            WHERE id_cliente = %s AND MONTH(fecha_consumo) = MONTH(CURDATE()) AND YEAR(fecha_consumo) = YEAR(CURDATE())
+                            GROUP BY id_cliente, id_nutriente
+                        ) cn ON n.id_nutriente = cn.id_nutriente
                         LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
+                        WHERE cl.id_cliente = %s AND MONTH(m.fecha) = MONTH(CURDATE()) AND YEAR(m.fecha) = YEAR(CURDATE())
                         GROUP BY n.id_nutriente, o.cantidad, n.categoria
-                    ''', (dias_en_mes, id_cliente, id_cliente))
+                    ''', (dias_en_mes, id_cliente, id_cliente, id_cliente))
                 else:  # Por defecto, diario
                     dias = 1
                     cur.execute('''
-                        SELECT n.nombreNutriente, n.descripcion, n.unidad, IFNULL(SUM(c.cantidad), 0) as consumido, o.cantidad as objetivo, n.categoria
+                        SELECT n.nombreNutriente, n.descripcion, n.unidad, 
+                               IFNULL(SUM(cn.cantidad), 0) as consumido, 
+                               o.cantidad as objetivo, 
+                               n.categoria
                         FROM Nutriente n
-                        LEFT JOIN consume c ON n.id_nutriente = c.id_nutriente AND c.id_cliente = %s AND c.fecha_consumo = CURDATE()
+                        LEFT JOIN contiene c ON n.id_nutriente = c.id_nutriente
+                        LEFT JOIN incluye i ON c.id_alimento = i.id_alimento
+                        LEFT JOIN Comida m ON i.id_comida = m.id_comida
+                        LEFT JOIN Cliente cl ON m.id_cliente = cl.id_cliente
+                        LEFT JOIN (
+                            SELECT id_cliente, id_nutriente, SUM(cantidad) as cantidad
+                            FROM consume
+                            WHERE id_cliente = %s AND fecha_consumo = CURDATE()
+                            GROUP BY id_cliente, id_nutriente
+                        ) cn ON n.id_nutriente = cn.id_nutriente
                         LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
+                        WHERE cl.id_cliente = %s AND m.fecha = CURDATE()
                         GROUP BY n.id_nutriente, o.cantidad, n.categoria
-                    ''', (id_cliente, id_cliente))
+                    ''', (id_cliente, id_cliente, id_cliente))
 
                 nutrientes = cur.fetchall()
 
@@ -444,6 +483,7 @@ def inicioUsu():
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
+
 
 
 
@@ -567,7 +607,6 @@ def añadirComida():
     
 
 
-
 @app.route('/añadirAlimento', methods=['GET', 'POST'])
 def añadirAlimento():
     if 'email' in session:
@@ -592,6 +631,7 @@ def añadirAlimento():
                 comida_id = request.form['comida']
                 cantidad = request.form['cantidad']
                 unidad = request.form['unidad']
+                email_cliente = session['email']
 
                 alimento = "100 gr de " + nombre_alimento
 
@@ -603,6 +643,7 @@ def añadirAlimento():
                     flash('No se pudo realizar el análisis nutricional.', 'error')
                     return redirect(url_for('añadirAlimento'))
                 else:
+                    # Insertar el alimento
                     insert_alimento_query = "INSERT INTO Alimento (nombreAlimento, descripcion) VALUES (%s, %s)"
                     cur.execute(insert_alimento_query, (nombre_alimento, descripcion_alimento))
                     alimento_id = cur.lastrowid  # Obtener el ID del alimento insertado
@@ -611,7 +652,11 @@ def añadirAlimento():
                     insert_incluye_query = "INSERT INTO incluye (id_comida, id_alimento, unidad, cantidad) VALUES (%s, %s, %s, %s)"
                     cur.execute(insert_incluye_query, (comida_id, alimento_id, unidad, cantidad))
 
-                    # Insertar nutrientes en la tabla contiene
+                    # Obtener la fecha de la comida
+                    cur.execute("SELECT fecha FROM Comida WHERE id_comida = %s", (comida_id,))
+                    fecha_consumo = cur.fetchone()[0]
+
+                    # Insertar nutrientes en la tabla contiene y actualizar la tabla consume
                     nutrientes = {
                         'ENERC_KCAL': 'Energia',
                         'FAT': 'Lipidos totales (grasas)',
@@ -647,19 +692,31 @@ def añadirAlimento():
                         'WATER': 'Agua'
                     }
 
-                    for key, nutriente in nutrientes.items():
-                        if key in analisis_data.index:
-                            cantidad_nutriente = analisis_data.at[key, 'quantity']
-                            unidad_nutriente = analisis_data.at[key, 'unit']
-                            cur.execute("SELECT id_nutriente FROM Nutriente WHERE nombreNutriente = %s", (nutriente,))
+                    for nutriente, nombre in nutrientes.items():
+                        if nutriente in analisis_data.index:
+                            cantidad_nutriente = analisis_data.loc[nutriente, 'quantity']
+                            unidad_nutriente = analisis_data.loc[nutriente, 'unit']
+
+                            # Obtener el id del nutriente
+                            cur.execute("SELECT id_nutriente FROM Nutriente WHERE nombreNutriente = %s", (nombre,))
                             id_nutriente = cur.fetchone()[0]
+
+                            # Insertar en la tabla contiene
                             insert_contiene_query = "INSERT INTO contiene (id_alimento, id_nutriente, cantidad) VALUES (%s, %s, %s)"
                             cur.execute(insert_contiene_query, (alimento_id, id_nutriente, cantidad_nutriente))
+
+                            # Actualizar la tabla consume (si el registro existe)
+                            update_consume_query = """
+                            INSERT INTO consume (id_cliente, id_nutriente, fecha_consumo, cantidad)
+                            VALUES ((SELECT id_cliente FROM Cliente WHERE email = %s), %s, %s, %s)
+                            ON DUPLICATE KEY UPDATE cantidad = cantidad + %s
+                            """
+                            cur.execute(update_consume_query, (email_cliente, id_nutriente, fecha_consumo, cantidad_nutriente, cantidad_nutriente))
 
                     # Guardar los cambios en la base de datos
                     connection.commit()
 
-                    flash('Alimento añadido correctamente.', 'success')
+                    flash('Alimento y nutrientes añadidos correctamente.', 'success')
                     return redirect(url_for('añadirAlimento'))
             except Exception as e:
                 flash(f'Error al añadir el alimento: {str(e)}', 'error')
@@ -696,6 +753,8 @@ def añadirAlimento():
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('login'))
+
+
 
 
 

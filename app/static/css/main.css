@@ -19,50 +19,38 @@
   font-family: JosefinSans-Bold;
   src: url('../fonts/JosefinSans/JosefinSans-Bold.ttf'); 
 }
-
 /* Estilos para el contenedor de botones adicionales */
-/* Estilos para el botón "Ver Comidas" */
-.btn-ver-comidas {
-  background-color: #4CAF50; /* Color de fondo */
-  color: white; /* Color del texto */
-  padding: 10px 15px; /* Espaciado interno (modificado) */
-  border: none; /* Quita el borde */
-  border-radius: 5px; /* Bordes redondeados */
-  cursor: pointer; /* Cursor de puntero */
-  transition: background-color 0.3s; /* Transición suave del color de fondo */
-}
-
-/* Aumentar el espacio entre los botones */
+/* Estilos para el contenedor de botones adicionales */
 .botones-adicionales {
   display: flex;
-  justify-content: space-around; /* Cambiado a space-around para más espacio */
-  width: 300px; /* Ajusta el ancho según sea necesario */
+  justify-content: flex-start; /* Alinea los botones a la izquierda */
+  gap: 10px; /* Añade espacio entre los botones */
+  width: auto; /* Ajusta el ancho según sea necesario */
 }
 
-
-/* Estilos para el botón "Añadir..." */
-.btn-anadir-comidas,
-.btn-dropdown
-.btn-ver-comidas {
+/* Estilos básicos para todos los botones */
+.btn-anadir-comidas, .btn-dropdown, .btn-ver-comidas {
   background-color: #4CAF50; /* Color de fondo */
   color: white; /* Color del texto */
-  padding: 10px 15px; /* Espaciado interno (modificado) */
+  padding: 10px 15px; /* Espaciado interno */
   border: none; /* Quita el borde */
   border-radius: 5px; /* Bordes redondeados */
   cursor: pointer; /* Cursor de puntero */
   transition: background-color 0.3s; /* Transición suave del color de fondo */
+  display: inline-flex; /* Asegura que los botones se alineen correctamente */
+  align-items: center; /* Centra el contenido verticalmente */
 }
 
-/* Estilos para el botón "Frecuencia" */
+/* Específico para el botón "Frecuencia" si quieres un color diferente */
 .btn-dropdown {
-  background-color: #008CBA; /* Otro color de fondo */
+  background-color: #008CBA; /* Color diferente */
 }
 
 /* Estilos para los enlaces dentro del dropdown */
 .dropdown-content a {
   color: black; /* Color del texto de los enlaces */
   padding: 12px 16px; /* Espaciado interno */
-  text-decoration: none; /* Quita la subrayado de los enlaces */
+  text-decoration: none; /* Quita el subrayado de los enlaces */
   display: block; /* Convierte los enlaces en bloques para ocupar todo el ancho del dropdown */
   transition: background-color 0.3s; /* Transición suave del color de fondo */
 }
@@ -78,7 +66,7 @@
   display: inline-block; /* Hace que el dropdown se muestre en línea con el botón */
 }
 
-/* Estilos para el contenidore del dropdown */
+/* Estilos para el contenido del dropdown */
 .dropdown-content {
   display: none; /* Oculta el contenido por defecto */
   position: absolute; /* Posición absoluta para que se ajuste correctamente al botón */
@@ -92,6 +80,7 @@
 .dropdown:hover .dropdown-content {
   display: block; /* Muestra el contenido cuando se pasa el ratón por encima del botón */
 }
+
 
 
 

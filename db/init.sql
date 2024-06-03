@@ -142,7 +142,8 @@ INSERT INTO tiene_objetivo (id_cliente, id_nutriente, cantidad)
 SELECT c.id_cliente, n.id_nutriente, 2000
 FROM Cliente c, Nutriente n;
 
--- Establecer un consumo de 0 para todos los nutrientes para cada cliente en el día de su creación
 INSERT INTO consume (id_cliente, id_nutriente, fecha_consumo, cantidad)
 SELECT c.id_cliente, n.id_nutriente, CURDATE(), 0
-FROM Cliente c, Nutriente n;
+FROM Cliente c, Nutriente n
+ON DUPLICATE KEY UPDATE cantidad = 0;
+
