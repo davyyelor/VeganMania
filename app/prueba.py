@@ -74,17 +74,17 @@ try:
     print("In Season Products:")
     for product_title, product_image_url in in_season:
         print(f"- {product_title}")
-        download_image(product_image_url, f"images/in_season/{product_title}.jpg")
+        download_image(product_image_url, f"./static/images/in_season/{product_title}.jpg")
 
     print("\nStart of Season Products:")
     for product_title, product_image_url in start_of_season:
         print(f"- {product_title}")
-        download_image(product_image_url, f"images/start_of_season/{product_title}.jpg")
+        download_image(product_image_url, f"./static/images/start_of_season/{product_title}.jpg")
 
     print("\nOut of Season Products:")
     for product_title, product_image_url in out_of_season:
         print(f"- {product_title}")
-        download_image(product_image_url, f"images/out_of_season/{product_title}.jpg")
+        download_image(product_image_url, f"./static/images/out_of_season/{product_title}.jpg")
 
 except Exception as e:
     print(f"Ocurrió un error: {e}")
@@ -92,4 +92,8 @@ finally:
     # Cerrar el navegador
     print("Cerrando el navegador...")
     driver.quit()
+
+# Obtener el número de productos clasificados
+total_products = len(in_season) + len(start_of_season) + len(out_of_season)
+print(f"Número total de productos: {total_products}")
 print("Proceso completado.")

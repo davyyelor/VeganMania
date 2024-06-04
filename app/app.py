@@ -629,7 +629,7 @@ def añadirAlimento():
                 nombre_alimento = request.form['nombreAlimento']
                 descripcion_alimento = request.form['descripcion']
                 comida_id = request.form['comida']
-                cantidad = request.form['cantidad']
+                cantidadAlimento = request.form['cantidad']
                 unidad = request.form['unidad']
                 email_cliente = session['email']
 
@@ -640,7 +640,7 @@ def añadirAlimento():
                 analisis_data = analisisNutricional(food)
                 analisis_data = pd.DataFrame(analisis_data)
                 if analisis_data.empty:
-                    flash('No se pudo realizar el análisis nutricional.', 'error')
+                    flash('No se ha encontrado nuestro alimento en la base de datos.', 'error')
                     return redirect(url_for('añadirAlimento'))
                 else:
                     # Insertar el alimento
@@ -650,7 +650,7 @@ def añadirAlimento():
 
                     # Insertar la relación en la tabla incluye
                     insert_incluye_query = "INSERT INTO incluye (id_comida, id_alimento, unidad, cantidad) VALUES (%s, %s, %s, %s)"
-                    cur.execute(insert_incluye_query, (comida_id, alimento_id, unidad, cantidad))
+                    cur.execute(insert_incluye_query, (comida_id, alimento_id, unidad, cantidadAlimento))
 
                     # Obtener la fecha de la comida
                     cur.execute("SELECT fecha FROM Comida WHERE id_comida = %s", (comida_id,))
@@ -696,6 +696,7 @@ def añadirAlimento():
                         if nutriente in analisis_data.index:
                             cantidad_nutriente = analisis_data.loc[nutriente, 'quantity']
                             unidad_nutriente = analisis_data.loc[nutriente, 'unit']
+                            cantidad = cantidad_nutriente*float(cantidadAlimento)/100
 
                             # Obtener el id del nutriente
                             cur.execute("SELECT id_nutriente FROM Nutriente WHERE nombreNutriente = %s", (nombre,))
@@ -703,7 +704,7 @@ def añadirAlimento():
 
                             # Insertar en la tabla contiene
                             insert_contiene_query = "INSERT INTO contiene (id_alimento, id_nutriente, cantidad) VALUES (%s, %s, %s)"
-                            cur.execute(insert_contiene_query, (alimento_id, id_nutriente, cantidad_nutriente))
+                            cur.execute(insert_contiene_query, (alimento_id, id_nutriente, cantidad))
 
                             # Actualizar la tabla consume (si el registro existe)
                             update_consume_query = """
@@ -711,7 +712,7 @@ def añadirAlimento():
                             VALUES ((SELECT id_cliente FROM Cliente WHERE email = %s), %s, %s, %s)
                             ON DUPLICATE KEY UPDATE cantidad = cantidad + %s
                             """
-                            cur.execute(update_consume_query, (email_cliente, id_nutriente, fecha_consumo, cantidad_nutriente, cantidad_nutriente))
+                            cur.execute(update_consume_query, (email_cliente, id_nutriente, fecha_consumo, cantidad, cantidad))
 
                     # Guardar los cambios en la base de datos
                     connection.commit()
@@ -891,11 +892,19 @@ def borrarComida(id_comida):
         cur = connection.cursor()
         
         try:
+            cur.execute("SELECT id_alimento FROM incluye WHERE id_comida = %s", [id_comida])
+            alimentos = cur.fetchall()
+
             # Primero eliminar los registros en la tabla incluye
             cur.execute("DELETE FROM incluye WHERE id_comida = %s", [id_comida])
             
             # Luego eliminar la comida en sí
             cur.execute("DELETE FROM Comida WHERE id_comida = %s", [id_comida])
+
+            for alimento in alimentos:
+                cur.execute("DELETE FROM contiene WHERE id_alimento = %s", [alimento[0]])
+                cur.execute("DELETE FROM Alimento WHERE id_alimento = %s", [alimento[0]])
+                flash(f'¡Comida eliminada correctamente pero {alimento[0]}!', 'success')
             
             connection.commit()
             flash('¡Comida eliminada correctamente!', 'success')
