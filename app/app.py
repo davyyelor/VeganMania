@@ -818,7 +818,7 @@ def verComida(id_comida):
         if comida:
             # Obtener alimentos y nutrientes asociados con la comida
             cur.execute("""
-                SELECT A.nombreAlimento, A.descripcion, I.cantidad, I.unidad
+                SELECT A.nombreAlimento, A.descripcion, I.cantidad, I.unidad, A.id_alimento
                 FROM incluye I
                 JOIN Alimento A ON I.id_alimento = A.id_alimento
                 WHERE I.id_comida = %s
@@ -872,6 +872,47 @@ def misComidas():
             connection.close()
             flash('No se encontró al usuario en la base de datos.', 'error')
             return render_template('inicioUsu.html')
+    else:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('index'))
+    
+
+@app.route('/borrarAlimento/<int:id_alimento>', methods=['POST'])
+def borrarAlimento(id_alimento):
+    if 'email' in session:
+        email = session['email']
+        config = {
+            'user': 'root',
+            'password': 'rootasdeg2324',
+            'host': 'db',
+            'port': '3306',
+            'database': 'usuarios'
+        }
+
+        connection = mysql.connect(**config)
+        cur = connection.cursor()
+
+        try:
+            cur.execute("SELECT id_comida FROM incluye WHERE id_alimento = %s", [id_alimento])
+            comida = cur.fetchone()
+
+            if comida:
+                cur.execute("DELETE FROM incluye WHERE id_alimento = %s", [id_alimento])
+                cur.execute("DELETE FROM contiene WHERE id_alimento = %s", [id_alimento])
+                cur.execute("DELETE FROM Alimento WHERE id_alimento = %s", [id_alimento])
+                connection.commit()
+                flash('¡Alimento eliminado correctamente!', 'success')
+                return redirect(url_for('misComidas'))
+            else:
+                flash('No se encontró el alimento especificado.', 'error')
+                return redirect(url_for('misComidas'))
+        except Exception as e:
+            connection.rollback()
+            flash(f'Error al eliminar el alimento: {e}', 'error')
+            return redirect(url_for('misComidas'))
+        finally:
+            cur.close()
+            connection.close()
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))

@@ -25,7 +25,7 @@
                                                 <p><strong>Cantidad:</strong> {{ alimento[2] }} {{ alimento[3] }}</p> <!-- cantidad, unidad -->
                                                 <!-- Agregar botones -->
                                                 <div class="botones-alimento">
-                                                    <form action="#" method="post" style="display:inline;">
+                                                    <form action="{{ url_for('borrarAlimento', id_alimento=alimento[4]) }}" method="post" style="display:inline;">
                                                         <button type="submit" class="btn btn-danger">Eliminar Alimento</button>
                                                     </form>
                                                     <a href="#" class="btn btn-info">Ver Alimento</a>
