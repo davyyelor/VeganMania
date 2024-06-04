@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="main-content">
+        <section>
+            <h1 class="tuSeguimiento">Detalles del Alimento</h1>
+
+            <div class="alimento-detalles">
+                {% if alimento %}
+                    <h2>{{ alimento.nombreAlimento }}</h2>
+                    <p><strong>Descripción:</strong> {{ alimento.descripcion }}</p>
+                    
+                    <h3>Nutrientes</h3>
+                    {% if nutrientes %}
+                        <ul class="lista-nutrientes">
+                            {% for nutriente in nutrientes %}
+                                <li class="nutriente-item">
+                                    <strong>{{ nutriente.nombreNutriente }}</strong>: {{ nutriente[1] }} {{ nutriente[2] }}
+                                    <p>{{ nutriente[0] }}</p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No se encontraron nutrientes para este alimento.</p>
+                    {% endif %}
+                {% else %}
+                    <p>No se encontró el alimento especificado.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

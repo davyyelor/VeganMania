@@ -373,6 +373,7 @@ def inicioUsu():
         try:
             email = session['email']
             frecuencia = request.args.get('frecuencia', 'diario')  # Obtener la frecuencia seleccionada
+            orden = request.args.get('orden', 'normal')  # Obtener el orden seleccionado
             config = {
                 'user': 'root',
                 'password': 'rootasdeg2324',
@@ -395,7 +396,7 @@ def inicioUsu():
                     dias = 7
                     cur.execute('''
                         SELECT n.nombreNutriente, n.descripcion, n.unidad, 
-                               IFNULL(SUM(cn.cantidad), 0) as consumido, 
+                               IFNULL(SUM(c.cantidad), 0) as consumido, 
                                o.cantidad * 7 as objetivo, 
                                n.categoria
                         FROM Nutriente n
@@ -403,23 +404,17 @@ def inicioUsu():
                         LEFT JOIN incluye i ON c.id_alimento = i.id_alimento
                         LEFT JOIN Comida m ON i.id_comida = m.id_comida
                         LEFT JOIN Cliente cl ON m.id_cliente = cl.id_cliente
-                        LEFT JOIN (
-                            SELECT id_cliente, id_nutriente, SUM(cantidad) as cantidad
-                            FROM consume
-                            WHERE id_cliente = %s AND YEARWEEK(fecha_consumo, 1) = YEARWEEK(CURDATE(), 1)
-                            GROUP BY id_cliente, id_nutriente
-                        ) cn ON n.id_nutriente = cn.id_nutriente
                         LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
                         WHERE cl.id_cliente = %s AND YEARWEEK(m.fecha, 1) = YEARWEEK(CURDATE(), 1)
                         GROUP BY n.id_nutriente, o.cantidad, n.categoria
-                    ''', (id_cliente, id_cliente, id_cliente))
+                    ''', (id_cliente, id_cliente))
                 elif frecuencia == 'mensual':
                     cur.execute('SELECT DAY(LAST_DAY(CURDATE()))')
                     dias_en_mes = cur.fetchone()[0]
                     dias = dias_en_mes
                     cur.execute('''
                         SELECT n.nombreNutriente, n.descripcion, n.unidad, 
-                               IFNULL(SUM(cn.cantidad), 0) as consumido, 
+                               IFNULL(SUM(c.cantidad), 0) as consumido, 
                                o.cantidad * %s as objetivo, 
                                n.categoria
                         FROM Nutriente n
@@ -427,21 +422,15 @@ def inicioUsu():
                         LEFT JOIN incluye i ON c.id_alimento = i.id_alimento
                         LEFT JOIN Comida m ON i.id_comida = m.id_comida
                         LEFT JOIN Cliente cl ON m.id_cliente = cl.id_cliente
-                        LEFT JOIN (
-                            SELECT id_cliente, id_nutriente, SUM(cantidad) as cantidad
-                            FROM consume
-                            WHERE id_cliente = %s AND MONTH(fecha_consumo) = MONTH(CURDATE()) AND YEAR(fecha_consumo) = YEAR(CURDATE())
-                            GROUP BY id_cliente, id_nutriente
-                        ) cn ON n.id_nutriente = cn.id_nutriente
                         LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
                         WHERE cl.id_cliente = %s AND MONTH(m.fecha) = MONTH(CURDATE()) AND YEAR(m.fecha) = YEAR(CURDATE())
                         GROUP BY n.id_nutriente, o.cantidad, n.categoria
-                    ''', (dias_en_mes, id_cliente, id_cliente, id_cliente))
+                    ''', (dias_en_mes, id_cliente, id_cliente))
                 else:  # Por defecto, diario
                     dias = 1
                     cur.execute('''
                         SELECT n.nombreNutriente, n.descripcion, n.unidad, 
-                               IFNULL(SUM(cn.cantidad), 0) as consumido, 
+                               IFNULL(SUM(c.cantidad), 0) as consumido, 
                                o.cantidad as objetivo, 
                                n.categoria
                         FROM Nutriente n
@@ -449,16 +438,10 @@ def inicioUsu():
                         LEFT JOIN incluye i ON c.id_alimento = i.id_alimento
                         LEFT JOIN Comida m ON i.id_comida = m.id_comida
                         LEFT JOIN Cliente cl ON m.id_cliente = cl.id_cliente
-                        LEFT JOIN (
-                            SELECT id_cliente, id_nutriente, SUM(cantidad) as cantidad
-                            FROM consume
-                            WHERE id_cliente = %s AND fecha_consumo = CURDATE()
-                            GROUP BY id_cliente, id_nutriente
-                        ) cn ON n.id_nutriente = cn.id_nutriente
                         LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
                         WHERE cl.id_cliente = %s AND m.fecha = CURDATE()
                         GROUP BY n.id_nutriente, o.cantidad, n.categoria
-                    ''', (id_cliente, id_cliente, id_cliente))
+                    ''', (id_cliente, id_cliente))
 
                 nutrientes = cur.fetchall()
 
@@ -473,16 +456,24 @@ def inicioUsu():
                         nutrientes_por_categoria[categoria] = []
                     nutrientes_por_categoria[categoria].append(nutriente)
 
-                return render_template('inicioUsu.html', nutrientes_por_categoria=nutrientes_por_categoria, frecuencia=frecuencia)
+                # Ordenar nutrientes según el parámetro de ordenación
+                for categoria in nutrientes_por_categoria:
+                    if orden == 'mayor-menor':
+                        nutrientes_por_categoria[categoria].sort(key=lambda x: (x[3] / x[4]) if x[4] > 0 else 0, reverse=True)
+                    elif orden == 'menor-mayor':
+                        nutrientes_por_categoria[categoria].sort(key=lambda x: (x[3] / x[4]) if x[4] > 0 else 0)
+                    # 'normal' mantiene el orden original, no se requiere acción
+
+                return render_template('inicioUsu.html', nombre=cliente[2], nutrientes_por_categoria=nutrientes_por_categoria, frecuencia=frecuencia)
+            else:
+                return redirect(url_for('login'))
 
         except Exception as e:
-            flash(f'Error al cargar la página de inicio: {str(e)}', 'error')
-
+            return render_template('inicioUsu.html', error=f'Error al conectar a la base de datos: {e}')
+    else:
         return redirect(url_for('login'))
 
-    else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
-        return redirect(url_for('index'))
+
 
 
 
@@ -796,6 +787,54 @@ def articulos():
 def sobreNosotros():
     return render_template('sobreNosotros.html')
 
+@app.route('/verAlimento/<int:id_alimento>', methods=['GET'])
+def verAlimento(id_alimento):
+    if 'email' in session:
+        email = session['email']
+        config = {
+            'user': 'root',
+            'password': 'rootasdeg2324',
+            'host': 'db',
+            'port': '3306',
+            'database': 'usuarios'
+        }
+
+        connection = mysql.connect(**config)
+        cur = connection.cursor()
+
+        # Obtener información del alimento
+        cur.execute("SELECT nombreAlimento, descripcion FROM Alimento WHERE id_alimento = %s", [id_alimento])
+        alimento = cur.fetchone()
+
+        if alimento:
+            alimento = {
+                'nombreAlimento': alimento[0],
+                'descripcion': alimento[1]
+            }
+
+            # Obtener nutrientes asociados con el alimento
+            cur.execute("""
+                SELECT N.nombreNutriente, N.descripcion, C.cantidad, N.unidad
+                FROM contiene C
+                JOIN Nutriente N ON C.id_nutriente = N.id_nutriente
+                WHERE C.id_alimento = %s
+            """, [id_alimento])
+            nutrientes = cur.fetchall()
+
+            cur.close()
+            connection.close()
+
+            return render_template('verAlimento.html', alimento=alimento, nutrientes=nutrientes)
+        else:
+            cur.close()
+            connection.close()
+            flash('No se encontró el alimento especificado.', 'error')
+            return redirect(url_for('misComidas'))
+    else:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('index'))
+
+
 @app.route('/verComida/<int:id_comida>', methods=['GET'])
 def verComida(id_comida):
     if 'email' in session:
@@ -837,6 +876,7 @@ def verComida(id_comida):
     else:
         flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
+
 
 
 

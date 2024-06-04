@@ -28,7 +28,7 @@
                                                     <form action="{{ url_for('borrarAlimento', id_alimento=alimento[4]) }}" method="post" style="display:inline;">
                                                         <button type="submit" class="btn btn-danger">Eliminar Alimento</button>
                                                     </form>
-                                                    <a href="#" class="btn btn-info">Ver Alimento</a>
+                                                    <a href="{{url_for('verAlimento', id_alimento=alimento[4])}}" class="btn btn-info">Ver Alimento</a>
                                                 </div>
                                             </article>
                                         </li>
