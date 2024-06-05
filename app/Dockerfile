@@ -1,6 +1,6 @@
 FROM python:3.6
 
-# Instala gunicornz
+# Instala gunicorn
 RUN pip install gunicorn
 
 EXPOSE 5000
@@ -9,4 +9,7 @@ COPY . /app
 RUN pip install -r requirements.txt
 COPY app.py /app
 
-CMD gunicorn -w 4 -b 0.0.0.0:5000 app:app
+# Asegúrate de copiar el archivo de configuración de Gunicorn
+COPY gunicorn_config.py /app
+
+CMD gunicorn -c /app/gunicorn_config.py app:app

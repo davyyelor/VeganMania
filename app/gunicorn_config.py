@@ -1,4 +1,6 @@
 # gunicorn_config.py
-workers = 4  # Puedes ajustar este número según la cantidad de núcleos de tu CPU
+import multiprocessing
+
+workers = multiprocessing.cpu_count() * 2 + 1  # Ajusta esto según tu entorno
 timeout = 120
 bind = "0.0.0.0:5000"
