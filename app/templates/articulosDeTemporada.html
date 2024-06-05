@@ -1,18 +1,68 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    /* Estilo para las imágenes a punto de salir de temporada */
+    .soon-to-be-out {
+        opacity: 0.7; /* Ajusta la opacidad según tu preferencia */
+        vertical-align: middle; /* Alinea verticalmente con el texto */
+    }
+
+    /* Estilo para las imágenes fuera de temporada */
+    .out-of-season {
+        filter: grayscale(100%); /* Aplica el filtro de blanco y negro */
+    }
+
+    /* Estilo para la descripción del producto */
+    .product-description {
+        display: none; /* Oculta la descripción por defecto */
+        position: absolute; /* Posiciona la descripción absolutamente */
+        background-color: #fff; /* Fondo blanco */
+        border: 1px solid #ccc; /* Borde gris */
+        padding: 10px; /* Espaciado interno */
+        z-index: 1; /* Asegura que esté encima de otras capas */
+    }
+</style>
 <div class="container" style="margin-top: 100px;">
-    <h2>Productos de Temporada</h2>
     <div class="row">
-        {% for product in in_season %}
-        <div class="col-md-4 text-center">
-            <img src="../static/images/products/{{ product[6] }}" class="img-fluid" alt="{{ product[1] }}">
-            <p>{{ product[1] }}</p>
+        <h2>Producto de temporada</h2>
+        <div class="col-md-6">
+            <img src="../static/images/icons/sand-clock-time-svgrepo-com.svg" alt="Producto entrando o saliendo de temporada" style="width: 5%; vertical-align: middle;">
+            <p style="display: inline-block; vertical-align: middle;">Producto entrando o saliendo de temporada</p>
         </div>
-        {% if loop.index % 3 == 0 %}
     </div>
+
     <div class="row">
-        {% endif %}
+        {% set index = 0 %}
+        {% for product in in_season %}
+            <div class="col-md-4 text-center">
+                <div class="product-container">
+                    <img src="../static/images/products/{{ product[6] }}" class="img-fluid" alt="{{ product[1] }}" onclick="toggleDescription(this)">
+                    <div class="product-description">{{ product[5] }}</div>
+                </div>
+                <p>{{ product[1] }}</p>
+            </div>
+            {% set index = index + 1 %}
+            {% if index % 3 == 0 %}
+                </div>
+                <div class="row">
+            {% endif %}
+        {% endfor %}
+
+        {% for product in start_of_season %}
+            <div class="col-md-4 text-center">
+                <div class="product-container">
+                    <img src="../static/images/products/{{ product[6] }}" class="img-fluid soon-to-be-out" alt="{{ product[1] }}" onclick="toggleDescription(this)">
+                    <div class="product-description">{{ product[5] }}</div>
+                </div>
+                <p>{{ product[1] }}</p>
+                <img src="../static/images/icons/sand-clock-time-svgrepo-com.svg" style="width: 10%;">
+            </div>
+            {% set index = index + 1 %}
+            {% if index % 3 == 0 %}
+                </div>
+                <div class="row">
+            {% endif %}
         {% endfor %}
     </div>
 
@@ -20,21 +70,10 @@
     <div class="row">
         {% for product in out_of_season %}
         <div class="col-md-4 text-center">
-            <img src="../static/images/products/{{ product[6] }}" class="img-fluid" alt="{{ product[1] }}">
-            <p>{{ product[1] }}</p>
-        </div>
-        {% if loop.index % 3 == 0 %}
-    </div>
-    <div class="row">
-        {% endif %}
-        {% endfor %}
-    </div>
-
-    <h2>Recién Llegados / A Punto de Salir</h2>
-    <div class="row">
-        {% for product in start_of_season %}
-        <div class="col-md-4 text-center">
-            <img src="../static/images/products/{{ product[6] }}" class="img-fluid" alt="{{ product[1] }}">
+            <div class="product-container">
+                <img src="../static/images/products/{{ product[6] }}" class="img-fluid out-of-season" alt="{{ product[1] }}" onclick="toggleDescription(this)">
+                <div class="product-description">{{ product[5] }}</div>
+            </div>
             <p>{{ product[1] }}</p>
         </div>
         {% if loop.index % 3 == 0 %}
@@ -44,4 +83,15 @@
         {% endfor %}
     </div>
 </div>
+
+<script>
+    function toggleDescription(img) {
+        var description = img.nextElementSibling;
+        if (description.style.display === "none") {
+            description.style.display = "block";
+        } else {
+            description.style.display = "none";
+        }
+    }
+</script>
 {% endblock %}

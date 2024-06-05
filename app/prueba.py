@@ -7,6 +7,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+import unicodedata  # Importar unicodedata para eliminar tildes
 
 # Crear directorios para almacenar las imágenes
 os.makedirs("./static/images/in_season", exist_ok=True)
@@ -47,14 +48,23 @@ try:
             product_image_url = item.find_element(By.TAG_NAME, "img").get_attribute("src")
             season_class = item.get_attribute("class")
 
+            # Eliminar tildes y convertir a minúsculas el nombre del archivo
+            product_title_normalized = (
+                unicodedata.normalize("NFD", product_title)
+                .encode("ascii", "ignore")
+                .decode("utf-8")
+                .lower()
+                .replace(" ", "_")
+            )
+
             print(f"Procesando: {product_title}")
 
             if "in-season" in season_class:
-                in_season.append((product_title, product_image_url))
+                in_season.append((product_title_normalized, product_image_url))
             elif "start-of-season" in season_class:
-                start_of_season.append((product_title, product_image_url))
+                start_of_season.append((product_title_normalized, product_image_url))
             elif "out-of-season" in season_class:
-                out_of_season.append((product_title, product_image_url))
+                out_of_season.append((product_title_normalized, product_image_url))
         except Exception as e:
             print(f"Error al procesar un elemento: {e}")
 
@@ -63,7 +73,7 @@ try:
         try:
             response = requests.get(url)
             if response.status_code == 200:
-                with open(path, 'wb') as f:
+                with open(path, "wb") as f:
                     f.write(response.content)
             else:
                 print(f"Error al descargar la imagen: {url}")
@@ -74,17 +84,23 @@ try:
     print("In Season Products:")
     for product_title, product_image_url in in_season:
         print(f"- {product_title}")
-        download_image(product_image_url, f"./static/images/in_season/{product_title}.jpg")
+        download_image(
+            product_image_url, f"./static/images/in_season/{product_title}.jpg"
+        )
 
     print("\nStart of Season Products:")
     for product_title, product_image_url in start_of_season:
         print(f"- {product_title}")
-        download_image(product_image_url, f"./static/images/start_of_season/{product_title}.jpg")
+        download_image(
+            product_image_url, f"./static/images/start_of_season/{product_title}.jpg"
+        )
 
     print("\nOut of Season Products:")
     for product_title, product_image_url in out_of_season:
         print(f"- {product_title}")
-        download_image(product_image_url, f"./static/images/out_of_season/{product_title}.jpg")
+        download_image(
+            product_image_url, f"./static/images/out_of_season/{product_title}.jpg"
+        )
 
 except Exception as e:
     print(f"Ocurrió un error: {e}")
@@ -97,4 +113,3 @@ finally:
 total_products = len(in_season) + len(start_of_season) + len(out_of_season)
 print(f"Número total de productos: {total_products}")
 print("Proceso completado.")
-me

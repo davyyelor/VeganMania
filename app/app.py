@@ -25,7 +25,9 @@ app = Flask(__name__)
 from flask import render_template, request, flash, url_for, redirect, session
 import mysql.connector as mysql
 app.config['SECRET_KEY'] = 'abcd1234@'
-app.config['SESSION_TYPE'] = 'filesystem'  
+app.config['SESSION_TYPE'] = 'filesystem' 
+app.config['JSON_AS_ASCII'] = False
+
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 import pandas as pd
 
