@@ -9,13 +9,15 @@
     .out-of-season {
         filter: grayscale(100%);
     }
-    .product-description {
+    .product-description, .info-note {
         display: none;
         position: absolute;
         background-color: #fff;
         border: 1px solid #ccc;
         padding: 10px;
         z-index: 1;
+        width: 200px; /* Ajusta el ancho según sea necesario */
+        font-size: 14px; /* Ajusta el tamaño de la fuente según sea necesario */
     }
     .month-filter {
         list-style: none;
@@ -31,6 +33,13 @@
         font-weight: bold;
         color: blue;
     }
+    .info-icon {
+        width: 20px;
+        height: 20px;
+        vertical-align: middle;
+        cursor: pointer;
+        margin-left: 10px;
+    }
 </style>
 
 <div class="container" style="margin-top: 100px;">
@@ -45,7 +54,10 @@
     </div>
 
     <div class="row">
-        <h2>Producto de temporada</h2>
+        <h2>En temporada
+            <img src="../static/images/icons/information-svgrepo-com.svg" alt="Información" class="info-icon" onclick="toggleDescription(event, document.getElementById('infoNote'))">
+            <div class="info-note" id="infoNote">Clicka un producto para ver su descripción. Los productos salen con las temporadas en función de la cosecha española. No disponemos información de productos que no sean de origen español con el fin de fomentar el producto local.</div>
+        </h2>
         <div class="col-md-6">
             <img src="../static/images/icons/sand-clock-time-svgrepo-com.svg" alt="Producto entrando o saliendo de temporada" style="width: 5%; vertical-align: middle;">
             <p style="display: inline-block; vertical-align: middle;">Producto entrando o saliendo de temporada</p>
@@ -58,7 +70,7 @@
         {% for product in in_season %}
             <div class="col-md-4 text-center">
                 <div class="product-container">
-                    <img src="../static/images/products/{{ product[6] }}" class="img-fluid" alt="{{ product[1] }}" onclick="toggleDescription(this)">
+                    <img src="../static/images/products/{{ product[6] }}" class="img-fluid" alt="{{ product[1] }}" onclick="toggleDescription(event, this.nextElementSibling)">
                     <div class="product-description">{{ product[5] }}</div>
                 </div>
                 <p>{{ product[1] }}</p>
@@ -74,7 +86,7 @@
         {% for product in start_of_season %}
             <div class="col-md-4 text-center">
                 <div class="product-container">
-                    <img src="../static/images/products/{{ product[6] }}" class="img-fluid soon-to-be-out" alt="{{ product[1] }}" onclick="toggleDescription(this)">
+                    <img src="../static/images/products/{{ product[6] }}" class="img-fluid soon-to-be-out" alt="{{ product[1] }}" onclick="toggleDescription(event, this.nextElementSibling)">
                     <div class="product-description">{{ product[5] }}</div>
                 </div>
                 <p>{{ product[1] }}</p>
@@ -93,7 +105,7 @@
         {% for product in out_of_season %}
         <div class="col-md-4 text-center">
             <div class="product-container">
-                <img src="../static/images/products/{{ product[6] }}" class="img-fluid out-of-season" alt="{{ product[1] }}" onclick="toggleDescription(this)">
+                <img src="../static/images/products/{{ product[6] }}" class="img-fluid out-of-season" alt="{{ product[1] }}" onclick="toggleDescription(event, this.nextElementSibling)">
                 <div class="product-description">{{ product[5] }}</div>
             </div>
             <p>{{ product[1] }}</p>
@@ -107,12 +119,26 @@
 </div>
 
 <script>
-    function toggleDescription(img) {
-        var description = img.nextElementSibling;
-        if (description.style.display === "none") {
-            description.style.display = "block";
+    function toggleDescription(event, element) {
+        event.stopPropagation();
+        var descriptions = document.querySelectorAll('.product-description');
+        var notes = document.querySelectorAll('.info-note');
+
+        if (element.style.display === "none" || element.style.display === "") {
+            // Cerrar todas las descripciones y notas
+            descriptions.forEach(function(description) {
+                description.style.display = "none";
+            });
+
+            notes.forEach(function(note) {
+                note.style.display = "none";
+            });
+
+            // Abrir la descripción o nota clicada
+            element.style.display = "block";
         } else {
-            description.style.display = "none";
+            // Cerrar la descripción o nota clicada
+            element.style.display = "none";
         }
     }
 
@@ -125,6 +151,24 @@
     document.addEventListener('DOMContentLoaded', function() {
         const currentMonth = "{{ current_month }}";
         document.querySelector(`.month[data-month="${currentMonth}"]`).classList.add('active');
+
+        document.addEventListener('click', function(event) {
+            // Cerrar todas las descripciones y notas al hacer clic en cualquier otro lugar de la pantalla
+            var descriptions = document.querySelectorAll('.product-description');
+            var notes = document.querySelectorAll('.info-note');
+
+            descriptions.forEach(function(description) {
+                if (description.style.display === "block") {
+                    description.style.display = "none";
+                }
+            });
+
+            notes.forEach(function(note) {
+                if (note.style.display === "block") {
+                    note.style.display = "none";
+                }
+            });
+        });
     });
 </script>
 {% endblock %}
