@@ -17,6 +17,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText 
 import ssl
 import string
+import locale
+
 
 
 app = Flask(__name__)
@@ -1003,12 +1005,79 @@ def borrarComida(id_comida):
 
 
 
+
 @app.route('/articulosDeTemporada', methods=['GET'])
 def articulosDeTemporada():
-    in_season_images = os.listdir('./static/images/products/in_season')
-    out_of_season_images = os.listdir('./static/images/products/out_of_season')
-    start_of_season_images = os.listdir('./static/images/products/start_of_season')
-    return render_template('articulosDeTemporada.html', in_season_images=in_season_images, out_of_season_images=out_of_season_images, start_of_season_images=start_of_season_images)
+    if 'email' in session:
+        email = session['email']
+        config = {
+            'user': 'root',
+            'password': 'rootasdeg2324',
+            'host': 'db',
+            'port': '3306',
+            'database': 'usuarios'
+        }
+
+        try:
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
+
+            cur.execute("SELECT * FROM productos")
+            productos = cur.fetchall()
+            cur.close()
+            connection.close()
+
+            # Diccionario para traducir los meses al español
+            meses_en_espanol = {
+                'January': 'ENERO',
+                'February': 'FEBRERO',
+                'March': 'MARZO',
+                'April': 'ABRIL',
+                'May': 'MAYO',
+                'June': 'JUNIO',
+                'July': 'JULIO',
+                'August': 'AGOSTO',
+                'September': 'SEPTIEMBRE',
+                'October': 'OCTUBRE',
+                'November': 'NOVIEMBRE',
+                'December': 'DICIEMBRE'
+            }
+
+            mes_actual = datetime.now().strftime("%B")
+            mes_actual = meses_en_espanol[mes_actual]
+
+            in_season = []
+            out_of_season = []
+            start_of_season = []
+
+            for producto in productos:
+                temporada = producto[2]  # Suponiendo que la temporada actual está en la columna 1
+                inicio_temporada = producto[3]  # Suponiendo que el inicio de temporada está en la columna 2
+
+                if temporada is not None and mes_actual in temporada:
+                    in_season.append(producto)
+                elif inicio_temporada is not None and mes_actual in inicio_temporada:
+                    start_of_season.append(producto)
+                else:
+                    out_of_season.append(producto)
+
+            flash('Longitud de in_season: ' + str(len(in_season)), 'success')
+            flash('Longitud de out_of_season: ' + str(len(out_of_season)), 'success')
+            flash('Longitud de start_of_season: ' + str(len(start_of_season)), 'success')
+
+            flash('¡Artículos cargados correctamente!', 'success')
+            return render_template(
+                'articulosDeTemporada.html', 
+                in_season=in_season, 
+                out_of_season=out_of_season, 
+                start_of_season=start_of_season
+            )
+        except Exception as e:
+            flash(f'Error al cargar los artículos: {e}', 'error')
+            return render_template('articulosDeTemporada.html')
+    else:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
+        return redirect(url_for('index'))
 
 #####################################################################################################################################
 ###################################################### Funciones Auxiliares ##############################################################

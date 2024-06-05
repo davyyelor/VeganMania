@@ -202,32 +202,19 @@ INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada,
 VALUES ('cereza', 'MAYO, JUNIO', NULL, 'ENERO, FEBRERO, MARZO, ABRIL, JULIO, AGOSTO, SEPTIEMBRE, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'La cereza, o picota, llega con el calor y tiene una temporada bastante corta, entre mayo y julio. Las cerezas del Jerte son muy populares en el mundo entero por su sabor y calidad.');
 
 INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
-VALUES ('ciruela', 'JULIO, AGOSTO, SEPTIEMBRE', 'JUNIO, OCTUBRE', 'ENERO, FEBRERO, MARZO, ABRIL, MAYO, NOVIEMBRE, DICIEMBRE', 'La ciruela puede ser amarilla, roja o negra, según su variedad. Es una fruta de hueso con propiedades laxantes. Aunque su piel no sea siempre muy atractiva, tiene muchas cualidades nutritivas.');
-
-INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
 VALUES ('col', 'OCTUBRE, NOVIEMBRE, DICIEMBRE', 'ENERO, FEBRERO, SEPTIEMBRE', 'MARZO, ABRIL, MAYO, JUNIO, JULIO, AGOSTO', 'Las coles se disfrutan en otoño e invierno. Aunque esté volviendo a ser de moda, este producto típico de la cultura culinaria de muchos países europeos fue despreciado por los franceses durante años.');
-
 
 INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
 VALUES ('coliflor', 'NOVIEMBRE, DICIEMBRE', 'ENERO, FEBRERO, MARZO, ABRIL, SEPTIEMBRE, OCTUBRE', 'MAYO, JUNIO, JULIO, AGOSTO', 'Su temporada perfecta es el otoño y el invierno. Se puede usar tanto en gratinados como en purés, y es deliciosa en sopa. Dato curioso: en algunos países, es muy popular como sustituto de los granos y se utiliza para hacer masa de pizza.');
 
 INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
-VALUES ('colinabo', 'NOVIEMBRE, DICIEMBRE', 'ENERO, FEBRERO, MARZO, ABRIL, MAYO, SEPTIEMBRE, OCTUBRE', 'JUNIO, JULIO, AGOSTO', 'También conocido como “nabo de col”, este producto con sabor suave se disfruta principalmente en invierno. Es muy nutritivo y se puede consumir tanto crudo como cocido.');
+VALUES ('col de bruselas', 'NOVIEMBRE, DICIEMBRE', 'ENERO, FEBRERO, MARZO, ABRIL, SEPTIEMBRE, OCTUBRE', 'MAYO, JUNIO, JULIO, AGOSTO', 'Esta variedad de col es perfecta para consumir en otoño e invierno. Se le llama así por su origen: empezó a cultivarse de manera más intensa en Bélgica en el siglo XIX.');
 
 INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
-VALUES ('col rizada', 'OCTUBRE, NOVIEMBRE, DICIEMBRE', 'ENERO, FEBRERO, MARZO, ABRIL', 'MAYO, JUNIO, JULIO, AGOSTO, SEPTIEMBRE', 'Este tipo de col también se llama “kale” y se encuentra principalmente en invierno. Está de moda en zumos y ensaladas porque es muy rica en vitaminas y minerales. La col rizada tiene un sabor particular y se cocina de muchas maneras en los países del norte de Europa.');
+VALUES ('esparrago', 'MARZO, ABRIL', 'FEBRERO, MAYO', 'ENERO, JUNIO, JULIO, AGOSTO, SEPTIEMBRE, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'La temporada ideal del espárrago es la primavera, entre marzo y abril. El espárrago verde y el espárrago blanco pertenecen a la misma planta, lo que los diferencia es su cultivo. Mientras que el primero crece al sol, el segundo lo hace en la tierra, y así mantiene su color blanco.');
 
 INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
-VALUES ('coles de bruselas', 'NOVIEMBRE, DICIEMBRE', 'ENERO, FEBRERO, MARZO, ABRIL, SEPTIEMBRE, OCTUBRE', 'MAYO, JUNIO, JULIO, AGOSTO', 'Esta variedad de col es perfecta para consumir en otoño e invierno. Se le llama así por su origen: empezó a cultivarse de manera más intensa en Bélgica en el siglo XIX.');
-
-INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
-VALUES ('escarola', 'ENERO, FEBRERO, MARZO, ABRIL, MAYO, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'JUNIO, JULIO, AGOSTO, SEPTIEMBRE', NULL, 'La escarola pertenece a la misma familia que las endibias y tiene un sabor un poco amargo. Es perfecta para las ensaladas en invierno, pero se encuentra también en verano.');
-
-INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
-VALUES ('espárragos', 'MARZO, ABRIL', 'FEBRERO, MAYO', 'ENERO, JUNIO, JULIO, AGOSTO, SEPTIEMBRE, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'La temporada ideal del espárrago es la primavera, entre marzo y abril. El espárrago verde y el espárrago blanco pertenecen a la misma planta, lo que los diferencia es su cultivo. Mientras que el primero crece al sol, el segundo lo hace en la tierra, y así mantiene su color blanco.');
-
-INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
-VALUES ('espinacas', 'ENERO, FEBRERO, MARZO, ABRIL, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'MAYO, JUNIO, SEPTIEMBRE', 'JULIO, AGOSTO', 'Las espinacas son conocidas por su alto contenido en hierro, aunque en realidad no tienen tanto como se pensaba. Se encuentran principalmente en invierno, pero se pueden consumir todo el año. Muy versátiles en la cocina, se pueden usar crudas en ensaladas o cocidas en diferentes platos.');
+VALUES ('espinaca', 'ENERO, FEBRERO, MARZO, ABRIL, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'MAYO, JUNIO, SEPTIEMBRE', 'JULIO, AGOSTO', 'Las espinacas son conocidas por su alto contenido en hierro, aunque en realidad no tienen tanto como se pensaba. Se encuentran principalmente en invierno, pero se pueden consumir todo el año. Muy versátiles en la cocina, se pueden usar crudas en ensaladas o cocidas en diferentes platos.');
 
 INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
 VALUES ('fresa', 'MARZO, ABRIL, MAYO', 'FEBRERO, JUNIO', 'ENERO, JULIO, AGOSTO, SEPTIEMBRE, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'La fresa es una fruta muy apreciada que se encuentra principalmente en primavera. Existen muchas variedades de fresas, cada una con su sabor particular. Las fresas de Huelva son muy conocidas en España por su calidad y dulzura.');
@@ -270,3 +257,67 @@ VALUES ('guisante', 'ABRIL, MAYO', 'MARZO, JUNIO', 'ENERO, FEBRERO, JULIO, AGOST
 ('uva', 'SEPTIEMBRE', 'AGOSTO, OCTUBRE', 'ENERO, FEBRERO, MARZO, ABRIL, MAYO, JUNIO, JULIO, NOVIEMBRE, DICIEMBRE', 'La uva es una fruta excepcional y uno de los alimentos básicos de la dieta mediterránea. Podemos encontrar uvas desde mediados de verano a principios del invierno y España es uno de los principales productores del mundo sólo superado por China a la cabeza, EEUU e Italia. Frescas, pasas o en vino, existen varios miles de variedades distintas, cada una con sus características y usos. ¿Cuántos tipos distintos conoces?'),
 ('zanahoria', 'ABRIL, MAYO, JUNIO, JULIO, AGOSTO, SEPTIEMBRE, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'ENERO, FEBRERO, MARZO', NULL, 'La zanahoria es un producto que podemos encontrar la mayor parte del año y resulta curioso que aunque su color habitual es el naranja, es posible encontrarlas en otros colores. En China, el principal productor del mundo es habitual encontrarlas blancas o púrpura. Disfrútala cada día cruda, frita, cocida, en tartas, guisos o ensaladas.');
 
+-- Paso 1: Agregar la columna 'imagen' a la tabla 'productos'
+ALTER TABLE productos
+ADD COLUMN imagen VARCHAR(255);
+
+UPDATE productos
+SET imagen = 
+    CASE 
+        WHEN Producto = 'acelga' THEN 'Acelga.jpg'
+        WHEN Producto = 'aguacate' THEN 'Aguacate.jpg'
+        WHEN Producto = 'ajo' THEN 'Ajo.jpg'
+        WHEN Producto = 'albaricoque' THEN 'Albaricoque.jpg'
+        WHEN Producto = 'alcachofa' THEN 'Alcachofa.jpg'
+        WHEN Producto = 'apio' THEN 'Apio.jpg'
+        WHEN Producto = 'batata' THEN 'Batata.jpg'
+        WHEN Producto = 'berenjena' THEN 'Berenjena.jpg'
+        WHEN Producto = 'brocoli' THEN 'Brócoli.jpg'
+        WHEN Producto = 'calabacin' THEN 'Calabacin.jpg'
+        WHEN Producto = 'calabaza' THEN 'Calabaza.jpg'
+        WHEN Producto = 'caqui' THEN 'Caqui.jpg'
+        WHEN Producto = 'cardo' THEN 'Cardo.jpg'
+        WHEN Producto = 'cebolla' THEN 'Cebolla.jpg'
+        WHEN Producto = 'cereza' THEN 'Cereza.jpg'
+        WHEN Producto = 'champiñon' THEN 'Champiñón.jpg'
+        WHEN Producto = 'col de bruselas' THEN 'Col de Bruselas.jpg'
+        WHEN Producto = 'col' THEN 'Col.jpg'
+        WHEN Producto = 'coliflor' THEN 'Coliflor.jpg'
+        WHEN Producto = 'endibia' THEN 'Endibia.jpg'
+        WHEN Producto = 'espinaca' THEN 'Espinaca.jpg'
+        WHEN Producto = 'esparrago' THEN 'Espárrago.jpg'
+        WHEN Producto = 'frambuesa' THEN 'Frambuesa.jpg'
+        WHEN Producto = 'fresa' THEN 'Fresa.jpg'
+        WHEN Producto = 'granada' THEN 'Granada.jpg'
+        WHEN Producto = 'guisante' THEN 'Guisante.jpg'
+        WHEN Producto = 'haba' THEN 'Haba.jpg'
+        WHEN Producto = 'higo' THEN 'Higo.jpg'
+        WHEN Producto = 'judia' THEN 'Judía.jpg'
+        WHEN Producto = 'kiwi' THEN 'Kiwi.jpg'
+        WHEN Producto = 'lechuga' THEN 'Lechuga.jpg'
+        WHEN Producto = 'lima' THEN 'Lima.jpg'
+        WHEN Producto = 'limon' THEN 'Limón.jpg'
+        WHEN Producto = 'mandarina' THEN 'Mandarina.jpg'
+        WHEN Producto = 'manzana' THEN 'Manzana.jpg'
+        WHEN Producto = 'maiz' THEN 'Maíz.jpg'
+        WHEN Producto = 'melocoton' THEN 'Melocotón.jpg'
+        WHEN Producto = 'melon' THEN 'Melón.jpg'
+        WHEN Producto = 'mora' THEN 'Mora.jpg'
+        WHEN Producto = 'nabo' THEN 'Nabo.jpg'
+        WHEN Producto = 'naranja' THEN 'Naranja.jpg'
+        WHEN Producto = 'nectarina' THEN 'Nectarina.jpg'
+        WHEN Producto = 'patata' THEN 'Patata.jpg'
+        WHEN Producto = 'pepino' THEN 'Pepino.jpg'
+        WHEN Producto = 'pera' THEN 'Pera.jpg'
+        WHEN Producto = 'pimiento' THEN 'Pimiento.jpg'
+        WHEN Producto = 'platano' THEN 'Plátano.jpg'
+        WHEN Producto = 'pomelo' THEN 'Pomelo.jpg'
+        WHEN Producto = 'puerro' THEN 'Puerro.jpg'
+        WHEN Producto = 'remolacha' THEN 'Remolacha.jpg'
+        WHEN Producto = 'rabano' THEN 'Rábano.jpg'
+        WHEN Producto = 'sandia' THEN 'Sandía.jpg'
+        WHEN Producto = 'tomate' THEN 'Tomate.jpg'
+        WHEN Producto = 'uva' THEN 'Uva.jpg'
+        WHEN Producto = 'zanahoria' THEN 'Zanahoria.jpg'
+        ELSE NULL
+    END;

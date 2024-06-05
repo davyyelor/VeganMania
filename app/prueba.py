@@ -97,3 +97,4 @@ finally:
 total_products = len(in_season) + len(start_of_season) + len(out_of_season)
 print(f"Número total de productos: {total_products}")
 print("Proceso completado.")
+me

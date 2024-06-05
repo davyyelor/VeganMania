@@ -4,10 +4,10 @@
 <div class="container" style="margin-top: 100px;">
     <h2>Productos de Temporada</h2>
     <div class="row">
-        {% for image in in_season_images %}
+        {% for product in in_season %}
         <div class="col-md-4 text-center">
-            <img src="{{ url_for('static', filename='images/products/in_season/' ~ image) }}" class="img-fluid" alt="{{ image }}">
-            <p>{{ image.split('.')[0] }}</p>
+            <img src="../static/images/products/{{ product[6] }}" class="img-fluid" alt="{{ product[1] }}">
+            <p>{{ product[1] }}</p>
         </div>
         {% if loop.index % 3 == 0 %}
     </div>
@@ -18,10 +18,10 @@
 
     <h2>Fuera de Temporada</h2>
     <div class="row">
-        {% for image in out_of_season_images %}
+        {% for product in out_of_season %}
         <div class="col-md-4 text-center">
-            <img src="{{ url_for('static', filename='images/products/out_of_season/' ~ image) }}" class="img-fluid" alt="{{ image }}">
-            <p>{{ image.split('.')[0] }}</p>
+            <img src="../static/images/products/{{ product[6] }}" class="img-fluid" alt="{{ product[1] }}">
+            <p>{{ product[1] }}</p>
         </div>
         {% if loop.index % 3 == 0 %}
     </div>
@@ -32,10 +32,10 @@
 
     <h2>Recién Llegados / A Punto de Salir</h2>
     <div class="row">
-        {% for image in start_of_season_images %}
+        {% for product in start_of_season %}
         <div class="col-md-4 text-center">
-            <img src="{{ url_for('static', filename='images/products/start_of_season/' ~ image) }}" class="img-fluid" alt="{{ image }}">
-            <p>{{ image.split('.')[0] }}</p>
+            <img src="../static/images/products/{{ product[6] }}" class="img-fluid" alt="{{ product[1] }}">
+            <p>{{ product[1] }}</p>
         </div>
         {% if loop.index % 3 == 0 %}
     </div>
