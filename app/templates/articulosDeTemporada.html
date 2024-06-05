@@ -2,28 +2,48 @@
 
 {% block content %}
 <style>
-    /* Estilo para las imágenes a punto de salir de temporada */
     .soon-to-be-out {
-        opacity: 0.7; /* Ajusta la opacidad según tu preferencia */
-        vertical-align: middle; /* Alinea verticalmente con el texto */
+        opacity: 0.7;
+        vertical-align: middle;
     }
-
-    /* Estilo para las imágenes fuera de temporada */
     .out-of-season {
-        filter: grayscale(100%); /* Aplica el filtro de blanco y negro */
+        filter: grayscale(100%);
     }
-
-    /* Estilo para la descripción del producto */
     .product-description {
-        display: none; /* Oculta la descripción por defecto */
-        position: absolute; /* Posiciona la descripción absolutamente */
-        background-color: #fff; /* Fondo blanco */
-        border: 1px solid #ccc; /* Borde gris */
-        padding: 10px; /* Espaciado interno */
-        z-index: 1; /* Asegura que esté encima de otras capas */
+        display: none;
+        position: absolute;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 10px;
+        z-index: 1;
+    }
+    .month-filter {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 20px;
+    }
+    .month-filter .month {
+        cursor: pointer;
+    }
+    .month-filter .active {
+        font-weight: bold;
+        color: blue;
     }
 </style>
+
 <div class="container" style="margin-top: 100px;">
+    <div class="row">
+        <ul class="month-filter">
+            {% for month in ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'] %}
+                <li>
+                    <span class="month text-center" data-month="{{ month }}" onclick="changeMonth('{{ month }}')">{{ month }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
     <div class="row">
         <h2>Producto de temporada</h2>
         <div class="col-md-6">
@@ -32,7 +52,8 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row" id="products-container">
+        <!-- Productos en temporada -->
         {% set index = 0 %}
         {% for product in in_season %}
             <div class="col-md-4 text-center">
@@ -49,6 +70,7 @@
             {% endif %}
         {% endfor %}
 
+        <!-- Productos empezando temporada -->
         {% for product in start_of_season %}
             <div class="col-md-4 text-center">
                 <div class="product-container">
@@ -93,5 +115,16 @@
             description.style.display = "none";
         }
     }
+
+    function changeMonth(month) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('mes', month);
+        window.location.href = url.toString();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentMonth = "{{ current_month }}";
+        document.querySelector(`.month[data-month="${currentMonth}"]`).classList.add('active');
+    });
 </script>
 {% endblock %}

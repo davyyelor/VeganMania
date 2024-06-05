@@ -22,7 +22,7 @@ import locale
 
 
 app = Flask(__name__)
-from flask import render_template, request, flash, url_for, redirect, session
+from flask import render_template, request, url_for, redirect, session
 import mysql.connector as mysql
 app.config['SECRET_KEY'] = 'abcd1234@'
 app.config['SESSION_TYPE'] = 'filesystem' 
@@ -85,19 +85,16 @@ def eliminarCuenta():
 
                 # Limpiar la sesión
                 session.pop('email', None)
-                flash('¡Cuenta eliminada correctamente!', 'success')
+                
                 return redirect(url_for('index'))
 
             else:
-                flash('No se encontró al usuario en la base de datos.', 'error')
                 return redirect(url_for('modificarUsuario'))
 
         except Exception as e:
-            flash(f'Error al eliminar la cuenta: {str(e)}', 'error')
             return redirect(url_for('modificarUsuario'))
 
     else:
-        flash('No se pudo encontrar la sesión del usuario.', 'error')
         return redirect(url_for('modificarUsuario'))
 
 
@@ -105,7 +102,6 @@ def eliminarCuenta():
 @app.route('/modificarUsuario', methods=['GET', 'POST'])
 def modificarUsuario():
     if 'email' not in session:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
 
     if request.method == 'POST':
@@ -153,15 +149,12 @@ def modificarUsuario():
                     cur.execute('UPDATE Cliente SET actividad = %s WHERE email = %s', (actividad, email))
 
                 connection.commit()
-                flash('¡Usuario modificado correctamente!', 'success')
                 return redirect(url_for('modificarUsuario'))
 
             else:
-                flash('¡No se encontró un usuario con ese email!', 'error')
                 return redirect(url_for('modificarUsuario'))
 
         except Exception as e:
-            flash(f'¡Error al modificar el usuario: {str(e)}', 'error')
             return redirect(url_for('modificarUsuario'))
     else:
         email = session['email']
@@ -193,11 +186,9 @@ def modificarUsuario():
                 # Puedes seguir extrayendo los otros campos de usuario aquí
                 return render_template('modificarUsuario.html', nombre_actual=nombre_actual, fechaNacimiento_actual=fechaNacimiento_actual, peso_actual=peso_actual, altura_actual=altura_actual, genero_actual=genero_actual, actividad_actual=actividad_actual)
             else:
-                flash('No se encontró al usuario en la base de datos.', 'error')
                 return redirect(url_for('modificarUsuario'))
 
         except Exception as e:
-            flash(f'Error al obtener los datos del usuario: {str(e)}', 'error')
             return redirect(url_for('modificarUsuario'))
 
 
@@ -232,7 +223,6 @@ def registro():
             user = cur.fetchone()
 
             if user:
-                flash('¡Ya existe un usuario con ese email!', 'error')
                 return redirect(url_for('registro'))
 
             hashed_password = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
@@ -259,11 +249,9 @@ def registro():
 
                 # Envío de correo electrónico, etc.
 
-                flash('¡Registro exitoso!', 'success')
                 return redirect(url_for('login'))
 
         except Exception as e:
-            flash(f'¡Error al insertar en la base de datos: {str(e)}', 'error')
             return redirect(url_for('registro'))
 
     return render_template('registro.html')
@@ -316,14 +304,10 @@ def recuperarContraseña():
                 connection.commit()
                 cur.close()
                 connection.close()
-                flash('¡Contraseña recuperada con éxito!', 'success')
-                flash(f'El enlace de recuperación de contraseña es: {enlace}', 'info')
                 return render_template('recuperarContrasena.html', email=email)
             else:
-                flash('No se encontró ningún usuario con ese correo electrónico', 'error')
                 return render_template('recuperarContrasena.html')
         except Exception as e:
-            flash(f'Error al recuperar la contraseña: {str(e)}', 'error')
             return render_template('recuperarContrasena.html')
     else:
         return render_template('recuperarContrasena.html')
@@ -352,17 +336,16 @@ def login():
 
             if user and user[1] == cn:
                 session['email'] = email
-                flash('¡Inicio de sesión exitoso!', 'success')
 
                 cur.close()
                 connection.close()
                 return redirect(url_for('inicioUsu'))
 
             else:
-                flash('Credenciales incorrectas. Inténtalo de nuevo.', 'error')
+                return redirect(url_for('login'))
 
         except Exception as e:
-            flash(f'Error al iniciar sesión: {str(e)}', 'error')
+            return redirect(url_for('login'))
 
     return render_template('login.html')
 
@@ -516,7 +499,6 @@ def loading():
 @app.route('/results')
 def results():
     if 'food' not in session:
-        flash('Please provide a food query.', 'error')
         return redirect(url_for('index'))
     else:
         food = session.get('food')
@@ -532,7 +514,6 @@ def recetas():
         if request.method == 'POST':
             food = request.form['query']
             if food == '':
-                flash('Por favor, introduce un alimento.', 'error')
                 return render_template('recetas.html')
             else:
                 buscar_receta(food)
@@ -550,7 +531,6 @@ def recetas():
         else:
             return render_template('recetas.html', recipes_list=None)
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
     
 @app.route('/añadirComida', methods=['GET', 'POST'])
@@ -583,21 +563,16 @@ def añadirComida():
 
                     cur.close()
                     connection.close()
-                    flash('¡Comida añadida correctamente!', 'success')
 
                     return redirect(url_for('añadirComida'))
                 else:
-                    flash('No se encontró al usuario en la base de datos.', 'error')
                     return redirect(url_for('añadirComida'))
             except Exception as e:
-                flash(f'Error al cargar la página de inicio: {str(e)}', 'error')
                 return redirect(url_for('añadirComida'))
                 
         else:
-            flash('¡Por favor, rellena todos los campos!', 'error')
             return render_template('añadirComida.html')
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
     
 
@@ -635,7 +610,6 @@ def añadirAlimento():
                 analisis_data = analisisNutricional(food)
                 analisis_data = pd.DataFrame(analisis_data)
                 if analisis_data.empty:
-                    flash('No se ha encontrado nuestro alimento en la base de datos.', 'error')
                     return redirect(url_for('añadirAlimento'))
                 else:
                     # Insertar el alimento
@@ -712,10 +686,8 @@ def añadirAlimento():
                     # Guardar los cambios en la base de datos
                     connection.commit()
 
-                    flash('Alimento y nutrientes añadidos correctamente.', 'success')
                     return redirect(url_for('añadirAlimento'))
             except Exception as e:
-                flash(f'Error al añadir el alimento: {str(e)}', 'error')
                 return redirect(url_for('añadirAlimento'))
             finally:
                 cur.close()
@@ -744,10 +716,8 @@ def añadirAlimento():
 
                 return render_template('añadirAlimento.html', data=comidas_dict)
             except Exception as e:
-                flash(f'Error al cargar la página de inicio: {str(e)}', 'error')
                 return redirect(url_for('añadirAlimento'))
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('login'))
 
 
@@ -772,15 +742,12 @@ def infoComida():
                     for column in analisis.columns:
                         if column == 'label':
                             analisis[column] = analisis[column].apply(lambda x: GoogleTranslator(source='auto', target='es').translate(str(x)))
-                    flash('¡Análisis nutricional realizado con éxito!', 'success')
                     return render_template('infoComida.html', analisis=analisis, query = food)
-                flash('¡No se pudo realizar el análisis nutricional!', 'error')
                 return render_template('infoComida.html')
 
         else:
             return render_template('infoComida.html', analisis=None)
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
     
 @app.route('/blog', methods=['GET'])
@@ -832,10 +799,8 @@ def verAlimento(id_alimento):
         else:
             cur.close()
             connection.close()
-            flash('No se encontró el alimento especificado.', 'error')
             return redirect(url_for('misComidas'))
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
 
 
@@ -875,10 +840,8 @@ def verComida(id_comida):
         else:
             cur.close()
             connection.close()
-            flash('No se encontró la comida especificada.', 'error')
             return redirect(url_for('misComidas'))
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
 
 
@@ -909,15 +872,12 @@ def misComidas():
             comidas = cur.fetchall()
             cur.close()
             connection.close()
-            flash('¡Comidas cargadas correctamente!', 'success')
             return render_template('misComidas.html', comidas=comidas)
         else:
             cur.close()
             connection.close()
-            flash('No se encontró al usuario en la base de datos.', 'error')
             return render_template('inicioUsu.html')
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
     
 
@@ -945,20 +905,16 @@ def borrarAlimento(id_alimento):
                 cur.execute("DELETE FROM contiene WHERE id_alimento = %s", [id_alimento])
                 cur.execute("DELETE FROM Alimento WHERE id_alimento = %s", [id_alimento])
                 connection.commit()
-                flash('¡Alimento eliminado correctamente!', 'success')
                 return redirect(url_for('misComidas'))
             else:
-                flash('No se encontró el alimento especificado.', 'error')
                 return redirect(url_for('misComidas'))
         except Exception as e:
             connection.rollback()
-            flash(f'Error al eliminar el alimento: {e}', 'error')
             return redirect(url_for('misComidas'))
         finally:
             cur.close()
             connection.close()
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
     
 @app.route('/borrarComida/<int:id_comida>', methods=['POST'])
@@ -989,20 +945,16 @@ def borrarComida(id_comida):
             for alimento in alimentos:
                 cur.execute("DELETE FROM contiene WHERE id_alimento = %s", [alimento[0]])
                 cur.execute("DELETE FROM Alimento WHERE id_alimento = %s", [alimento[0]])
-                flash(f'¡Comida eliminada correctamente pero {alimento[0]}!', 'success')
             
             connection.commit()
-            flash('¡Comida eliminada correctamente!', 'success')
         except Exception as e:
             connection.rollback()
-            flash(f'Error al eliminar la comida: {e}', 'error')
         finally:
             cur.close()
             connection.close()
         
         return redirect(url_for('misComidas'))
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
 
 
@@ -1020,6 +972,23 @@ def articulosDeTemporada():
             'database': 'usuarios'
         }
 
+        mes_seleccionado = request.args.get('mes', datetime.now().strftime("%b"))
+        meses_en_espanol = {
+            'Ene': 'ENERO',
+            'Feb': 'FEBRERO',
+            'Mar': 'MARZO',
+            'Abr': 'ABRIL',
+            'May': 'MAYO',
+            'Jun': 'JUNIO',
+            'Jul': 'JULIO',
+            'Ago': 'AGOSTO',
+            'Sep': 'SEPTIEMBRE',
+            'Oct': 'OCTUBRE',
+            'Nov': 'NOVIEMBRE',
+            'Dic': 'DICIEMBRE'
+        }
+        mes_actual = meses_en_espanol.get(mes_seleccionado)
+
         try:
             connection = mysql.connect(**config)
             cur = connection.cursor()
@@ -1028,25 +997,6 @@ def articulosDeTemporada():
             productos = cur.fetchall()
             cur.close()
             connection.close()
-
-            # Diccionario para traducir los meses al español
-            meses_en_espanol = {
-                'January': 'ENERO',
-                'February': 'FEBRERO',
-                'March': 'MARZO',
-                'April': 'ABRIL',
-                'May': 'MAYO',
-                'June': 'JUNIO',
-                'July': 'JULIO',
-                'August': 'AGOSTO',
-                'September': 'SEPTIEMBRE',
-                'October': 'OCTUBRE',
-                'November': 'NOVIEMBRE',
-                'December': 'DICIEMBRE'
-            }
-
-            mes_actual = datetime.now().strftime("%B")
-            mes_actual = meses_en_espanol[mes_actual]
 
             in_season = []
             out_of_season = []
@@ -1063,22 +1013,16 @@ def articulosDeTemporada():
                 else:
                     out_of_season.append(producto)
 
-            flash('Longitud de in_season: ' + str(len(in_season)), 'success')
-            flash('Longitud de out_of_season: ' + str(len(out_of_season)), 'success')
-            flash('Longitud de start_of_season: ' + str(len(start_of_season)), 'success')
-
-            flash('¡Artículos cargados correctamente!', 'success')
             return render_template(
                 'articulosDeTemporada.html', 
                 in_season=in_season, 
                 out_of_season=out_of_season, 
-                start_of_season=start_of_season
+                start_of_season=start_of_season,
+                current_month=mes_seleccionado
             )
         except Exception as e:
-            flash(f'Error al cargar los artículos: {e}', 'error')
-            return render_template('articulosDeTemporada.html')
+            return render_template('articulosDeTemporada.html', current_month=mes_seleccionado)
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
 
 #####################################################################################################################################
