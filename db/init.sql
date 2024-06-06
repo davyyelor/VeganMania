@@ -324,3 +324,33 @@ SET imagen =
         WHEN Producto = 'zanahoria' THEN 'zanahoria.jpg'
         ELSE NULL
     END;
+
+CREATE TABLE recetas (
+    Id INT PRIMARY KEY,
+    Categoria VARCHAR(255),
+    Nombre VARCHAR(255),
+    Valoracion DECIMAL(3, 2),
+    Dificultad VARCHAR(50),
+    Num_comensales INT,
+    Tiempo VARCHAR(50),
+    Tipo VARCHAR(50),
+    Link_receta VARCHAR(255),
+    Num_comentarios INT,
+    Num_reviews INT,
+    Fecha_modificacion DATE,
+    Ingredientes TEXT
+);
+
+LOAD DATA INFILE '/var/lib/mysql-files/recetas.csv'
+INTO TABLE recetas
+FIELDS TERMINATED BY '|'
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(Id, Categoria, Nombre, @Valoracion, Dificultad, @Num_comensales, Tiempo, Tipo, Link_receta, @Num_comentarios, @Num_reviews, @Fecha_modificacion, Ingredientes)
+SET 
+    Valoracion = NULLIF(@Valoracion, ''),
+    Num_comensales = NULLIF(@Num_comensales, ''),
+    Num_comentarios = NULLIF(@Num_comentarios, ''),
+    Num_reviews = NULLIF(@Num_reviews, ''),
+    Fecha_modificacion = NULLIF(@Fecha_modificacion, '');
