@@ -8,19 +8,21 @@
             <input type="text" name="ingredientes" placeholder="Buscar recetas por ingredientes">
             <button type="submit">Buscar</button>
         </form>
+        
         {% for message in get_flashed_messages() %}
             <p>{{ message }}</p>
         {% endfor %}
 
-        <!-- Aquí debería ser un for loop sobre las recetas -->
         {% if recetas %}
         <h2 style="text-align: center;">Recetas encontradas:</h2>
-        <div class="recipe-container" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+        <div class="recipe-container">
             {% for receta in recetas %}
-            <div class="recipe" style="width: calc(33.33% - 20px); margin-bottom: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-                <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ receta.nombre }}</h2>
-                <img src="{{ receta.imagen }}" alt="Imagen de la receta" style="max-width: 100%; height: auto;" class="zoom" onclick="showRecipeDetails(this)">
-                <div class="recipe-details" style="display: none; padding: 10px;">
+            <div class="recipe">
+                <h2 class="recipe-title">{{ receta.nombre }}</h2>
+                <div class="recipe-image-wrapper">
+                    <img src="{{ receta.imagen }}" alt="Imagen de la receta" class="recipe-image zoom" onclick="showRecipeDetails(this)">
+                </div>
+                <div class="recipe-details">
                     <p><strong>Categoría:</strong> {{ receta.categoria }}</p>
                     <p><strong>Valoración:</strong> {{ receta.valoracion }}</p>
                     <p><strong>Dificultad:</strong> {{ receta.dificultad }}</p>
@@ -38,21 +40,107 @@
             </div>
             {% endfor %}
         </div>
-        <button id="volverBtn" style="display: none;" onclick="showAllRecipes()">Volver y ver todas las recetas</button>
-        <div style="text-align: center; margin-top: 20px;">
+        <button id="volverBtn" onclick="showAllRecipes()">Volver y ver todas las recetas</button>
+        <div class="pagination-container">
             {% if total_paginas > 1 %}
             <ul class="pagination">
-                {% for num_pagina in range(1, total_paginas + 1) %}
-                <li class="page-item {% if num_pagina == pagina_actual %}active{% endif %}">
-                    <a class="page-link" href="{{ url_for('recetas', pagina=num_pagina) }}">{{ num_pagina }}</a>
-                </li>
+                {% if pagina_actual > 1 %}
+                <li><a class="prev" href="{{ url_for('recetas', pagina=pagina_actual-1, ingredientes=ingredientes) }}">Anterior</a></li>
+                {% endif %}
+                {% if pagina_actual > 3 %}
+                <li><a href="{{ url_for('recetas', pagina=1, ingredientes=ingredientes) }}">1</a></li>
+                <li><span class="dots">…</span></li>
+                {% endif %}
+                {% for num_pagina in range(max(1, pagina_actual-2), min(total_paginas, pagina_actual+2) + 1) %}
+                <li><a class="{{ 'current' if num_pagina == pagina_actual else '' }}" href="{{ url_for('recetas', pagina=num_pagina, ingredientes=ingredientes) }}">{{ num_pagina }}</a></li>
                 {% endfor %}
+                {% if pagina_actual < total_paginas - 2 %}
+                <li><span class="dots">…</span></li>
+                <li><a href="{{ url_for('recetas', pagina=total_paginas, ingredientes=ingredientes) }}">{{ total_paginas }}</a></li>
+                {% endif %}
+                {% if pagina_actual < total_paginas %}
+                <li><a class="next" href="{{ url_for('recetas', pagina=pagina_actual+1, ingredientes=ingredientes) }}">Siguiente »</a></li>
+                {% endif %}
             </ul>
             {% endif %}
+        </div>
+        
         </div>
         {% endif %}
     </main>
 </div>
+
+<style>
+    .recipe-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    .recipe {
+        width: calc(33.33% - 20px);
+        margin-bottom: 40px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background: #f9f9f9;
+        transition: all 0.3s ease;
+    }
+    .recipe:hover {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .recipe-title {
+        font-weight: bold;
+        font-family: Ubuntu-Bold, sans-serif;
+        font-size: 20px;
+        color: #57b846;
+        margin-bottom: 10px;
+    }
+    .recipe-image-wrapper {
+        overflow: hidden;
+        border-radius: 10px;
+    }
+    .recipe-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .recipe-image:hover {
+        transform: scale(1.05);
+    }
+    .recipe-details {
+        display: none;
+        padding: 10px;
+    }
+    .pagination-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+    .pagination {
+        display: inline-block;
+        list-style-type: none;
+        padding: 0;
+    }
+    .pagination li {
+        display: inline;
+        margin: 0 5px;
+    }
+    .pagination a {
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #007bff;
+        transition: background-color 0.3s ease;
+    }
+    .pagination a.current, .pagination a:hover {
+        background-color: #007bff;
+        color: white;
+    }
+    .pagination .dots {
+        padding: 8px 16px;
+    }
+</style>
 
 <script>
     function showRecipeDetails(image) {
@@ -60,32 +148,25 @@
         const recipes = recipeContainer.querySelectorAll('.recipe');
         const clickedRecipe = image.closest('.recipe');
         
-        // Oculta las recetas no seleccionadas
         recipes.forEach(recipe => {
             if (recipe !== clickedRecipe) {
                 recipe.style.display = 'none';
             }
         });
         
-        // Muestra los detalles de la receta seleccionada y ajusta su ancho
         const recipeDetails = clickedRecipe.querySelector('.recipe-details');
         recipeDetails.style.display = 'block';
         clickedRecipe.style.width = '100%';
 
-        // Muestra el botón de volver
         document.getElementById('volverBtn').style.display = 'block';
     }
 
     function showAllRecipes() {
-        const recipeContainers = document.querySelectorAll('.recipe-container');
-        recipeContainers.forEach(container => {
-            const recipes = container.querySelectorAll('.recipe');
-            recipes.forEach(recipe => {
-                recipe.style.display = 'block';
-                recipe.style.width = 'calc(33.33% - 20px)';
-                const recipeDetails = recipe.querySelector('.recipe-details');
-                recipeDetails.style.display = 'none';
-            });
+        const recipes = document.querySelectorAll('.recipe');
+        recipes.forEach(recipe => {
+            recipe.style.display = 'block';
+            recipe.style.width = 'calc(33.33% - 20px)';
+            recipe.querySelector('.recipe-details').style.display = 'none';
         });
 
         document.getElementById('volverBtn').style.display = 'none';

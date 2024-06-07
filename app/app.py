@@ -795,18 +795,37 @@ def recetas():
         connection = mysql.connect(**config)
         cur = connection.cursor()
 
-        cur.execute("SELECT COUNT(*) FROM recetas WHERE images IS NOT NULL")
-        total_recetas = cur.fetchone()[0]
-
-        recetas_por_pagina = 9
-        total_paginas = math.ceil(total_recetas / recetas_por_pagina)
-
+        recetas_por_pagina = 9  # Definir el número de recetas por página aquí
         pagina_actual = request.args.get('pagina', 1, type=int)
         offset = (pagina_actual - 1) * recetas_por_pagina
 
-        cur.execute("SELECT * FROM recetas WHERE images IS NOT NULL AND images != '' LIMIT %s OFFSET %s", (recetas_por_pagina, offset))
+        # Inicializar variables
+        ingredientes = None
+        if request.method == 'POST':
+            ingredientes = request.form.get('ingredientes')
+        elif 'ingredientes' in request.args:
+            ingredientes = request.args.get('ingredientes')
+
+        if ingredientes:
+            query_count = "SELECT COUNT(*) FROM recetas WHERE images IS NOT NULL AND images != '' AND nombre LIKE %s"
+            cur.execute(query_count, ('%' + ingredientes + '%',))
+            total_recetas = cur.fetchone()[0]
+
+            query_recetas = """
+                SELECT * FROM recetas 
+                WHERE images IS NOT NULL AND images != '' AND nombre LIKE %s
+                LIMIT %s OFFSET %s
+            """
+            cur.execute(query_recetas, ('%' + ingredientes + '%', recetas_por_pagina, offset))
+        else:
+            cur.execute("SELECT COUNT(*) FROM recetas WHERE images IS NOT NULL AND images != ''")
+            total_recetas = cur.fetchone()[0]
+
+            query_recetas = "SELECT * FROM recetas WHERE images IS NOT NULL AND images != '' LIMIT %s OFFSET %s"
+            cur.execute(query_recetas, (recetas_por_pagina, offset))
 
         recetas = cur.fetchall()
+        total_paginas = math.ceil(total_recetas / recetas_por_pagina)
 
         if recetas:
             recetas = [{'id_receta': receta[0], 'categoria': receta[1], 'nombre': receta[2], 
@@ -816,13 +835,15 @@ def recetas():
                         'ingredientes': receta[12], 'imagen': receta[13]} for receta in recetas]
             cur.close()
             connection.close()
-            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual)
+            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes)
         else:
             cur.close()
             connection.close()
-            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual)
+            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes)
     else:
         return redirect(url_for('index'))
+
+
 
 
 
