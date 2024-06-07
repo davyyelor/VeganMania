@@ -22,7 +22,7 @@ import locale
 
 
 app = Flask(__name__)
-from flask import render_template, request, url_for, redirect, session
+from flask import render_template, request, url_for, redirect, session, flash
 import mysql.connector as mysql
 app.config['SECRET_KEY'] = 'abcd1234@'
 app.config['SESSION_TYPE'] = 'filesystem' 
@@ -463,75 +463,9 @@ def inicioUsu():
 
 
 
+    
 
 
-
-
-
-def slow_loading_function(food: str):
-    """Simulates a time consuming process (wait 10 seconds and return a reversed string)"""
-
-    buscar_receta(food)
-    dataframe_receta = pd.read_csv(f"{food}_recipes_dataframe.csv")
-
-    # Traducir todas las columnas excepto la columna de la imagen
-    dataframe_receta_translated = dataframe_receta.copy()
-    for column in dataframe_receta_translated.columns:
-        if column != 'image':
-            dataframe_receta_translated[column] = dataframe_receta_translated[column].apply(lambda x: GoogleTranslator(source='auto', target='es').translate(str(x)))
-
-    recipes_list = dataframe_receta_translated.to_dict(orient='records')
-    return recipes_list
-
-
-@app.route("/loading", methods=["POST"])
-def loading():
-    if request.method == "POST":
-        global recipes_list
-        food = request.form['query']
-        session['food'] = food
-        if food == '':
-            return render_template('recetas.html')
-        else:
-            return render_template("loading.html")
-
-
-@app.route('/results')
-def results():
-    if 'food' not in session:
-        return redirect(url_for('index'))
-    else:
-        food = session.get('food')
-        recipes_list = slow_loading_function(food)
-        return render_template('recetas.html', recipes_list=recipes_list)
-
-
-
-@app.route('/recetas', methods=['GET', 'POST'])
-def recetas():
-    if 'email' in session:
-        global recipes_list
-        if request.method == 'POST':
-            food = request.form['query']
-            if food == '':
-                return render_template('recetas.html')
-            else:
-                buscar_receta(food)
-                dataframe_receta = pd.read_csv(f"{food}_recipes_dataframe.csv")
-
-                # Traducir todas las columnas excepto la columna de la imagen
-                dataframe_receta_translated = dataframe_receta.copy()
-                for column in dataframe_receta_translated.columns:
-                    if column != 'image':
-                        dataframe_receta_translated[column] = dataframe_receta_translated[column].apply(lambda x: GoogleTranslator(source='auto', target='es').translate(str(x)))
-
-                recipes_list = dataframe_receta_translated.to_dict(orient='records')
-
-                return render_template('recetas.html', recipes_list=recipes_list)
-        else:
-            return render_template('recetas.html', recipes_list=None)
-    else:
-        return redirect(url_for('index'))
     
 @app.route('/añadirComida', methods=['GET', 'POST'])
 def añadirComida():
@@ -844,7 +778,51 @@ def verComida(id_comida):
     else:
         return redirect(url_for('index'))
 
+import math
 
+@app.route('/recetas', methods=['GET', 'POST'])
+def recetas():
+    if 'email' in session:
+        email = session['email']
+        config = {
+            'user': 'root',
+            'password': 'rootasdeg2324',
+            'host': 'db',
+            'port': '3306',
+            'database': 'usuarios'
+        }
+
+        connection = mysql.connect(**config)
+        cur = connection.cursor()
+
+        cur.execute("SELECT COUNT(*) FROM recetas WHERE images IS NOT NULL")
+        total_recetas = cur.fetchone()[0]
+
+        recetas_por_pagina = 9
+        total_paginas = math.ceil(total_recetas / recetas_por_pagina)
+
+        pagina_actual = request.args.get('pagina', 1, type=int)
+        offset = (pagina_actual - 1) * recetas_por_pagina
+
+        cur.execute("SELECT * FROM recetas WHERE images IS NOT NULL AND images != '' LIMIT %s OFFSET %s", (recetas_por_pagina, offset))
+
+        recetas = cur.fetchall()
+
+        if recetas:
+            recetas = [{'id_receta': receta[0], 'categoria': receta[1], 'nombre': receta[2], 
+                        'valoracion': receta[3], 'dificultad': receta[4], 'num_comensales': receta[5], 
+                        'tiempo': receta[6], 'tipo': receta[7], 'link_receta': receta[8], 
+                        'num_comentarios': receta[9], 'num_reviews': receta[10], 'fecha_modificacion': receta[11], 
+                        'ingredientes': receta[12], 'imagen': receta[13]} for receta in recetas]
+            cur.close()
+            connection.close()
+            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual)
+        else:
+            cur.close()
+            connection.close()
+            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual)
+    else:
+        return redirect(url_for('index'))
 
 
 

@@ -338,16 +338,18 @@ CREATE TABLE recetas (
     Num_comentarios INT,
     Num_reviews INT,
     Fecha_modificacion DATE,
-    Ingredientes TEXT
+    Ingredientes TEXT,
+    images VARCHAR(255) -- Add this line
 );
 
-LOAD DATA INFILE '/var/lib/mysql-files/recetas.csv'
+
+LOAD DATA INFILE '/var/lib/mysql-files/recetas_con_imagenes.csv'
 INTO TABLE recetas
 FIELDS TERMINATED BY '|'
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(Id, Categoria, Nombre, @Valoracion, Dificultad, @Num_comensales, Tiempo, Tipo, Link_receta, @Num_comentarios, @Num_reviews, @Fecha_modificacion, Ingredientes)
+(Id, Categoria, Nombre, @Valoracion, Dificultad, @Num_comensales, Tiempo, Tipo, Link_receta, @Num_comentarios, @Num_reviews, @Fecha_modificacion, Ingredientes, images)
 SET 
     Valoracion = NULLIF(@Valoracion, ''),
     Num_comensales = NULLIF(@Num_comensales, ''),

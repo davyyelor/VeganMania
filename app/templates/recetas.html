@@ -4,40 +4,53 @@
 <div class="recetas">
     <main>
         <h1 class="title">Buscar Recetas</h1>
-        <form class="buscar-wrapper" action="{{ url_for('loading') }}" method="post">
-            <input type="text" name="query" placeholder="Buscar recetas">
+        <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
+            <input type="text" name="ingredientes" placeholder="Buscar recetas por ingredientes">
             <button type="submit">Buscar</button>
         </form>
-        
-        {% if recipes_list %}
+        {% for message in get_flashed_messages() %}
+            <p>{{ message }}</p>
+        {% endfor %}
+
+        <!-- Aquí debería ser un for loop sobre las recetas -->
+        {% if recetas %}
         <h2 style="text-align: center;">Recetas encontradas:</h2>
         <div class="recipe-container" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
-            {% for recipe in recipes_list %}
+            {% for receta in recetas %}
             <div class="recipe" style="width: calc(33.33% - 20px); margin-bottom: 40px; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-                <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ recipe['name'] }}</h2>
-                <img src="{{ recipe['image'] }}" alt="Imagen de la receta" style="max-width: 100%; height: auto;" class="zoom" onclick="showRecipeDetails(this)">
+                <h2 style="font-weight: bold; font-family: Ubuntu-Bold, sans-serif; font-size: 20px; color: #57b846; margin-bottom: 10px;">{{ receta.nombre }}</h2>
+                <img src="{{ receta.imagen }}" alt="Imagen de la receta" style="max-width: 100%; height: auto;" class="zoom" onclick="showRecipeDetails(this)">
                 <div class="recipe-details" style="display: none; padding: 10px;">
-                    <p><strong>Etiquetas de Dieta:</strong> {{ recipe['diet_labels'] }}</p>
-                    <p><strong>Etiquetas de Salud :</strong> {{ recipe['health_labels'] }}</p>
+                    <p><strong>Categoría:</strong> {{ receta.categoria }}</p>
+                    <p><strong>Valoración:</strong> {{ receta.valoracion }}</p>
+                    <p><strong>Dificultad:</strong> {{ receta.dificultad }}</p>
+                    <p><strong>Número de comensales:</strong> {{ receta.num_comensales }}</p>
+                    <p><strong>Tiempo:</strong> {{ receta.tiempo }}</p>
+                    <p><strong>Tipo:</strong> {{ receta.tipo }}</p>
                     <p><strong>Ingredientes:</strong></p>
-                    <ul style="padding-left: 20px;">
-                        {% set ingredients_list = recipe['ingredients'].split("', '") %}
-                        {% for ingredient in ingredients_list[1:-1] %}
-                            <li>{{ ingredient|replace("'", "") }}</li>
+                    <ul>
+                        {% for ingrediente in receta.ingredientes.split(',') %}
+                        <li>{{ ingrediente }}</li>
                         {% endfor %}
                     </ul>
-                    <p><a href="{{ recipe['recipe_link'] }}" target="_blank">Link a la receta</a></p>
+                    <p><a href="{{ receta.link_receta }}" target="_blank">Link a la receta</a></p>
                 </div>
             </div>
             {% endfor %}
         </div>
         <button id="volverBtn" style="display: none;" onclick="showAllRecipes()">Volver y ver todas las recetas</button>
+        <div style="text-align: center; margin-top: 20px;">
+            {% if total_paginas > 1 %}
+            <ul class="pagination">
+                {% for num_pagina in range(1, total_paginas + 1) %}
+                <li class="page-item {% if num_pagina == pagina_actual %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('recetas', pagina=num_pagina) }}">{{ num_pagina }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
         {% endif %}
-        
-        {% for message in get_flashed_messages() %}
-            <p>{{ message }}</p>
-        {% endfor %}
-        
     </main>
 </div>
 
