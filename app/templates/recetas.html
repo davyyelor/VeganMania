@@ -40,7 +40,7 @@
             </div>
             {% endfor %}
         </div>
-        <button id="volverBtn" onclick="showAllRecipes()">Volver y ver todas las recetas</button>
+        <button id="volverBtn" style="display: none;" onclick="showAllRecipes()">Volver y ver todas las recetas</button>
         <div class="pagination-container">
             {% if total_paginas > 1 %}
             <ul class="pagination">
@@ -113,11 +113,13 @@
         padding: 10px;
     }
     .pagination-container {
-        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         margin-top: 20px;
     }
     .pagination {
-        display: inline-block;
+        display: flex;
         list-style-type: none;
         padding: 0;
     }
