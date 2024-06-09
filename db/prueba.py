@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 
 # Paso 1: Cargar el archivo CSV en un DataFrame de pandas
-df = pd.read_csv('C:/Users/19340/Documents/GitHub/VeganMania/db/recetas.csv', sep='|')
+df = pd.read_csv('db/recetas.csv', sep='|')
 
 # Crear una función para obtener la URL de la imagen de cada receta
 def get_image_url(recipe_url):
@@ -34,4 +34,4 @@ df = df.dropna(subset=['images'])
 print(df)
 
 # Guardar el DataFrame actualizado a un nuevo archivo CSV
-df.to_csv('recetas_con_imagenes.csv', index=False, sep='|')
+df.to_csv('recetas_con_imagenes2.csv', index=False, sep='|')

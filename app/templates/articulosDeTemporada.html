@@ -40,6 +40,34 @@
         cursor: pointer;
         margin-left: 10px;
     }
+    #productSearch {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        margin-bottom: 20px;
+        border: 2px solid #000; /* Borde del buscador */
+        border-radius: 25px; /* Esquinas redondeadas */
+        outline: none; /* Quitar el contorno por defecto al hacer clic */
+    }
+    #searchResults {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    #searchResults .list-group-item {
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+    #searchResults .list-group-item img {
+        width: 50px;
+        height: 50px;
+        margin-right: 10px;
+    }
+    #searchResults .list-group-item:hover {
+        background-color: #f0f0f0;
+    }
 </style>
 
 <div class="container" style="margin-top: 100px;">
@@ -51,6 +79,13 @@
                 </li>
             {% endfor %}
         </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <input type="text" id="productSearch" placeholder="Buscar productos..." oninput="filterProducts()">
+            <ul id="searchResults" class="list-group" style="display: none; position: absolute; width: 100%; z-index: 1;"></ul>
+        </div>
     </div>
 
     <div class="row">
@@ -68,7 +103,7 @@
         <!-- Productos en temporada -->
         {% set index = 0 %}
         {% for product in in_season %}
-            <div class="col-md-4 text-center">
+            <div class="col-md-4 text-center product-item" data-product="{{ product[1] }}">
                 <div class="product-container">
                     <img src="../static/images/products/{{ product[6] }}" class="img-fluid" alt="{{ product[1] }}" onclick="toggleDescription(event, this.nextElementSibling)">
                     <div class="product-description">{{ product[5] }}</div>
@@ -84,7 +119,7 @@
 
         <!-- Productos empezando temporada -->
         {% for product in start_of_season %}
-            <div class="col-md-4 text-center">
+            <div class="col-md-4 text-center product-item" data-product="{{ product[1] }}">
                 <div class="product-container">
                     <img src="../static/images/products/{{ product[6] }}" class="img-fluid soon-to-be-out" alt="{{ product[1] }}" onclick="toggleDescription(event, this.nextElementSibling)">
                     <div class="product-description">{{ product[5] }}</div>
@@ -103,7 +138,7 @@
     <h2>Fuera de Temporada</h2>
     <div class="row">
         {% for product in out_of_season %}
-        <div class="col-md-4 text-center">
+        <div class="col-md-4 text-center product-item" data-product="{{ product[1] }}">
             <div class="product-container">
                 <img src="../static/images/products/{{ product[6] }}" class="img-fluid out-of-season" alt="{{ product[1] }}" onclick="toggleDescription(event, this.nextElementSibling)">
                 <div class="product-description">{{ product[5] }}</div>
@@ -146,6 +181,55 @@
         const url = new URL(window.location.href);
         url.searchParams.set('mes', month);
         window.location.href = url.toString();
+    }
+
+    function filterProducts() {
+        const searchInput = document.getElementById('productSearch').value.toLowerCase();
+        const products = document.querySelectorAll('.product-item');
+        const searchResults = document.getElementById('searchResults');
+        searchResults.innerHTML = ''; // Clear previous results
+
+        if (searchInput) {
+            let results = [];
+            products.forEach(product => {
+                const productName = product.getAttribute('data-product').toLowerCase();
+                if (productName.includes(searchInput)) {
+                    const productImage = product.querySelector('img').src;
+                    results.push({ name: productName, image: productImage });
+                }
+            });
+
+            if (results.length > 0) {
+                searchResults.style.display = 'block';
+                results.forEach(result => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.innerHTML = `<img src="${result.image}" alt="${result.name}">${result.name}`;
+                    li.onclick = () => {
+                        document.getElementById('productSearch').value = result.name;
+                        searchResults.style.display = 'none';
+                        showFilteredProducts(result.name);
+                    };
+                    searchResults.appendChild(li);
+                });
+            } else {
+                searchResults.style.display = 'none';
+            }
+        } else {
+            searchResults.style.display = 'none';
+            showFilteredProducts('');
+        }
+    }
+
+    function showFilteredProducts(productName) {
+        const products = document.querySelectorAll('.product-item');
+        products.forEach(product => {
+            if (!productName || product.getAttribute('data-product').toLowerCase() === productName.toLowerCase()) {
+                product.style.display = 'block';
+            } else {
+                product.style.display = 'none';
+            }
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function() {

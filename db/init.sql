@@ -343,7 +343,7 @@ CREATE TABLE recetas (
 );
 
 
-LOAD DATA INFILE '/var/lib/mysql-files/recetas_con_imagenes.csv'
+LOAD DATA INFILE '/var/lib/mysql-files/recetas_con_imagenes3.csv'
 INTO TABLE recetas
 FIELDS TERMINATED BY '|'
 ENCLOSED BY '"'
