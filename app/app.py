@@ -2,6 +2,7 @@
 ###################################################### Importaciones ##############################################################
 #####################################################################################################################################
 from deep_translator import GoogleTranslator
+import math
 from flask import Flask
 import hashlib
 import datetime
@@ -96,68 +97,6 @@ def eliminarCuenta():
 
     else:
         return redirect(url_for('modificarUsuario'))
-
-@app.route('/modificarAlergenos', methods=['GET', 'POST'])
-def modificarAlergenos():
-    if 'email' not in session:
-        return redirect(url_for('index'))
-
-    if request.method == 'POST':
-        alimento_id = request.form.get('alimento')
-        gravedad = request.form.get('gravedad')
-        sintomas = request.form.get('sintomas')
-        email = session.get('email')
-
-        try:
-            config = {
-                'user': 'root',
-                'password': 'rootasdeg2324',
-                'host': 'db',
-                'port': '3306',
-                'database': 'usuarios'
-            }
-            connection = mysql.connect(**config)
-            cur = connection.cursor()
-
-            cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
-            user = cur.fetchone()
-
-            if user:
-                user_id = user[0]
-                cur.execute('INSERT INTO tiene_alergia (id_cliente, id_alimento, gravedad, sintomas) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE gravedad = %s, sintomas = %s', 
-                            (user_id, alimento_id, gravedad, sintomas, gravedad, sintomas))
-                connection.commit()
-                cur.close()
-                connection.close()
-                return redirect(url_for('modificarAlergenos'))
-            else:
-                return redirect(url_for('modificarAlergenos'))
-
-        except Exception as e:
-            return redirect(url_for('modificarAlergenos'))
-
-    else:
-        try:
-            config = {
-                'user': 'root',
-                'password': 'rootasdeg2324',
-                'host': 'db',
-                'port': '3306',
-                'database': 'usuarios'
-            }
-            connection = mysql.connect(**config)
-            cur = connection.cursor()
-
-            cur.execute('SELECT id_alimento, nombreAlimento FROM Alimento')
-            alimentos = cur.fetchall()
-            cur.close()
-            connection.close()
-
-            return render_template('modificarAlergenos.html', alimentos=alimentos)
-
-        except Exception as e:
-            return redirect(url_for('modificarAlergenos'))
-
 
 
 @app.route('/modificarUsuario', methods=['GET', 'POST'])
@@ -839,7 +778,6 @@ def verComida(id_comida):
     else:
         return redirect(url_for('index'))
 
-import math
 def convertir_tiempo_a_minutos(tiempo_str):
     tiempo_minutos = 0
     if 'h' in tiempo_str:
@@ -850,6 +788,7 @@ def convertir_tiempo_a_minutos(tiempo_str):
     elif 'm' in tiempo_str:
         tiempo_minutos += int(tiempo_str.replace('m', '').strip())
     return tiempo_minutos
+
 @app.route('/recetas', methods=['GET', 'POST'])
 def recetas():
     if 'email' in session:
@@ -869,10 +808,15 @@ def recetas():
         pagina_actual = request.args.get('pagina', 1, type=int)
         offset = (pagina_actual - 1) * recetas_por_pagina
 
-        ingredientes = categoria = tiempo_min = tiempo_max = tipo = dificultad = valoracion = None
+        tiempo_max = 480
+        tiempo_min = 0
+        valoracion = 0
+        ingredientes = ''
+        tipo = ''
+        dificultad = ''
+
         if request.method == 'POST':
             ingredientes = request.form.get('ingredientes')
-            categoria = request.form.getlist('categoria')
             tiempo_min = request.form.get('tiempo_min', type=int)
             tiempo_max = request.form.get('tiempo_max', type=int)
             tipo = request.form.get('tipo')
@@ -881,21 +825,13 @@ def recetas():
         else:
             if 'ingredientes' in request.args:
                 ingredientes = request.args.get('ingredientes')
-            if 'categoria' in request.args:
-                categoria = request.args.getlist('categoria')
-            if 'tiempo_min' in request.args:
-                tiempo_min = request.args.get('tiempo_min', type=int)
-            if 'tiempo_max' in request.args:
-                tiempo_max = request.args.get('tiempo_max', type=int)
+            tiempo_min = request.args.get('tiempo_min', 0, type=int)
+            tiempo_max = request.args.get('tiempo_max', 480, type=int)
+            valoracion = request.args.get('valoracion', 0, type=float)
             if 'tipo' in request.args:
                 tipo = request.args.get('tipo')
             if 'dificultad' in request.args:
                 dificultad = request.args.get('dificultad')
-            if 'valoracion' in request.args:
-                valoracion = request.args.get('valoracion', type=float)
-
-        if categoria is None:
-            categoria = []
 
         query_count = "SELECT COUNT(*) FROM recetas WHERE images IS NOT NULL AND images != ''"
         query_recetas = "SELECT * FROM recetas WHERE images IS NOT NULL AND images != ''"
@@ -906,9 +842,6 @@ def recetas():
         if ingredientes:
             filters.append("nombre LIKE %s")
             params.append('%' + ingredientes + '%')
-        if categoria:
-            filters.append("categoria IN (%s)" % ','.join(['%s']*len(categoria)))
-            params.extend(categoria)
         if tiempo_min is not None and tiempo_max is not None:
             filters.append("""
                 (
@@ -921,8 +854,15 @@ def recetas():
             """)
             params.extend(['%h%', tiempo_min, tiempo_max, '%m%', tiempo_min, tiempo_max])
         if dificultad:
-            filters.append("dificultad = %s")
-            params.append(dificultad)
+            dificultad_map = {
+                'Fácil': ['muy baja', 'baja'],
+                'Media': ['media'],
+                'Difícil': ['alta', 'muy alta']
+            }
+            if dificultad in dificultad_map:
+                dificultad_placeholders = ', '.join(['%s'] * len(dificultad_map[dificultad]))
+                filters.append(f"dificultad IN ({dificultad_placeholders})")
+                params.extend(dificultad_map[dificultad])
         if valoracion:
             filters.append("valoracion >= %s")
             params.append(valoracion)
@@ -932,16 +872,11 @@ def recetas():
             query_count += filter_clause
             query_recetas += filter_clause
 
-        params_count = params.copy()
-        params_count.extend([recetas_por_pagina, offset])
-
-        query_recetas += " LIMIT %s OFFSET %s"
+        # Añadir el ORDER BY antes del LIMIT
+        query_recetas += " ORDER BY valoracion DESC LIMIT %s OFFSET %s"
         params.extend([recetas_por_pagina, offset])
 
-        print(f"query_count: {query_count}, params: {params}")
-        print(f"query_recetas: {query_recetas}, params: {params}")
-
-        cur.execute(query_count, tuple(params[:len(params_count) - 2]))
+        cur.execute(query_count, tuple(params[:-2]))
         total_recetas = cur.fetchone()[0]
 
         cur.execute(query_recetas, tuple(params))
@@ -957,16 +892,13 @@ def recetas():
                         'ingredientes': receta[12], 'imagen': receta[13]} for receta in recetas]
             cur.close()
             connection.close()
-            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion)
+            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion)
         else:
             cur.close()
             connection.close()
-            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion)
+            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion)
     else:
         return redirect(url_for('index'))
-
-
-
 
 
 
@@ -994,12 +926,15 @@ def misComidas():
             comidas = cur.fetchall()
             cur.close()
             connection.close()
+            flash('¡Comidas cargadas correctamente!', 'success')
             return render_template('misComidas.html', comidas=comidas)
         else:
             cur.close()
             connection.close()
+            flash('No se encontró al usuario en la base de datos.', 'error')
             return render_template('inicioUsu.html')
     else:
+        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
     
 

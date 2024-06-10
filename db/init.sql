@@ -1,26 +1,26 @@
 DROP DATABASE IF EXISTS usuarios;
-CREATE DATABASE IF NOT EXISTS usuarios;
+CREATE DATABASE IF NOT EXISTS usuarios CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE usuarios;
 
 -- Tabla Cliente
 CREATE TABLE IF NOT EXISTS Cliente (
   id_cliente INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(255) NOT NULL,
-  nombre_usu VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  contrasena VARCHAR(255) NOT NULL,
+  nombre VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  nombre_usu VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  email VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  contrasena VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   peso DECIMAL(5,2) NOT NULL,
   altura DECIMAL(5,2) NOT NULL,
-  genero VARCHAR(10) NOT NULL,
-  actividad VARCHAR(255) NOT NULL,
+  genero VARCHAR(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  actividad VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   fecha_nacimiento DATE NOT NULL
 );
 
 -- Tabla Alimento
 CREATE TABLE IF NOT EXISTS Alimento (
   id_alimento INT AUTO_INCREMENT PRIMARY KEY,
-  nombreAlimento VARCHAR(255) NOT NULL,
-  descripcion TEXT NOT NULL
+  nombreAlimento VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  descripcion TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
 );
 
 -- Tabla Comida
@@ -149,15 +149,12 @@ ON DUPLICATE KEY UPDATE cantidad = 0;
 
 CREATE TABLE productos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    Producto TEXT NOT NULL,
+    Producto TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     EnTemporada TEXT,
     InicioTemporada TEXT,
     FueraDeTemporada TEXT,
-    Descripcion TEXT
+    Descripcion TEXT 
 );
-
-ALTER TABLE productos CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
-
 
 INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
 VALUES ('acelga', 'ENERO, FEBRERO, MARZO, ABRIL, MAYO, JUNIO, JULIO, SEPTIEMBRE, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'AGOSTO', NULL, 'Se puede encontrar acelgas de varios colores (rosas, amarillas, blancas...) dependiendo de su variedad. La acelga se adapta bien a cualquier clima, por lo tanto se recolecta durante casi todo el año.');
@@ -325,24 +322,25 @@ SET imagen =
         ELSE NULL
     END;
 
+-- Crear la tabla recetas
 CREATE TABLE recetas (
     Id INT PRIMARY KEY,
-    Categoria VARCHAR(255),
-    Nombre VARCHAR(255),
+    Categoria VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+    Nombre VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     Valoracion DECIMAL(3, 2),
-    Dificultad VARCHAR(50),
+    Dificultad VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     Num_comensales INT,
-    Tiempo VARCHAR(50),
-    Tipo VARCHAR(50),
-    Link_receta VARCHAR(255),
+    Tiempo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+    Tipo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+    Link_receta VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     Num_comentarios INT,
     Num_reviews INT,
     Fecha_modificacion DATE,
-    Ingredientes TEXT,
-    images VARCHAR(255) -- Add this line
+    Ingredientes TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+    images VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 );
 
-
+-- Cargar los datos en la tabla recetas
 LOAD DATA INFILE '/var/lib/mysql-files/recetas_con_imagenes3.csv'
 INTO TABLE recetas
 FIELDS TERMINATED BY '|'
@@ -356,3 +354,4 @@ SET
     Num_comentarios = NULLIF(@Num_comentarios, ''),
     Num_reviews = NULLIF(@Num_reviews, ''),
     Fecha_modificacion = NULLIF(@Fecha_modificacion, '');
+
