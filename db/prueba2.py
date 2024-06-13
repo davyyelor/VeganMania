@@ -1,20 +1,15 @@
 import pandas as pd
 
 # Ruta del archivo original
-file_path = 'db/recetas_con_imagenes2.csv'
+file_path = 'db/recetas_con_imagenes3.csv'
 
-# Cargar el archivo CSV con el delimitador correcto
-df = pd.read_csv(file_path, delimiter='|')
+recetas_df = pd.read_csv(file_path, delimiter='|')
 
-# Reemplazar los valores faltantes en la columna 'Tiempo' con '30m'
-df['Tiempo'].fillna('30m', inplace=True)
+# Definir los productos de temporada
+productos_temporada = ['acelga', 'frambuesa', 'melón']
 
-# Reemplazar los valores faltantes en la columna 'Dificultad' con la moda
-dificultad_mode = df['Dificultad'].mode()[0]
-df['Dificultad'].fillna(dificultad_mode, inplace=True)
+# Filtrar las recetas que contienen alguno de los productos de temporada
+filtered_recetas_df = recetas_df[recetas_df['Ingredientes'].str.contains('|'.join(productos_temporada), case=False, na=False)]
 
-# Ruta para guardar el archivo modificado
-output_path = 'db/recetas_con_imagenes3.csv'
-df.to_csv(output_path, index=False, sep='|')
-
-print(f"Archivo modificado guardado en {output_path}")
+# Mostrar las recetas filtradas
+print(filtered_recetas_df)

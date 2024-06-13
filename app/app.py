@@ -2,7 +2,6 @@
 ###################################################### Importaciones ##############################################################
 #####################################################################################################################################
 from deep_translator import GoogleTranslator
-import math
 from flask import Flask
 import hashlib
 import datetime
@@ -19,6 +18,8 @@ from email.mime.text import MIMEText
 import ssl
 import string
 import locale
+import random
+from datetime import datetime, timedelta
 
 
 
@@ -97,6 +98,68 @@ def eliminarCuenta():
 
     else:
         return redirect(url_for('modificarUsuario'))
+
+@app.route('/modificarAlergenos', methods=['GET', 'POST'])
+def modificarAlergenos():
+    if 'email' not in session:
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        alimento_id = request.form.get('alimento')
+        gravedad = request.form.get('gravedad')
+        sintomas = request.form.get('sintomas')
+        email = session.get('email')
+
+        try:
+            config = {
+                'user': 'root',
+                'password': 'rootasdeg2324',
+                'host': 'db',
+                'port': '3306',
+                'database': 'usuarios'
+            }
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
+
+            cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
+            user = cur.fetchone()
+
+            if user:
+                user_id = user[0]
+                cur.execute('INSERT INTO tiene_alergia (id_cliente, id_alimento, gravedad, sintomas) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE gravedad = %s, sintomas = %s', 
+                            (user_id, alimento_id, gravedad, sintomas, gravedad, sintomas))
+                connection.commit()
+                cur.close()
+                connection.close()
+                return redirect(url_for('modificarAlergenos'))
+            else:
+                return redirect(url_for('modificarAlergenos'))
+
+        except Exception as e:
+            return redirect(url_for('modificarAlergenos'))
+
+    else:
+        try:
+            config = {
+                'user': 'root',
+                'password': 'rootasdeg2324',
+                'host': 'db',
+                'port': '3306',
+                'database': 'usuarios'
+            }
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
+
+            cur.execute('SELECT id_alimento, nombreAlimento FROM Alimento')
+            alimentos = cur.fetchall()
+            cur.close()
+            connection.close()
+
+            return render_template('modificarAlergenos.html', alimentos=alimentos)
+
+        except Exception as e:
+            return redirect(url_for('modificarAlergenos'))
+
 
 
 @app.route('/modificarUsuario', methods=['GET', 'POST'])
@@ -195,6 +258,104 @@ def modificarUsuario():
 #####################################################################################################################################
 ###################################################### Registro/Login ##############################################################
 #####################################################################################################################################
+def generate_token():
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=50))
+
+
+@app.route('/recuperarContraseña', methods=['GET', 'POST'])
+def recuperarContraseña():
+    if request.method == 'POST':
+        email = request.form['email']
+        try:
+            config = {
+                'user': 'root',
+                'password': 'rootasdeg2324',
+                'host': 'db',
+                'port': '3306',
+                'database': 'usuarios'
+            }
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
+
+            cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
+            user = cur.fetchone()
+
+            if user:
+                token = generate_token()
+                expiration = datetime.now() + timedelta(hours=1)
+                cur.execute('INSERT INTO PasswordReset (email, token, expiration) VALUES (%s, %s, %s)', (email, token, expiration))
+                connection.commit()
+                
+                send_email(email, 0, token)
+                flash('An email has been sent with instructions to reset your password.', 'success')
+            else:
+                flash('Email address not found.', 'danger')
+        except Exception as e:
+            
+            flash(str(e), 'danger')
+        finally:
+            cur.close()
+            connection.close()
+
+    return render_template('recuperarContrasena.html')
+
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == 'POST':
+        token = request.form['token']
+        new_password = request.form['password']
+        hashed_new_password = hashAPI.hashear(new_password)
+        
+        try:
+            config = {
+                'user': 'root',
+                'password': 'rootasdeg2324',
+                'host': 'db',
+                'port': '3306',
+                'database': 'usuarios'
+            }
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
+            
+            cur.execute('SELECT email FROM PasswordReset WHERE token = %s AND expiration > %s', (token, datetime.now()))
+            result = cur.fetchone()
+
+            if result:
+                email = result[0]
+                
+                # Check if the new password has been used before
+                cur.execute('SELECT 1 FROM PasswordHistory WHERE email = %s AND hashed_password = %s', (email, hashed_new_password))
+                if cur.fetchone():
+                    flash('This password has been used before. Please choose a different password.', 'danger')
+                    return render_template('reset_password.html', token=token)
+                else:
+                    # Update the password
+                    cur.execute('UPDATE Cliente SET contrasena = %s WHERE email = %s', (hashed_new_password, email))
+                    
+                    # Insert the new password into PasswordHistory
+                    cur.execute('INSERT INTO PasswordHistory (email, hashed_password, change_date) VALUES (%s, %s, %s)', (email, hashed_new_password, datetime.now()))
+                    
+                    # Delete the token
+                    cur.execute('DELETE FROM PasswordReset WHERE token = %s', (token,))
+                    connection.commit()
+                    
+                    flash('Your password has been reset successfully.', 'success')
+                    return redirect(url_for('login'))  
+            else:
+                flash('Invalid or expired token.', 'danger')
+                return redirect(url_for('request_reset_token'))  
+        except Exception as e:
+            flash(str(e), 'danger')
+        finally:
+            cur.close()
+            connection.close()
+    
+    token = request.args.get('token')
+    return render_template('reset_password.html', token=token)
+
+
+
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
@@ -247,11 +408,14 @@ def registro():
                 cur.close()
                 connection.close()
 
-                # Envío de correo electrónico, etc.
+                
+                send_email(email, 1, '')
 
+                flash('Usuario registrado correctamente', 'success')
                 return redirect(url_for('login'))
 
         except Exception as e:
+            flash('Error al registrar el usuario', e)
             return redirect(url_for('registro'))
 
     return render_template('registro.html')
@@ -262,58 +426,7 @@ def logout():
     session.pop('email', None)
     return redirect(url_for('index'))
 
-@app.route('/recuperarContraseña/<token>')
-def mostrar_contraseña(token):
-    try:
-        correo = serializer.loads(token, max_age=3600)
-        # Aquí deberías permitir al usuario cambiar su contraseña
-        nueva_contraseña = generar_contraseña()
-        return f"Tu nueva contraseña es: {nueva_contraseña}"
-    except:
-        return "El enlace de recuperación de contraseña es inválido o ha expirado."
-
-
-@app.route('/recuperarContraseña', methods=['GET', 'POST']) 
-def recuperarContraseña():
-    if request.method == 'POST':
-        email = request.form['email']
-        try:
-            config = {
-                    'user': 'root',
-                    'password': 'rootasdeg2324',
-                    'host': 'db',
-                    'port': '3306',
-                    'database': 'usuarios'
-            }
-            connection = mysql.connect(**config)
-            cur = connection.cursor()
-            
-            cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
-            user = cur.fetchone()
-            
-            if user:
-                token = generar_token(email)
-                contraseña = generar_contraseña()
-                enlace = f"http://localhost:5000/recuperarContraseña/{token}"
-                
-                send_email(email, 0, link=enlace)
-    
-                cn = hashAPI.hashear(contraseña)
-    
-                cur.execute('UPDATE Cliente SET contrasena = %s WHERE email = %s', (cn, email))
-                connection.commit()
-                cur.close()
-                connection.close()
-                return render_template('recuperarContrasena.html', email=email)
-            else:
-                return render_template('recuperarContrasena.html')
-        except Exception as e:
-            return render_template('recuperarContrasena.html')
-    else:
-        return render_template('recuperarContrasena.html')
-
-    
-
+        
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -778,6 +891,7 @@ def verComida(id_comida):
     else:
         return redirect(url_for('index'))
 
+import math
 def convertir_tiempo_a_minutos(tiempo_str):
     tiempo_minutos = 0
     if 'h' in tiempo_str:
@@ -788,7 +902,6 @@ def convertir_tiempo_a_minutos(tiempo_str):
     elif 'm' in tiempo_str:
         tiempo_minutos += int(tiempo_str.replace('m', '').strip())
     return tiempo_minutos
-
 @app.route('/recetas', methods=['GET', 'POST'])
 def recetas():
     if 'email' in session:
@@ -808,15 +921,10 @@ def recetas():
         pagina_actual = request.args.get('pagina', 1, type=int)
         offset = (pagina_actual - 1) * recetas_por_pagina
 
-        tiempo_max = 480
-        tiempo_min = 0
-        valoracion = 0
-        ingredientes = ''
-        tipo = ''
-        dificultad = ''
-
+        ingredientes = categoria = tiempo_min = tiempo_max = tipo = dificultad = valoracion = None
         if request.method == 'POST':
             ingredientes = request.form.get('ingredientes')
+            categoria = request.form.getlist('categoria')
             tiempo_min = request.form.get('tiempo_min', type=int)
             tiempo_max = request.form.get('tiempo_max', type=int)
             tipo = request.form.get('tipo')
@@ -825,13 +933,21 @@ def recetas():
         else:
             if 'ingredientes' in request.args:
                 ingredientes = request.args.get('ingredientes')
-            tiempo_min = request.args.get('tiempo_min', 0, type=int)
-            tiempo_max = request.args.get('tiempo_max', 480, type=int)
-            valoracion = request.args.get('valoracion', 0, type=float)
+            if 'categoria' in request.args:
+                categoria = request.args.getlist('categoria')
+            if 'tiempo_min' in request.args:
+                tiempo_min = request.args.get('tiempo_min', type=int)
+            if 'tiempo_max' in request.args:
+                tiempo_max = request.args.get('tiempo_max', type=int)
             if 'tipo' in request.args:
                 tipo = request.args.get('tipo')
             if 'dificultad' in request.args:
                 dificultad = request.args.get('dificultad')
+            if 'valoracion' in request.args:
+                valoracion = request.args.get('valoracion', type=float)
+
+        if categoria is None:
+            categoria = []
 
         query_count = "SELECT COUNT(*) FROM recetas WHERE images IS NOT NULL AND images != ''"
         query_recetas = "SELECT * FROM recetas WHERE images IS NOT NULL AND images != ''"
@@ -842,6 +958,9 @@ def recetas():
         if ingredientes:
             filters.append("nombre LIKE %s")
             params.append('%' + ingredientes + '%')
+        if categoria:
+            filters.append("categoria IN (%s)" % ','.join(['%s']*len(categoria)))
+            params.extend(categoria)
         if tiempo_min is not None and tiempo_max is not None:
             filters.append("""
                 (
@@ -854,15 +973,8 @@ def recetas():
             """)
             params.extend(['%h%', tiempo_min, tiempo_max, '%m%', tiempo_min, tiempo_max])
         if dificultad:
-            dificultad_map = {
-                'Fácil': ['muy baja', 'baja'],
-                'Media': ['media'],
-                'Difícil': ['alta', 'muy alta']
-            }
-            if dificultad in dificultad_map:
-                dificultad_placeholders = ', '.join(['%s'] * len(dificultad_map[dificultad]))
-                filters.append(f"dificultad IN ({dificultad_placeholders})")
-                params.extend(dificultad_map[dificultad])
+            filters.append("dificultad = %s")
+            params.append(dificultad)
         if valoracion:
             filters.append("valoracion >= %s")
             params.append(valoracion)
@@ -872,11 +984,16 @@ def recetas():
             query_count += filter_clause
             query_recetas += filter_clause
 
-        # Añadir el ORDER BY antes del LIMIT
-        query_recetas += " ORDER BY valoracion DESC LIMIT %s OFFSET %s"
+        params_count = params.copy()
+        params_count.extend([recetas_por_pagina, offset])
+
+        query_recetas += " LIMIT %s OFFSET %s"
         params.extend([recetas_por_pagina, offset])
 
-        cur.execute(query_count, tuple(params[:-2]))
+        print(f"query_count: {query_count}, params: {params}")
+        print(f"query_recetas: {query_recetas}, params: {params}")
+
+        cur.execute(query_count, tuple(params[:len(params_count) - 2]))
         total_recetas = cur.fetchone()[0]
 
         cur.execute(query_recetas, tuple(params))
@@ -892,13 +1009,16 @@ def recetas():
                         'ingredientes': receta[12], 'imagen': receta[13]} for receta in recetas]
             cur.close()
             connection.close()
-            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion)
+            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion)
         else:
             cur.close()
             connection.close()
-            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion)
+            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion)
     else:
         return redirect(url_for('index'))
+
+
+
 
 
 
@@ -926,15 +1046,12 @@ def misComidas():
             comidas = cur.fetchall()
             cur.close()
             connection.close()
-            flash('¡Comidas cargadas correctamente!', 'success')
             return render_template('misComidas.html', comidas=comidas)
         else:
             cur.close()
             connection.close()
-            flash('No se encontró al usuario en la base de datos.', 'error')
             return render_template('inicioUsu.html')
     else:
-        flash('Acceso no autorizado. Por favor, inicia sesión.', 'error')
         return redirect(url_for('index'))
     
 
@@ -1094,42 +1211,33 @@ def generar_token(correo):
     token = serializer.dumps(correo)
     return token
 
-def send_email(email_receiver, opcion, link):
+def send_email(email_receiver, opcion, token):
     password = 'rzxz jhtf lbxf tqus'
     email_sender = 'veganmaniiaa@gmail.com'
     if opcion == 0:
-        msg = MIMEMultipart()
-        msg['From'] = email_sender
-        msg['To'] = email_receiver
-        msg['Subject'] = "Recuperación de Contraseña"
-
-        message = render_template('mails/reset_password.html', link=link)
-
-        msg.attach(MIMEText(message, 'html'))
-
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(email_sender, password)
-        server.sendmail(email_sender, email_receiver, msg.as_string())
-        print("enviado")
-        server.quit()        
-
+        subject = "Recuperación de Contraseña"
+        message = render_template('mails/reset_password.html', link=f'http://localhost:5000/reset_password?token={token}')
     elif opcion == 1:
-        msg = MIMEMultipart()
-        msg['From'] = email_sender
-        msg['To'] = email_receiver
-        msg['Subject'] = "Bienvenido a VeganMania"
-
+        subject = "Bienvenido a VeganMania"
         message = render_template('mails/welcomeMail.html')
+    else:
+        return
 
-        msg.attach(MIMEText(message, 'html'))
+    msg = MIMEMultipart()
+    msg['From'] = email_sender
+    msg['To'] = email_receiver
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, 'html'))
 
+    try:
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(email_sender, password)
         server.sendmail(email_sender, email_receiver, msg.as_string())
-        print("enviado")
-        server.quit()    
+        server.quit()
+        print("Correo enviado")
+    except Exception as e:
+        print(f"Error al enviar correo: {e}")
 
 
 

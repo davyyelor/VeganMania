@@ -2,6 +2,22 @@ DROP DATABASE IF EXISTS usuarios;
 CREATE DATABASE IF NOT EXISTS usuarios CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE usuarios;
 
+
+CREATE TABLE IF NOT EXISTS PasswordReset (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  token VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  expiration DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS PasswordHistory (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    hashed_password VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    change_date DATETIME NOT NULL
+);
+
+
 -- Tabla Cliente
 CREATE TABLE IF NOT EXISTS Cliente (
   id_cliente INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,7 +116,8 @@ CREATE TABLE IF NOT EXISTS tiene_objetivo (
 INSERT INTO Cliente (nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento)
 VALUES
   ('Kepa', 'kepab', 'kepa@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 70.5, 180.0, 'Hombre', 'Sedentario', '1990-05-15'),
-  ('Ander', 'andere', 'ander@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20');
+  ('Ander', 'andere', 'ander@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20'),
+  ('David', 'davidd', 'davy.elorza@gmail.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20');
 
 -- Insertar nutrientes con categorías
 INSERT INTO Nutriente (nombreNutriente, descripcion, unidad, categoria) VALUES
@@ -149,7 +166,7 @@ ON DUPLICATE KEY UPDATE cantidad = 0;
 
 CREATE TABLE productos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    Producto TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    Producto TEXT,
     EnTemporada TEXT,
     InicioTemporada TEXT,
     FueraDeTemporada TEXT,
