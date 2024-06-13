@@ -3,24 +3,6 @@ CREATE DATABASE IF NOT EXISTS usuarios CHARACTER SET utf8mb4 COLLATE utf8mb4_uni
 USE usuarios;
 
 
-CREATE TABLE IF NOT EXISTS PasswordReset (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  email VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  token VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  expiration DATETIME NOT NULL,
-  requested_at DATETIME NOT NULL,
-  used BOOLEAN NOT NULL DEFAULT FALSE
-);
-
-
-CREATE TABLE IF NOT EXISTS PasswordHistory (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-    hashed_password VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-    change_date DATETIME NOT NULL
-);
-
-
 -- Tabla Cliente
 CREATE TABLE IF NOT EXISTS Cliente (
   id_cliente INT AUTO_INCREMENT PRIMARY KEY,
@@ -32,7 +14,28 @@ CREATE TABLE IF NOT EXISTS Cliente (
   altura DECIMAL(5,2) NOT NULL,
   genero VARCHAR(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   actividad VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  fecha_nacimiento DATE NOT NULL
+  fecha_nacimiento DATE NOT NULL,
+  UNIQUE (email)
+);
+
+-- Tabla PasswordReset
+CREATE TABLE IF NOT EXISTS PasswordReset (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_cliente INT NOT NULL,
+  token VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  expiration DATETIME NOT NULL,
+  requested_at DATETIME NOT NULL,
+  used BOOLEAN NOT NULL DEFAULT FALSE,
+  FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente) ON DELETE CASCADE
+);
+
+-- Tabla PasswordHistory
+CREATE TABLE IF NOT EXISTS PasswordHistory (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    hashed_password VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    change_date DATETIME NOT NULL,
+    FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente) ON DELETE CASCADE
 );
 
 -- Tabla Alimento

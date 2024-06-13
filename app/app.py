@@ -280,7 +280,8 @@ def recuperarContraseña():
             user = cur.fetchone()
 
             if user:
-                cur.execute('SELECT requested_at FROM PasswordReset WHERE email = %s ORDER BY requested_at DESC LIMIT 1', (email,))
+                id_cliente = user[0]
+                cur.execute('SELECT requested_at FROM PasswordReset WHERE id_cliente = %s ORDER BY requested_at DESC LIMIT 1', (id_cliente,))
                 last_request = cur.fetchone()
                 
                 if last_request and datetime.now() - last_request[0] < timedelta(hours=24):
@@ -289,7 +290,7 @@ def recuperarContraseña():
                     token = generate_token()
                     expiration = datetime.now() + timedelta(hours=1)
                     requested_at = datetime.now()
-                    cur.execute('INSERT INTO PasswordReset (email, token, expiration, requested_at) VALUES (%s, %s, %s, %s)', (email, token, expiration, requested_at))
+                    cur.execute('INSERT INTO PasswordReset (id_cliente, token, expiration, requested_at) VALUES (%s, %s, %s, %s)', (id_cliente, token, expiration, requested_at))
                     connection.commit()
                     
                     send_email(email, 0, token)
@@ -322,23 +323,23 @@ def reset_password():
             connection = mysql.connect(**config)
             cur = connection.cursor()
             
-            cur.execute('SELECT email FROM PasswordReset WHERE token = %s AND expiration > %s AND used = FALSE', (token, datetime.now()))
+            cur.execute('SELECT id_cliente FROM PasswordReset WHERE token = %s AND expiration > %s AND used = FALSE', (token, datetime.now()))
             result = cur.fetchone()
 
             if result:
-                email = result[0]
+                id_cliente = result[0]
                 
                 # Check if the new password has been used before
-                cur.execute('SELECT 1 FROM PasswordHistory WHERE email = %s AND hashed_password = %s', (email, hashed_new_password))
+                cur.execute('SELECT 1 FROM PasswordHistory WHERE id_cliente = %s AND hashed_password = %s', (id_cliente, hashed_new_password))
                 if cur.fetchone():
                     flash('This password has been used before. Please choose a different password.', 'danger')
                     return render_template('reset_password.html', token=token)
                 else:
                     # Update the password
-                    cur.execute('UPDATE Cliente SET contrasena = %s WHERE email = %s', (hashed_new_password, email))
+                    cur.execute('UPDATE Cliente SET contrasena = %s WHERE id_cliente = %s', (hashed_new_password, id_cliente))
                     
                     # Insert the new password into PasswordHistory
-                    cur.execute('INSERT INTO PasswordHistory (email, hashed_password, change_date) VALUES (%s, %s, %s)', (email, hashed_new_password, datetime.now()))
+                    cur.execute('INSERT INTO PasswordHistory (id_cliente, hashed_password, change_date) VALUES (%s, %s, %s)', (id_cliente, hashed_new_password, datetime.now()))
                     
                     # Mark the token as used
                     cur.execute('UPDATE PasswordReset SET used = TRUE WHERE token = %s', (token,))
@@ -357,9 +358,6 @@ def reset_password():
     
     token = request.args.get('token')
     return render_template('reset_password.html', token=token)
-
-
-
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
@@ -389,6 +387,7 @@ def registro():
             user = cur.fetchone()
 
             if user:
+                flash('Ya existe una cuenta con ese correo electrónico', 'error')
                 return redirect(url_for('registro'))
 
             hashed_password = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
@@ -398,7 +397,7 @@ def registro():
             connection.commit()
 
             # Obtener el id_cliente del nuevo cliente
-            cliente_id = cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
+            cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
             cliente_id = cur.fetchone()[0]
 
             if cliente_id:
@@ -410,17 +409,20 @@ def registro():
                 cur.execute('INSERT INTO tiene_objetivo (id_cliente, id_nutriente, cantidad) SELECT %s, id_nutriente, 2000 FROM Nutriente', (cliente_id,))
                 connection.commit()
 
+                # Insertar registro en la tabla PasswordHistory
+                cur.execute('INSERT INTO PasswordHistory (id_cliente, hashed_password, change_date) VALUES (%s, %s, NOW())', (cliente_id, hashed_password))
+                connection.commit()
+
                 cur.close()
                 connection.close()
 
-                
                 send_email(email, 1, '')
 
                 flash('Usuario registrado correctamente', 'success')
                 return redirect(url_for('login'))
 
         except Exception as e:
-            flash('Error al registrar el usuario', e)
+            flash('Error al registrar el usuario', 'error')
             return redirect(url_for('registro'))
 
     return render_template('registro.html')
