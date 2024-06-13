@@ -261,7 +261,6 @@ def modificarUsuario():
 def generate_token():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=50))
 
-
 @app.route('/recuperarContraseña', methods=['GET', 'POST'])
 def recuperarContraseña():
     if request.method == 'POST':
@@ -281,24 +280,29 @@ def recuperarContraseña():
             user = cur.fetchone()
 
             if user:
-                token = generate_token()
-                expiration = datetime.now() + timedelta(hours=1)
-                cur.execute('INSERT INTO PasswordReset (email, token, expiration) VALUES (%s, %s, %s)', (email, token, expiration))
-                connection.commit()
+                cur.execute('SELECT requested_at FROM PasswordReset WHERE email = %s ORDER BY requested_at DESC LIMIT 1', (email,))
+                last_request = cur.fetchone()
                 
-                send_email(email, 0, token)
-                flash('An email has been sent with instructions to reset your password.', 'success')
+                if last_request and datetime.now() - last_request[0] < timedelta(hours=24):
+                    flash('You can only request a password reset once every 24 hours.', 'danger')
+                else:
+                    token = generate_token()
+                    expiration = datetime.now() + timedelta(hours=1)
+                    requested_at = datetime.now()
+                    cur.execute('INSERT INTO PasswordReset (email, token, expiration, requested_at) VALUES (%s, %s, %s, %s)', (email, token, expiration, requested_at))
+                    connection.commit()
+                    
+                    send_email(email, 0, token)
+                    flash('An email has been sent with instructions to reset your password.', 'success')
             else:
                 flash('Email address not found.', 'danger')
         except Exception as e:
-            
             flash(str(e), 'danger')
         finally:
             cur.close()
             connection.close()
 
     return render_template('recuperarContrasena.html')
-
 
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
@@ -318,7 +322,7 @@ def reset_password():
             connection = mysql.connect(**config)
             cur = connection.cursor()
             
-            cur.execute('SELECT email FROM PasswordReset WHERE token = %s AND expiration > %s', (token, datetime.now()))
+            cur.execute('SELECT email FROM PasswordReset WHERE token = %s AND expiration > %s AND used = FALSE', (token, datetime.now()))
             result = cur.fetchone()
 
             if result:
@@ -336,8 +340,8 @@ def reset_password():
                     # Insert the new password into PasswordHistory
                     cur.execute('INSERT INTO PasswordHistory (email, hashed_password, change_date) VALUES (%s, %s, %s)', (email, hashed_new_password, datetime.now()))
                     
-                    # Delete the token
-                    cur.execute('DELETE FROM PasswordReset WHERE token = %s', (token,))
+                    # Mark the token as used
+                    cur.execute('UPDATE PasswordReset SET used = TRUE WHERE token = %s', (token,))
                     connection.commit()
                     
                     flash('Your password has been reset successfully.', 'success')
@@ -353,6 +357,7 @@ def reset_password():
     
     token = request.args.get('token')
     return render_template('reset_password.html', token=token)
+
 
 
 
