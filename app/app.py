@@ -261,6 +261,39 @@ def modificarUsuario():
 def generate_token():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=50))
 
+@app.route('/verificar_email', methods=['GET'])
+def verificar_email():
+    token = request.args.get('token')
+    email = verificar_token(token)
+    
+    if email:
+        try:
+            config = {
+                'user': 'root',
+                'password': 'rootasdeg2324',
+                'host': 'db',
+                'port': '3306',
+                'database': 'usuarios'
+            }
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
+            cur.execute('UPDATE Cliente SET email_verificado = TRUE WHERE email = %s', (email,))
+            connection.commit()
+            cur.close()
+            connection.close()
+
+            send_email(email, 1)
+            
+            return render_template('verificacion_correcta.html')
+        except Exception as e:
+            flash(f'Error al verificar el correo: {str(e)}', 'error')
+            return redirect(url_for('login'))
+    else:
+        flash('Enlace de verificación inválido o expirado', 'error')
+        return redirect(url_for('registro'))
+
+
+
 @app.route('/recuperarContraseña', methods=['GET', 'POST'])
 def recuperarContraseña():
     if request.method == 'POST':
@@ -359,6 +392,7 @@ def reset_password():
     token = request.args.get('token')
     return render_template('reset_password.html', token=token)
 
+
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'POST':
@@ -392,40 +426,36 @@ def registro():
 
             hashed_password = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
 
-            # Insertar datos del nuevo cliente
-            cur.execute('INSERT INTO Cliente (nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (nombre, usuario, email, hashed_password, peso, altura, genero, actividad, fechaNacimiento))
+            cur.execute('INSERT INTO Cliente (nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', 
+                        (nombre, usuario, email, hashed_password, peso, altura, genero, actividad, fechaNacimiento))
             connection.commit()
 
-            # Obtener el id_cliente del nuevo cliente
             cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
             cliente_id = cur.fetchone()[0]
 
             if cliente_id:
-                # Insertar registros en la tabla consume para todos los nutrientes con cantidad 0
                 cur.execute('INSERT INTO consume (id_cliente, id_nutriente, fecha_consumo, cantidad) SELECT %s, n.id_nutriente, CURDATE(), 0 FROM Nutriente n', (cliente_id,))
                 connection.commit()
-
-                # Establecer un objetivo de 2000 para todos los nutrientes para el nuevo cliente
                 cur.execute('INSERT INTO tiene_objetivo (id_cliente, id_nutriente, cantidad) SELECT %s, id_nutriente, 2000 FROM Nutriente', (cliente_id,))
                 connection.commit()
-
-                # Insertar registro en la tabla PasswordHistory
                 cur.execute('INSERT INTO PasswordHistory (id_cliente, hashed_password, change_date) VALUES (%s, %s, NOW())', (cliente_id, hashed_password))
                 connection.commit()
 
                 cur.close()
                 connection.close()
 
-                send_email(email, 1, '')
+                token = generar_token(email)
+                send_email(email, 2, token, nombre)
 
-                flash('Usuario registrado correctamente', 'success')
+                flash('Usuario registrado correctamente. Por favor verifica tu correo electrónico.', 'success')
                 return redirect(url_for('login'))
 
         except Exception as e:
-            flash('Error al registrar el usuario', 'error')
+            flash(f'Error al registrar el usuario: {str(e)}', 'error')
             return redirect(url_for('registro'))
 
     return render_template('registro.html')
+
 
 
 @app.route('/logout')
@@ -1215,10 +1245,18 @@ def generar_contraseña():
     return ''.join(choice(caracteres) for _ in range(longitud))
 
 def generar_token(correo):
-    token = serializer.dumps(correo)
+    token = serializer.dumps(correo, salt=app.secret_key)
     return token
 
-def send_email(email_receiver, opcion, token):
+# Verificar token
+def verificar_token(token, expiration=3600):
+    try:
+        email = serializer.loads(token, salt=app.secret_key, max_age=expiration)
+    except:
+        return False
+    return email
+
+def send_email(email_receiver, opcion, token=None, nombre=None):
     password = 'rzxz jhtf lbxf tqus'
     email_sender = 'veganmaniiaa@gmail.com'
     if opcion == 0:
@@ -1228,7 +1266,8 @@ def send_email(email_receiver, opcion, token):
         subject = "Bienvenido a VeganMania"
         message = render_template('mails/welcomeMail.html')
     else:
-        return
+        subject = "Verificación de Cuenta"
+        message = render_template('mails/verificarMail.html', link=f'http://localhost:5000/verificar_email?token={token}', nombre=nombre)
 
     msg = MIMEMultipart()
     msg['From'] = email_sender
