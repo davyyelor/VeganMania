@@ -9,6 +9,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/util.css') }}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/main.css') }}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
 </head>
 <body>    
     <div class="limiter">
@@ -48,17 +50,6 @@
                             Iniciar Sesión
                         </button>
                     </div>
-                    <div>
-                        {% with messages = get_flashed_messages() %}
-                            {% if messages %}
-                                <ul>
-                                    {% for message in messages %}
-                                        <li>{{ message }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        {% endwith %}
-                    </div>
 
                     <div class="flex-col-c p-t-130 p-b-40">
                         <span class="txt1 p-b-9">
@@ -70,10 +61,42 @@
                     </div>
                 </form>
             </div>
+
+            <div class="modal fade" id="verificationModal" tabindex="-1" role="dialog" aria-labelledby="verificationModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="verificationModalLabel">Verificación de Cuenta</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Por favor, verifica tu correo electrónico antes de iniciar sesión.
+                            <br>¿No lo ves? Revisa tu carpeta de spam por si acaso.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
-    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var verificacion = "{{ verificacion }}";
+            if (verificacion === "pendiente") {
+                $('#verificationModal').modal('show');
+            }
+        });
+    </script>
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
 </body>

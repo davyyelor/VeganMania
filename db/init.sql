@@ -120,11 +120,11 @@ CREATE TABLE IF NOT EXISTS tiene_objetivo (
 );
 
 -- Insertar datos de ejemplo en Cliente
-INSERT INTO Cliente (nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento)
+INSERT INTO Cliente (nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento, email_verificado)
 VALUES
-  ('Kepa', 'kepab', 'kepa@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 70.5, 180.0, 'Hombre', 'Sedentario', '1990-05-15'),
-  ('Ander', 'andere', 'ander@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20'),
-  ('David', 'davidd', 'davy.elorza@gmail.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20');
+  ('Kepa', 'kepab', 'kepa@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 70.5, 180.0, 'Hombre', 'Sedentario', '1990-05-15', TRUE),
+  ('Ander', 'andere', 'ander@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20', TRUE),
+  ('David', 'davidd', 'davy.elorza@gmail.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20', TRUE);
 
 -- Insertar nutrientes con categorías
 INSERT INTO Nutriente (nombreNutriente, descripcion, unidad, categoria) VALUES

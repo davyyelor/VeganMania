@@ -48,6 +48,7 @@ def index():
     session.pop('email', None)
     return render_template('index.html')
 
+
 @app.route('/eliminarCuenta', methods=['POST'])
 def eliminarCuenta():
     if 'email' in session:
@@ -74,8 +75,28 @@ def eliminarCuenta():
                 cur.execute('DELETE FROM consume WHERE id_cliente = %s', (cliente_id,))
                 connection.commit()
 
-                # Eliminar los registros asociados al consumo
+                # Eliminar los registros asociados a objetivos
                 cur.execute('DELETE FROM tiene_objetivo WHERE id_cliente = %s', (cliente_id,))
+                connection.commit()
+
+                # Eliminar las comidas del cliente
+                cur.execute('DELETE FROM Comidas WHERE id_cliente = %s', (cliente_id,))
+                connection.commit()
+
+                # Eliminar los alimentos ingeridos por el cliente
+                cur.execute('DELETE FROM Alimentos WHERE id_cliente = %s', (cliente_id,))
+                connection.commit()
+
+                # Eliminar las alergias del cliente
+                cur.execute('DELETE FROM Alergias WHERE id_cliente = %s', (cliente_id,))
+                connection.commit()
+
+                # Eliminar el historial de contraseñas del cliente
+                cur.execute('DELETE FROM HistorialContraseñas WHERE id_cliente = %s', (cliente_id,))
+                connection.commit()
+
+                # Eliminar el historial de resets del cliente
+                cur.execute('DELETE FROM HistorialResets WHERE id_cliente = %s', (cliente_id,))
                 connection.commit()
 
                 # Eliminar la cuenta de usuario
@@ -98,6 +119,7 @@ def eliminarCuenta():
 
     else:
         return redirect(url_for('modificarUsuario'))
+
 
 @app.route('/modificarAlergenos', methods=['GET', 'POST'])
 def modificarAlergenos():
@@ -456,14 +478,11 @@ def registro():
 
     return render_template('registro.html')
 
-
-
 @app.route('/logout')
 def logout():
     session.pop('email', None)
     return redirect(url_for('index'))
 
-        
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -481,23 +500,32 @@ def login():
             connection = mysql.connect(**config)
             cur = connection.cursor()
             cn = hashAPI.hashear(contrasena)
-            cur.execute('SELECT id_cliente, contrasena FROM Cliente WHERE email = %s AND contrasena = %s', (email, cn))
+            cur.execute('SELECT id_cliente, contrasena, email_verificado FROM Cliente WHERE email = %s AND contrasena = %s', (email, cn))
             user = cur.fetchone()
 
             if user and user[1] == cn:
                 session['email'] = email
 
-                cur.close()
-                connection.close()
-                return redirect(url_for('inicioUsu'))
+                if user[2] == 0:
+                    cur.close()
+                    connection.close()
+                    flash('Por favor, verifica tu correo electrónico antes de iniciar sesión.')
+                    return redirect(url_for('login', verificacion='pendiente'))
+                else:
+                    cur.close()
+                    connection.close()
+                    return redirect(url_for('inicioUsu'))
 
             else:
+                cur.close()
+                connection.close()
                 return redirect(url_for('login'))
 
         except Exception as e:
             return redirect(url_for('login'))
 
-    return render_template('login.html')
+    return render_template('login.html', verificacion=request.args.get('verificacion'))
+
 
 
 
@@ -836,11 +864,17 @@ def infoComida():
     
 @app.route('/blog', methods=['GET'])
 def articulos():
-    return render_template('blog.html')
+    if 'email' in session:
+        return render_template('blog.html')
+    else:
+        return render_template('index.html')
 
 @app.route('/sobreNosotros', methods=['GET'])
 def sobreNosotros():
-    return render_template('sobreNosotros.html')
+    if 'email' in session:
+        return render_template('sobreNosotros.html')
+    else:
+        return render_template('index.html')
 
 @app.route('/verAlimento/<int:id_alimento>', methods=['GET'])
 def verAlimento(id_alimento):
@@ -939,6 +973,7 @@ def convertir_tiempo_a_minutos(tiempo_str):
     elif 'm' in tiempo_str:
         tiempo_minutos += int(tiempo_str.replace('m', '').strip())
     return tiempo_minutos
+
 @app.route('/recetas', methods=['GET', 'POST'])
 def recetas():
     if 'email' in session:
