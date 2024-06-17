@@ -6,33 +6,14 @@
         <h2>Filtrar Recetas</h2>
         <form action="{{ url_for('recetas') }}" method="post">
             <div>
-                <label for="categoria">Categoría:</label>
-                <div id="categoria">
-                    <label class="checkbox-label">Aperitivos y tapas<input type="checkbox" name="categoria" value="Recetas de Aperitivos y tapas" {% if 'Recetas de Aperitivos y tapas' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Pan y bollería<input type="checkbox" name="categoria" value="Recetas de Pan y bollería" {% if 'Recetas de Pan y bollería' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Carne<input type="checkbox" name="categoria" value="Recetas de Carne" {% if 'Recetas de Carne' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Aves y caza<input type="checkbox" name="categoria" value="Recetas de Aves y caza" {% if 'Recetas de Aves y caza' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Ensaladas<input type="checkbox" name="categoria" value="Recetas de Ensaladas" {% if 'Recetas de Ensaladas' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Cócteles y bebidas<input type="checkbox" name="categoria" value="Cócteles y bebidas" {% if 'Cócteles y bebidas' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Huevos y lácteos<input type="checkbox" name="categoria" value="Recetas de Huevos y lácteos" {% if 'Recetas de Huevos y lácteos' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Mariscos<input type="checkbox" name="categoria" value="Recetas de Mariscos" {% if 'Recetas de Mariscos' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Arroces y cereales<input type="checkbox" name="categoria" value="Recetas de Arroces y cereales" {% if 'Recetas de Arroces y cereales' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Legumbres<input type="checkbox" name="categoria" value="Recetas de Legumbres" {% if 'Recetas de Legumbres' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Postres<input type="checkbox" name="categoria" value="Recetas de Postres" {% if 'Recetas de Postres' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Guisos y Potajes<input type="checkbox" name="categoria" value="Recetas de Guisos y Potajes" {% if 'Recetas de Guisos y Potajes' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Consejos de cocina<input type="checkbox" name="categoria" value="Consejos de cocina" {% if 'Consejos de cocina' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Pasta<input type="checkbox" name="categoria" value="Recetas de Pasta" {% if 'Recetas de Pasta' in categoria %}checked{% endif %}></label><br>
-                </div>
-            </div>
-            <div>
                 <label for="tiempo_min">Tiempo mínimo:</label>
                 <input type="range" id="tiempo_min" name="tiempo_min" min="0" max="480" value="{{ tiempo_min|default(0) }}" oninput="this.nextElementSibling.value = this.value">
                 <output>{{ tiempo_min|default(0) }}</output> min
             </div>
             <div>
                 <label for="tiempo_max">Tiempo máximo:</label>
-                <input type="range" id="tiempo_max" name="tiempo_max" min="0" max="480" value="{{ tiempo_max|default(240) }}" oninput="this.nextElementSibling.value = this.value">
-                <output>{{ tiempo_max|default(240) }}</output> min
+                <input type="range" id="tiempo_max" name="tiempo_max" min="0" max="480" value="{{ tiempo_max|default(480) }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ tiempo_max|default(480) }}</output> min
             </div>
             <div>
                 <label for="dificultad">Dificultad:</label>
@@ -115,7 +96,6 @@
                 </ul>
                 {% endif %}
             </div>
-            
         </div>
         {% else %}
         <p>No se encontraron recetas con los filtros seleccionados.</p>

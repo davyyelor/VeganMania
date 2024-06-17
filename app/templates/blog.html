@@ -25,7 +25,7 @@
                     <img class="card-img-top fixed-img-size" src="static/images/blog_macroNutrientes.jpg" alt="Imagen de ejemplo">
                     <div class="card-body">
                         <h4 class="card-title">Macronutrientes: qué son y cómo entenderlos</h4>
-                        <p class="card-text">os macronutrientes son los nutrientes que el cuerpo humano necesita en grandes cantidades para funcionar correctamente y proporcionar energía.</p>
+                        <p class="card-text">Los macronutrientes son los nutrientes que el cuerpo humano necesita en grandes cantidades para funcionar correctamente y proporcionar energía.</p>
                     </div>
                     <div class="card-footer">
                         <a href="#" class="btn btn-primary read-more" data-id="1">Leer más</a>
@@ -448,7 +448,10 @@ document.querySelectorAll('.read-more').forEach(button => {
 
 document.getElementById('back-button').addEventListener('click', function() {
     document.getElementById('article-detail').style.display = 'none';
-    document.getElementById('articles').style.display = 'flex';
+    document.getElementById('articles').style.display = 'block';
+    document.querySelectorAll('.article-item').forEach(article => {
+        article.style.display = 'block';
+    });
     initializeSearchForm();
 });
 

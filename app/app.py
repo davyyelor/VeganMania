@@ -641,10 +641,10 @@ def inicioUsu():
 
 
 
-    
 
 
-    
+
+
 @app.route('/añadirComida', methods=['GET', 'POST'])
 def añadirComida():
     if 'email' in session:
@@ -676,16 +676,17 @@ def añadirComida():
                     cur.close()
                     connection.close()
 
-                    return redirect(url_for('añadirComida'))
+                    return redirect(url_for('añadirComida', success=True))
                 else:
-                    return redirect(url_for('añadirComida'))
+                    return redirect(url_for('añadirComida', success=False))
             except Exception as e:
-                return redirect(url_for('añadirComida'))
+                return redirect(url_for('añadirComida', success=False))
                 
         else:
             return render_template('añadirComida.html')
     else:
         return redirect(url_for('index'))
+
     
 
 
