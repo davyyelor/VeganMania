@@ -20,6 +20,28 @@
                 <option value="dificil" {% if dificultad == 'dificil' %}selected{% endif %}>Difícil</option>
             </select>
             <br>
+            <label for="categoria">Categoría:</label>
+            <select id="categoria" name="categoria">
+                <option value="" {% if not categoria %}selected{% endif %}>Todas</option>
+                <option value="Cócteles y bebidas" {% if categoria == 'Cócteles y bebidas' %}selected{% endif %}>Cócteles y bebidas</option>
+                <option value="Recetas de Verduras" {% if categoria == 'Recetas de Verduras' %}selected{% endif %}>Recetas de Verduras</option>
+                <option value="Recetas de Arroces y cereales" {% if categoria == 'Recetas de Arroces y cereales' %}selected{% endif %}>Recetas de Arroces y cereales</option>
+                <option value="Recetas de Sopas y cremas" {% if categoria == 'Recetas de Sopas y cremas' %}selected{% endif %}>Recetas de Sopas y cremas</option>
+                <option value="Recetas de Mariscos" {% if categoria == 'Recetas de Mariscos' %}selected{% endif %}>Recetas de Mariscos</option>
+                <option value="Recetas de Postres" {% if categoria == 'Recetas de Postres' %}selected{% endif %}>Recetas de Postres</option>
+                <option value="Recetas de Huevos y lácteos" {% if categoria == 'Recetas de Huevos y lácteos' %}selected{% endif %}>Recetas de Huevos y lácteos</option>
+                <option value="Recetas de Carne" {% if categoria == 'Recetas de Carne' %}selected{% endif %}>Recetas de Carne</option>
+                <option value="Recetas de Aperitivos y tapas" {% if categoria == 'Recetas de Aperitivos y tapas' %}selected{% endif %}>Recetas de Aperitivos y tapas</option>
+                <option value="Recetas de Aves y caza" {% if categoria == 'Recetas de Aves y caza' %}selected{% endif %}>Recetas de Aves y caza</option>
+                <option value="Recetas de Pan y bollería" {% if categoria == 'Recetas de Pan y bollería' %}selected{% endif %}>Recetas de Pan y bollería</option>
+                <option value="Recetas de Guisos y Potajes" {% if categoria == 'Recetas de Guisos y Potajes' %}selected{% endif %}>Recetas de Guisos y Potajes</option>
+                <option value="Recetas de Legumbres" {% if categoria == 'Recetas de Legumbres' %}selected{% endif %}>Recetas de Legumbres</option>
+                <option value="Recetas de Ensaladas" {% if categoria == 'Recetas de Ensaladas' %}selected{% endif %}>Recetas de Ensaladas</option>
+                <option value="Recetas de Salsas" {% if categoria == 'Recetas de Salsas' %}selected{% endif %}>Recetas de Salsas</option>
+                <option value="Consejos de cocina" {% if categoria == 'Consejos de cocina' %}selected{% endif %}>Consejos de cocina</option>
+                <option value="Recetas de Pasta" {% if categoria == 'Recetas de Pasta' %}selected{% endif %}>Recetas de Pasta</option>
+            </select>
+            <br>
             <button type="submit">Filtrar</button>
         </form>
     </aside>
@@ -65,21 +87,21 @@
                 {% if total_paginas > 1 %}
                 <ul class="pagination">
                     {% if pagina_actual > 1 %}
-                    <li><a class="prev" href="{{ url_for('recetas', pagina=pagina_actual-1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad) }}">Anterior</a></li>
+                    <li><a class="prev" href="{{ url_for('recetas', pagina=pagina_actual-1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria) }}">Anterior</a></li>
                     {% endif %}
                     {% if pagina_actual > 3 %}
-                    <li><a href="{{ url_for('recetas', pagina=1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad) }}">1</a></li>
+                    <li><a href="{{ url_for('recetas', pagina=1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria) }}">1</a></li>
                     <li><span class="dots">...</span></li>
                     {% endif %}
                     {% for pagina in range(max(1, pagina_actual-2), min(total_paginas, pagina_actual+2)+1) %}
-                    <li><a href="{{ url_for('recetas', pagina=pagina, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad) }}" class="{% if pagina == pagina_actual %}active{% endif %}">{{ pagina }}</a></li>
+                    <li><a href="{{ url_for('recetas', pagina=pagina, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria) }}" class="{% if pagina == pagina_actual %}active{% endif %}">{{ pagina }}</a></li>
                     {% endfor %}
                     {% if pagina_actual < total_paginas - 2 %}
                     <li><span class="dots">...</span></li>
-                    <li><a href="{{ url_for('recetas', pagina=total_paginas, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad) }}">{{ total_paginas }}</a></li>
+                    <li><a href="{{ url_for('recetas', pagina=total_paginas, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria) }}">{{ total_paginas }}</a></li>
                     {% endif %}
                     {% if pagina_actual < total_paginas %}
-                    <li><a class="next" href="{{ url_for('recetas', pagina=pagina_actual+1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad) }}">Siguiente</a></li>
+                    <li><a class="next" href="{{ url_for('recetas', pagina=pagina_actual+1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria) }}">Siguiente</a></li>
                     {% endif %}
                 </ul>
                 {% endif %}
@@ -90,6 +112,7 @@
         {% endif %}
     </main>
 </div>
+
 
 <style>
     .pagination a.active {

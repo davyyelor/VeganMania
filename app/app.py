@@ -999,6 +999,7 @@ def recetas():
         tiempo_min = int(request.form.get('tiempo_min', 0)) if request.method == 'POST' else int(request.args.get('tiempo_min', 0))
         tiempo_max = int(request.form.get('tiempo_max', 480)) if request.method == 'POST' else int(request.args.get('tiempo_max', 480))
         dificultad = request.form.get('dificultad') if request.method == 'POST' else request.args.get('dificultad')
+        categoria = request.form.get('categoria') if request.method == 'POST' else request.args.get('categoria')
 
         query_base = "SELECT * FROM recetas WHERE images IS NOT NULL AND images != ''"
         query_count_base = "SELECT COUNT(*) FROM recetas WHERE images IS NOT NULL AND images != ''"
@@ -1017,6 +1018,10 @@ def recetas():
                 filters.append("dificultad = 'media'")
             elif dificultad == 'dificil':
                 filters.append("(dificultad = 'alta' OR dificultad = 'muy alta')")
+
+        if categoria:
+            filters.append("categoria = %s")
+            params.append(categoria)
 
         if filters:
             filter_clause = " AND " + " AND ".join(filters)
@@ -1049,13 +1054,14 @@ def recetas():
                         'ingredientes': receta[12], 'imagen': receta[13]} for receta in recetas_paginadas]
             cur.close()
             connection.close()
-            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad)
+            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria)
         else:
             cur.close()
             connection.close()
-            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad)
+            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria)
     else:
         return redirect(url_for('index'))
+
 
 
 
