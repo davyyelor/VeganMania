@@ -962,6 +962,8 @@ def verComida(id_comida):
         return redirect(url_for('index'))
 
 import math
+
+
 def convertir_tiempo_a_minutos(tiempo_str):
     tiempo_minutos = 0
     if 'h' in tiempo_str:
@@ -972,6 +974,7 @@ def convertir_tiempo_a_minutos(tiempo_str):
     elif 'm' in tiempo_str:
         tiempo_minutos += int(tiempo_str.replace('m', '').strip())
     return tiempo_minutos
+
 
 @app.route('/recetas', methods=['GET', 'POST'])
 def recetas():
@@ -992,36 +995,13 @@ def recetas():
         pagina_actual = request.args.get('pagina', 1, type=int)
         offset = (pagina_actual - 1) * recetas_por_pagina
 
-        ingredientes = categoria = tiempo_min = tiempo_max = tipo = dificultad = valoracion = None
-        if request.method == 'POST':
-            ingredientes = request.form.get('ingredientes')
-            categoria = request.form.getlist('categoria')
-            tiempo_min = request.form.get('tiempo_min', type=int)
-            tiempo_max = request.form.get('tiempo_max', type=int)
-            tipo = request.form.get('tipo')
-            dificultad = request.form.get('dificultad')
-            valoracion = request.form.get('valoracion', type=float)
-        else:
-            if 'ingredientes' in request.args:
-                ingredientes = request.args.get('ingredientes')
-            if 'categoria' in request.args:
-                categoria = request.args.getlist('categoria')
-            if 'tiempo_min' in request.args:
-                tiempo_min = request.args.get('tiempo_min', type=int)
-            if 'tiempo_max' in request.args:
-                tiempo_max = request.args.get('tiempo_max', type=int)
-            if 'tipo' in request.args:
-                tipo = request.args.get('tipo')
-            if 'dificultad' in request.args:
-                dificultad = request.args.get('dificultad')
-            if 'valoracion' in request.args:
-                valoracion = request.args.get('valoracion', type=float)
+        ingredientes = request.form.get('ingredientes') if request.method == 'POST' else request.args.get('ingredientes')
+        tiempo_min = int(request.form.get('tiempo_min', 0)) if request.method == 'POST' else int(request.args.get('tiempo_min', 0))
+        tiempo_max = int(request.form.get('tiempo_max', 480)) if request.method == 'POST' else int(request.args.get('tiempo_max', 480))
+        dificultad = request.form.get('dificultad') if request.method == 'POST' else request.args.get('dificultad')
 
-        if categoria is None:
-            categoria = []
-
-        query_count = "SELECT COUNT(*) FROM recetas WHERE images IS NOT NULL AND images != ''"
-        query_recetas = "SELECT * FROM recetas WHERE images IS NOT NULL AND images != ''"
+        query_base = "SELECT * FROM recetas WHERE images IS NOT NULL AND images != ''"
+        query_count_base = "SELECT COUNT(*) FROM recetas WHERE images IS NOT NULL AND images != ''"
 
         filters = []
         params = []
@@ -1029,62 +1009,51 @@ def recetas():
         if ingredientes:
             filters.append("nombre LIKE %s")
             params.append('%' + ingredientes + '%')
-        if categoria:
-            filters.append("categoria IN (%s)" % ','.join(['%s']*len(categoria)))
-            params.extend(categoria)
-        if tiempo_min is not None and tiempo_max is not None:
-            filters.append("""
-                (
-                    tiempo LIKE %s AND CAST(SUBSTRING_INDEX(tiempo, 'h', 1) AS UNSIGNED) * 60 + CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(tiempo, ' ', -1), 'm', 1) AS UNSIGNED) BETWEEN %s AND %s
-                )
-                OR 
-                (
-                    tiempo LIKE %s AND CAST(SUBSTRING_INDEX(tiempo, 'm', 1) AS UNSIGNED) BETWEEN %s AND %s
-                )
-            """)
-            params.extend(['%h%', tiempo_min, tiempo_max, '%m%', tiempo_min, tiempo_max])
+
         if dificultad:
-            filters.append("dificultad = %s")
-            params.append(dificultad)
-        if valoracion:
-            filters.append("valoracion >= %s")
-            params.append(valoracion)
+            if dificultad == 'facil':
+                filters.append("(dificultad = 'muy baja' OR dificultad = 'baja')")
+            elif dificultad == 'media':
+                filters.append("dificultad = 'media'")
+            elif dificultad == 'dificil':
+                filters.append("(dificultad = 'alta' OR dificultad = 'muy alta')")
 
         if filters:
             filter_clause = " AND " + " AND ".join(filters)
-            query_count += filter_clause
-            query_recetas += filter_clause
+            query_base += filter_clause
+            query_count_base += filter_clause
 
-        params_count = params.copy()
-        params_count.extend([recetas_por_pagina, offset])
+        # Ordenar los resultados por fecha de modificación más reciente
+        query_base += " ORDER BY fecha_modificacion DESC"
 
-        query_recetas += " LIMIT %s OFFSET %s"
-        params.extend([recetas_por_pagina, offset])
-
-        print(f"query_count: {query_count}, params: {params}")
-        print(f"query_recetas: {query_recetas}, params: {params}")
-
-        cur.execute(query_count, tuple(params[:len(params_count) - 2]))
+        cur.execute(query_count_base, tuple(params))
         total_recetas = cur.fetchone()[0]
 
-        cur.execute(query_recetas, tuple(params))
+        cur.execute(query_base, tuple(params))
         recetas = cur.fetchall()
 
-        total_paginas = math.ceil(total_recetas / recetas_por_pagina)
+        filtered_recetas = []
+        for receta in recetas:
+            tiempo_minutos = convertir_tiempo_a_minutos(receta[6])  # Suponiendo que el tiempo está en la columna 6
+            if tiempo_min <= tiempo_minutos <= tiempo_max:
+                filtered_recetas.append(receta)
 
-        if recetas:
-            recetas = [{'id_receta': receta[0], 'categoria': receta[1], 'nombre': receta[2], 
-                        'valoracion': receta[3], 'dificultad': receta[4], 'num_comensales': receta[5], 
-                        'tiempo': receta[6], 'tipo': receta[7], 'link_receta': receta[8], 
-                        'num_comentarios': receta[9], 'num_reviews': receta[10], 'fecha_modificacion': receta[11], 
-                        'ingredientes': receta[12], 'imagen': receta[13]} for receta in recetas]
+        total_paginas = math.ceil(len(filtered_recetas) / recetas_por_pagina)
+        recetas_paginadas = filtered_recetas[offset:offset + recetas_por_pagina]
+
+        if recetas_paginadas:
+            recetas = [{'id_receta': receta[0], 'categoria': receta[1], 'nombre': receta[2],
+                        'valoracion': receta[3], 'dificultad': receta[4], 'num_comensales': receta[5],
+                        'tiempo': receta[6], 'tipo': receta[7], 'link_receta': receta[8],
+                        'num_comentarios': receta[9], 'num_reviews': receta[10], 'fecha_modificacion': receta[11],
+                        'ingredientes': receta[12], 'imagen': receta[13]} for receta in recetas_paginadas]
             cur.close()
             connection.close()
-            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion)
+            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad)
         else:
             cur.close()
             connection.close()
-            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion)
+            return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad)
     else:
         return redirect(url_for('index'))
 

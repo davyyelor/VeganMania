@@ -5,45 +5,33 @@
     <aside>
         <h2>Filtrar Recetas</h2>
         <form action="{{ url_for('recetas') }}" method="post">
-            <div>
-                <label for="tiempo_min">Tiempo mínimo:</label>
-                <input type="range" id="tiempo_min" name="tiempo_min" min="0" max="480" value="{{ tiempo_min|default(0) }}" oninput="this.nextElementSibling.value = this.value">
-                <output>{{ tiempo_min|default(0) }}</output> min
-            </div>
-            <div>
-                <label for="tiempo_max">Tiempo máximo:</label>
-                <input type="range" id="tiempo_max" name="tiempo_max" min="0" max="480" value="{{ tiempo_max|default(480) }}" oninput="this.nextElementSibling.value = this.value">
-                <output>{{ tiempo_max|default(480) }}</output> min
-            </div>
-            <div>
-                <label for="dificultad">Dificultad:</label>
-                <select id="dificultad" name="dificultad">
-                    <option value="">Todas</option>
-                    <option value="Fácil" {% if dificultad == 'Fácil' %}selected{% endif %}>Fácil</option>
-                    <option value="Media" {% if dificultad == 'Media' %}selected{% endif %}>Media</option>
-                    <option value="Difícil" {% if dificultad == 'Difícil' %}selected{% endif %}>Difícil</option>
-                </select>
-            </div>
-            <div>
-                <label for="valoracion">Valoración mínima:</label>
-                <input type="range" id="valoracion" name="valoracion" min="0" max="5" value="{{ valoracion|default(0) }}" step="0.1" oninput="this.nextElementSibling.value = this.value">
-                <output>{{ valoracion|default(0) }}</output>
-            </div>
+            <label for="tiempo_min">Tiempo mínimo (min):</label>
+            <input type="range" id="tiempo_min" name="tiempo_min" min="0" max="480" value="{{ tiempo_min }}" oninput="this.nextElementSibling.value = this.value">
+            <output>{{ tiempo_min }}</output>
+            <br>
+            <label for="tiempo_max">Tiempo máximo (min):</label>
+            <input type="range" id="tiempo_max" name="tiempo_max" min="0" max="480" value="{{ tiempo_max }}" oninput="this.nextElementSibling.value = this.value">
+            <output>{{ tiempo_max }}</output>
+            <br>
+            <label for="dificultad">Dificultad:</label>
+            <select id="dificultad" name="dificultad">
+                <option value="facil" {% if dificultad == 'facil' %}selected{% endif %}>Fácil</option>
+                <option value="media" {% if dificultad == 'media' %}selected{% endif %}>Media</option>
+                <option value="dificil" {% if dificultad == 'dificil' %}selected{% endif %}>Difícil</option>
+            </select>
+            <br>
             <button type="submit">Filtrar</button>
         </form>
     </aside>
-
     <main>
         <h1 class="title">Buscar Recetas</h1>
         <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
-            <input type="text" name="ingredientes" placeholder="Buscar recetas por ingredientes">
+            <input type="text" name="ingredientes" placeholder="Buscar recetas por ingredientes" value="{{ ingredientes }}">
             <button type="submit">Buscar</button>
         </form>
-        
         {% for message in get_flashed_messages() %}
             <p>{{ message }}</p>
         {% endfor %}
-
         {% if recetas %}
         <h2 style="text-align: center;">Recetas encontradas:</h2>
         <div class="recipe-container">
@@ -77,21 +65,21 @@
                 {% if total_paginas > 1 %}
                 <ul class="pagination">
                     {% if pagina_actual > 1 %}
-                    <li><a class="prev" href="{{ url_for('recetas', pagina=pagina_actual-1, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion) }}">Anterior</a></li>
+                    <li><a class="prev" href="{{ url_for('recetas', pagina=pagina_actual-1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad) }}">Anterior</a></li>
                     {% endif %}
                     {% if pagina_actual > 3 %}
-                    <li><a href="{{ url_for('recetas', pagina=1, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion) }}">1</a></li>
+                    <li><a href="{{ url_for('recetas', pagina=1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad) }}">1</a></li>
                     <li><span class="dots">...</span></li>
                     {% endif %}
                     {% for pagina in range(max(1, pagina_actual-2), min(total_paginas, pagina_actual+2)+1) %}
-                    <li><a href="{{ url_for('recetas', pagina=pagina, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion) }}" class="{% if pagina == pagina_actual %}active{% endif %}">{{ pagina }}</a></li>
+                    <li><a href="{{ url_for('recetas', pagina=pagina, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad) }}" class="{% if pagina == pagina_actual %}active{% endif %}">{{ pagina }}</a></li>
                     {% endfor %}
                     {% if pagina_actual < total_paginas - 2 %}
                     <li><span class="dots">...</span></li>
-                    <li><a href="{{ url_for('recetas', pagina=total_paginas, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion) }}">{{ total_paginas }}</a></li>
+                    <li><a href="{{ url_for('recetas', pagina=total_paginas, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad) }}">{{ total_paginas }}</a></li>
                     {% endif %}
                     {% if pagina_actual < total_paginas %}
-                    <li><a class="next" href="{{ url_for('recetas', pagina=pagina_actual+1, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion) }}">Siguiente</a></li>
+                    <li><a class="next" href="{{ url_for('recetas', pagina=pagina_actual+1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad) }}">Siguiente</a></li>
                     {% endif %}
                 </ul>
                 {% endif %}
@@ -102,7 +90,37 @@
         {% endif %}
     </main>
 </div>
+
 <style>
+    .pagination a.active {
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+    }
+    .pagination a {
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #007bff;
+        transition: background-color 0.3s ease;
+    }
+    .pagination a:hover {
+        background-color: #007bff;
+        color: white;
+    }
+    .pagination li {
+        display: inline;
+        margin: 0 5px;
+    }
+    .pagination {
+        display: flex;
+        list-style-type: none;
+        padding: 0;
+    }
+    .pagination .dots {
+        padding: 8px 16px;
+    }
     .recetas {
         display: flex;
     }
@@ -179,7 +197,6 @@
     #volverBtn:hover {
         background-color: #4b9e3e;
     }
-
     .controls-container {
         display: flex;
         flex-direction: column;
@@ -245,6 +262,9 @@
         border: 1px solid #ccc;
         border-radius: 5px;
     }
+    aside form select {
+        margin-bottom: 15px; /* Added margin-bottom */
+    }
     aside form button {
         width: 100%;
         padding: 10px;
@@ -258,7 +278,6 @@
     aside form button:hover {
         background-color: #4b9e3e;
     }
-
     .checkbox-label {
         display: flex;
         justify-content: space-between;
@@ -269,7 +288,6 @@
         margin-left: 10px;
     }
 </style>
-
 
 <script>
     function showRecipeDetails(image) {
