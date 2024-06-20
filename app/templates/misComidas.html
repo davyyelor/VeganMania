@@ -7,22 +7,60 @@
             <h1 class="tuSeguimiento">Tus Comidas</h1>
 
             <div class="comidas-list">
-                {% if comidas %}
-                    {% for comida in comidas %}
-                    <article class="comida">
-                        <h2>{{ comida[2] }}</h2>
-                        <p><strong>Tipo:</strong> {{ comida[3] }}</p>
-                        <p><strong>Descripción:</strong> {{ comida[4] }}</p>
-                        <p><strong>Fecha:</strong> {{ comida[5] }}</p>
-                        <!-- Agregar botones -->
-                        <div class="botones-comida">
-                            <form action="{{ url_for('borrarComida', id_comida=comida[0]) }}" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-danger">Borrar Comida</button>
-                            </form>
-                            <a href="{{ url_for('verComida', id_comida=comida[0]) }}" class="btn btn-info">Ver Comida</a>
-                        </div>
-                    </article>
-                    {% endfor %}
+                {% if comidas_hoy or comidas_ultima_semana or comidas_anteriores %}
+                    {% if comidas_hoy %}
+                        <h2>Hoy</h2>
+                        {% for comida in comidas_hoy %}
+                        <article class="comida">
+                            <h3>{{ comida[2] }}</h3>
+                            <p><strong>Tipo:</strong> {{ comida[3] }}</p>
+                            <p><strong>Descripción:</strong> {{ comida[4] }}</p>
+                            <p><strong>Fecha:</strong> {{ comida[5] }}</p>
+                            <div class="botones-comida">
+                                <form action="{{ url_for('borrarComida', id_comida=comida[0]) }}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger">Borrar Comida</button>
+                                </form>
+                                <a href="{{ url_for('verComida', id_comida=comida[0]) }}" class="btn btn-info">Ver Comida</a>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if comidas_ultima_semana %}
+                        <h2>Últimos 7 Días</h2>
+                        {% for comida in comidas_ultima_semana %}
+                        <article class="comida">
+                            <h3>{{ comida[2] }}</h3>
+                            <p><strong>Tipo:</strong> {{ comida[3] }}</p>
+                            <p><strong>Descripción:</strong> {{ comida[4] }}</p>
+                            <p><strong>Fecha:</strong> {{ comida[5] }}</p>
+                            <div class="botones-comida">
+                                <form action="{{ url_for('borrarComida', id_comida=comida[0]) }}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger">Borrar Comida</button>
+                                </form>
+                                <a href="{{ url_for('verComida', id_comida=comida[0]) }}" class="btn btn-info">Ver Comida</a>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if comidas_anteriores %}
+                        <h2>Anteriores</h2>
+                        {% for comida in comidas_anteriores %}
+                        <article class="comida">
+                            <h3>{{ comida[2] }}</h3>
+                            <p><strong>Tipo:</strong> {{ comida[3] }}</p>
+                            <p><strong>Descripción:</strong> {{ comida[4] }}</p>
+                            <p><strong>Fecha:</strong> {{ comida[5] }}</p>
+                            <div class="botones-comida">
+                                <form action="{{ url_for('borrarComida', id_comida=comida[0]) }}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger">Borrar Comida</button>
+                                </form>
+                                <a href="{{ url_for('verComida', id_comida=comida[0]) }}" class="btn btn-info">Ver Comida</a>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    {% endif %}
                 {% else %}
                     <div class="comida">
                         <p>Todavía no has añadido ninguna comida. ¡Añade tu primera comida ahora!</p>

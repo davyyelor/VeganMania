@@ -1061,7 +1061,6 @@ def recetas():
 
 
 
-
 @app.route('/misComidas', methods=['GET'])
 def misComidas():
     if 'email' in session:
@@ -1086,13 +1085,26 @@ def misComidas():
             comidas = cur.fetchall()
             cur.close()
             connection.close()
-            return render_template('misComidas.html', comidas=comidas)
+            
+            # Agrupar las comidas por tiempo
+            from datetime import datetime, timedelta
+            hoy = datetime.today().date()
+            hace_7_dias = hoy - timedelta(days=7)
+
+            comidas_hoy = [comida for comida in comidas if comida[5] == hoy]
+            comidas_ultima_semana = [comida for comida in comidas if hace_7_dias <= comida[5] < hoy]
+            comidas_anteriores = [comida for comida in comidas if comida[5] < hace_7_dias]
+
+            return render_template('misComidas.html', comidas_hoy=comidas_hoy, comidas_ultima_semana=comidas_ultima_semana, comidas_anteriores=comidas_anteriores)
         else:
             cur.close()
             connection.close()
             return render_template('inicioUsu.html')
     else:
         return redirect(url_for('index'))
+
+
+
     
 
 @app.route('/borrarAlimento/<int:id_alimento>', methods=['POST'])
