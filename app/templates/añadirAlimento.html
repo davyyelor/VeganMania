@@ -1,6 +1,67 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+        display: none;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loader-text {
+        position: absolute;
+        top: 55%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+        font-size: 1.5em;
+        color: #3498db;
+        display: none;
+    }
+
+    .blurred {
+        filter: blur(5px);
+    }
+
+    .notification {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .error-message {
+        color: red;
+        margin-top: 10px;
+    }
+
+    .error-input {
+        border-color: red;
+    }
+</style>
+<div class="loader" id="loader"></div>
+<div class="loader-text" id="loaderText">Añadiendo alimento...</div>
+<div class="notification" id="toastNotification">Alimento añadido correctamente!</div>
+
 <section class="añadir-alimento">
     <h1>Añadir Alimento</h1>
     <form class="añadir-alimento-form" method="post" id="añadirForm" action="{{ url_for('añadirAlimento') }}">
@@ -39,42 +100,84 @@
         <div class="form-group">
             <button type="submit" id="btnAñadir">Añadir</button>
         </div>
-        <div class="notification" id="toastNotification" style="display: none;">
-            <div class="notification__body">
-                <img src="{{url_for('static', filename='images/icons/check-circle.svg')}}" alt="Success" class="notification__icon">
-                Alimento añadido! &#128640; 
-            </div>
-            <div class="notification__progress"></div>
-        </div>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for message in messages %}
-                        <div class="flash-message">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+        <div class="error-message" id="errorMessage"></div>
     </form>
 </section>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var añadirForm = document.getElementById('añadirForm');
+        var loader = document.getElementById('loader');
+        var loaderText = document.getElementById('loaderText');
+        var content = document.querySelector('.añadir-alimento');
         var toastNotification = document.getElementById('toastNotification');
-        var selectComida = document.getElementById('comida');
+        var errorMessage = document.getElementById('errorMessage');
 
-        selectComida.addEventListener('change', function() {
-            if (selectComida.value === 'añadir') {
-                window.location.href = "{{ url_for('añadirComida') }}";
+        añadirForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar el envío del formulario
+
+            var nombreAlimento = document.getElementById('nombreAlimento');
+            var descripcion = document.getElementById('descripcion');
+            var comida = document.getElementById('comida');
+            var cantidad = document.getElementById('cantidad');
+            var isValid = true;
+            var errorText = "";
+
+            // Reset previous errors
+            errorMessage.textContent = "";
+            nombreAlimento.classList.remove('error-input');
+            descripcion.classList.remove('error-input');
+            comida.classList.remove('error-input');
+            cantidad.classList.remove('error-input');
+
+            // Validate fields
+            if (!nombreAlimento.value.trim()) {
+                errorText += "El nombre del alimento es obligatorio. ";
+                nombreAlimento.classList.add('error-input');
+                isValid = false;
+            }
+            if (!descripcion.value.trim()) {
+                errorText += "La descripción es obligatoria. ";
+                descripcion.classList.add('error-input');
+                isValid = false;
+            }
+            if (!comida.value) {
+                errorText += "La comida es obligatoria. ";
+                comida.classList.add('error-input');
+                isValid = false;
+            }
+            if (!cantidad.value || cantidad.value <= 0) {
+                errorText += "La cantidad es obligatoria y debe ser un número positivo. ";
+                cantidad.classList.add('error-input');
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Mostrar el loader, el texto y desenfocar el fondo
+                loader.style.display = 'block';
+                loaderText.style.display = 'block';
+                content.classList.add('blurred');
+
+                setTimeout(function() {
+                    // Simular tiempo de carga y enviar el formulario
+                    añadirForm.submit();
+                }, 2000);
+            } else {
+                errorMessage.textContent = errorText;
             }
         });
 
-        añadirForm.addEventListener('submit', function(event) {
+        if (new URLSearchParams(window.location.search).get('success') === 'true') {
             toastNotification.style.display = 'block';
             setTimeout(function() {
                 toastNotification.style.display = 'none';
-            }, 5000); // Aumentar el tiempo para mostrar la notificación
-        });
+            }, 5000); // Mostrar la notificación por más tiempo
+        }
+
+        if (new URLSearchParams(window.location.search).get('success') === 'false') {
+            alert('Error al añadir el alimento. Inténtalo de nuevo.');
+        }
     });
 </script>
+
 {% endblock %}

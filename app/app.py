@@ -676,11 +676,11 @@ def añadirComida():
                     cur.close()
                     connection.close()
 
-                    return redirect(url_for('añadirComida', success=True))
+                    return redirect(url_for('añadirComida', success='true'))
                 else:
-                    return redirect(url_for('añadirComida', success=False))
+                    return redirect(url_for('añadirComida', success='false'))
             except Exception as e:
-                return redirect(url_for('añadirComida', success=False))
+                return redirect(url_for('añadirComida', success='false'))
                 
         else:
             return render_template('añadirComida.html')
@@ -693,7 +693,6 @@ def añadirComida():
 @app.route('/añadirAlimento', methods=['GET', 'POST'])
 def añadirAlimento():
     if 'email' in session:
-        
         if request.method == 'POST':
             try:
                 config = {
@@ -718,12 +717,11 @@ def añadirAlimento():
 
                 alimento = "100 gr de " + nombre_alimento
 
-                print("Buscando receta para:", alimento)
                 food = GoogleTranslator(source='auto', target='en').translate(alimento)
                 analisis_data = analisisNutricional(food)
                 analisis_data = pd.DataFrame(analisis_data)
                 if analisis_data.empty:
-                    return redirect(url_for('añadirAlimento'))
+                    return redirect(url_for('añadirAlimento', success='false'))
                 else:
                     # Insertar el alimento
                     insert_alimento_query = "INSERT INTO Alimento (nombreAlimento, descripcion) VALUES (%s, %s)"
@@ -778,7 +776,7 @@ def añadirAlimento():
                         if nutriente in analisis_data.index:
                             cantidad_nutriente = analisis_data.loc[nutriente, 'quantity']
                             unidad_nutriente = analisis_data.loc[nutriente, 'unit']
-                            cantidad = cantidad_nutriente*float(cantidadAlimento)/100
+                            cantidad = cantidad_nutriente * float(cantidadAlimento) / 100
 
                             # Obtener el id del nutriente
                             cur.execute("SELECT id_nutriente FROM Nutriente WHERE nombreNutriente = %s", (nombre,))
@@ -799,9 +797,9 @@ def añadirAlimento():
                     # Guardar los cambios en la base de datos
                     connection.commit()
 
-                    return redirect(url_for('añadirAlimento'))
+                    return redirect(url_for('añadirAlimento', success='true'))
             except Exception as e:
-                return redirect(url_for('añadirAlimento'))
+                return redirect(url_for('añadirAlimento', success='false'))
             finally:
                 cur.close()
                 connection.close()
