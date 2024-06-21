@@ -1000,6 +1000,7 @@ def recetas():
         tiempo_max = int(request.form.get('tiempo_max', 480)) if request.method == 'POST' else int(request.args.get('tiempo_max', 480))
         dificultad = request.form.get('dificultad') if request.method == 'POST' else request.args.get('dificultad')
         categoria = request.form.get('categoria') if request.method == 'POST' else request.args.get('categoria')
+        productos_de_temporada = request.form.get('productos_de_temporada') if request.method == 'POST' else request.args.get('productos_de_temporada')
 
         query_base = "SELECT * FROM recetas WHERE images IS NOT NULL AND images != ''"
         query_count_base = "SELECT COUNT(*) FROM recetas WHERE images IS NOT NULL AND images != ''"
@@ -1011,13 +1012,47 @@ def recetas():
             filters.append("nombre LIKE %s")
             params.append('%' + ingredientes + '%')
 
-        if dificultad:
+        if dificultad and dificultad != '':
             if dificultad == 'facil':
                 filters.append("(dificultad = 'muy baja' OR dificultad = 'baja')")
             elif dificultad == 'media':
                 filters.append("dificultad = 'media'")
             elif dificultad == 'dificil':
                 filters.append("(dificultad = 'alta' OR dificultad = 'muy alta')")
+
+        if productos_de_temporada:
+            mes_seleccionado = request.args.get('mes', datetime.now().strftime("%b"))
+            meses_en_espanol = {
+                'Ene': 'ENERO',
+                'Feb': 'FEBRERO',
+                'Mar': 'MARZO',
+                'Abr': 'ABRIL',
+                'May': 'MAYO',
+                'Jun': 'JUNIO',
+                'Jul': 'JULIO',
+                'Ago': 'AGOSTO',
+                'Sep': 'SEPTIEMBRE',
+                'Oct': 'OCTUBRE',
+                'Nov': 'NOVIEMBRE',
+                'Dic': 'DICIEMBRE'
+            }
+            mes_actual = meses_en_espanol.get(mes_seleccionado)
+
+            cur.execute("SELECT * FROM productos")
+            productos = cur.fetchall()
+
+            in_season = []
+
+            for producto in productos:
+                temporada = producto[2]
+                if temporada is not None and mes_actual in temporada:
+                    in_season.append(producto)
+            
+            if len(in_season) > 0:
+                producto_nombres = [producto[1] for producto in in_season]
+                productos_filtro = " OR ".join(["nombre LIKE %s" for _ in producto_nombres])
+                filters.append(f"({productos_filtro})")
+                params.extend(['%' + producto_nombre + '%' for producto_nombre in producto_nombres])
 
         if categoria:
             filters.append("categoria = %s")
@@ -1061,6 +1096,7 @@ def recetas():
             return render_template('recetas.html', total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria)
     else:
         return redirect(url_for('index'))
+
 
 
 
