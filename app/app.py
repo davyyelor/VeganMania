@@ -49,78 +49,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/eliminarCuenta', methods=['POST'])
-def eliminarCuenta():
-    if 'email' in session:
-        try:
-            email = session['email']
-            config = {
-                'user': 'root',
-                'password': 'rootasdeg2324',
-                'host': 'db',
-                'port': '3306',
-                'database': 'usuarios'
-            }
-            connection = mysql.connector.connect(**config)
-            cur = connection.cursor()
 
-            # Obtener el id_cliente del cliente
-            cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
-            cliente_id = cur.fetchone()
-
-            if cliente_id:
-                cliente_id = cliente_id[0]
-
-                # Eliminar los registros asociados al consumo
-                cur.execute('DELETE FROM consume WHERE id_cliente = %s', (cliente_id,))
-                connection.commit()
-
-                # Eliminar los registros asociados a objetivos
-                cur.execute('DELETE FROM tiene_objetivo WHERE id_cliente = %s', (cliente_id,))
-                connection.commit()
-
-                # Eliminar las comidas del cliente
-                cur.execute('DELETE FROM Comida WHERE id_cliente = %s', (cliente_id,))
-                connection.commit()
-
-                # Eliminar los alimentos ingeridos por el cliente
-                cur.execute('DELETE FROM Alimento WHERE id_cliente = %s', (cliente_id,))
-                connection.commit()
-
-                # Eliminar las alergias del cliente
-                cur.execute('DELETE FROM Alergia WHERE id_cliente = %s', (cliente_id,))
-                connection.commit()
-
-                # Eliminar el historial de contraseñas del cliente
-                cur.execute('DELETE FROM PasswordHistory WHERE id_cliente = %s', (cliente_id,))
-                connection.commit()
-
-                # Eliminar el historial de resets del cliente
-                cur.execute('DELETE FROM PasswordReset WHERE id_cliente = %s', (cliente_id,))
-                connection.commit()
-
-                # Eliminar la cuenta de usuario
-                cur.execute('DELETE FROM Cliente WHERE email = %s', (email,))
-                connection.commit()
-
-                cur.close()
-                connection.close()
-
-                # Limpiar la sesión
-                session.pop('email', None)
-                
-                return redirect(url_for('index'))
-
-            else:
-                return redirect(url_for('modificarUsuario'))
-
-        except Exception as e:
-            # Log de errores para debugging
-            print(f"Error: {e}")
-            return redirect(url_for('modificarUsuario'))
-
-    else:
-        return redirect(url_for('modificarUsuario'))
 
 
 
@@ -184,6 +113,65 @@ def modificarAlergenos():
 
         except Exception as e:
             return redirect(url_for('modificarAlergenos'))
+        
+
+@app.route('/eliminarCuenta', methods=['POST'])
+def eliminarCuenta():
+    if 'email' in session:
+        try:
+            email = session['email']
+            config = {
+                'user': 'root',
+                'password': 'rootasdeg2324',
+                'host': 'db',
+                'port': '3306',
+                'database': 'usuarios'
+            }
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
+
+            # Obtener el id_cliente del cliente
+            cur.execute('SELECT id_cliente FROM Cliente WHERE email = %s', (email,))
+            cliente_id = cur.fetchone()
+
+            if cliente_id:
+                cliente_id = cliente_id[0]
+
+                cur.execute('DELETE FROM PasswordHistory WHERE id_cliente = %s', (cliente_id,))
+
+                cur.execute('DELETE FROM consume WHERE id_cliente = %s', (cliente_id,))
+
+                cur.execute('DELETE FROM tiene_alergia WHERE id_cliente = %s', (cliente_id,))
+
+                cur.execute('DELETE FROM tiene_objetivo WHERE id_cliente = %s', (cliente_id,))
+
+                cur.execute('DELETE FROM incluye WHERE id_comida IN (SELECT id_comida FROM Comida WHERE id_cliente = %s)', (cliente_id,))
+
+                cur.execute('DELETE FROM Comida WHERE id_cliente = %s', (cliente_id,))
+
+                cur.execute('DELETE FROM PasswordReset WHERE id_cliente = %s', (cliente_id,))
+
+                cur.execute('DELETE FROM Cliente WHERE email = %s', (email,))
+
+                cur.close()
+                connection.close()
+
+                # Limpiar la sesión
+                session.pop('email', None)
+                
+                return redirect(url_for('index'))
+
+            else:
+                flash('No se encontró el usuario', 'error')
+                return redirect(url_for('modificarUsuario'))
+
+        except Exception as e:
+            print(f"Error: {e}")
+            flash(f'Error al eliminar la cuenta: {e}', 'error')
+            return redirect(url_for('modificarUsuario'))
+
+    else:
+        return redirect(url_for('modificarUsuario'))
 
 
 
