@@ -24,7 +24,7 @@
                     </div>
                 </div>
                 <div>
-                    <a href="{{ url_for('misComidas') }}" class="btn-anadir-comidas">Ver Comidas</a>
+                    <a href="{{ url_for('misComidas') }}" class="btn-anadir-comidas btn-ver-comidas">Ver Comidas</a>
                 </div>
                 
                 <div class="dropdown">
@@ -34,6 +34,9 @@
                         <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='menor-mayor') }}">Menor a mayor</a>
                         <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='normal') }}">Normal</a>
                     </div>
+                </div>
+                <div>
+                    <a href="{{ url_for('consultarObjetivos') }}" class="btn-anadir-comidas btn-ver-objetivos">Ver Objetivos</a>
                 </div>
             </div>
 

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    th {
+        background-color: #f2f2f2;
+        text-align: left;
+    }
+    h2 {
+        background-color: #e2e2e2;
+        padding: 10px;
+    }
+    .filter-container {
+        margin-bottom: 20px;
+    }
+    .filter-container label {
+        margin-right: 10px;
+    }
+    .filter-container select, .filter-container input[type="number"] {
+        padding: 5px;
+        margin-right: 20px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        background-color: #f9f9f9;
+        transition: border-color 0.3s;
+    }
+    .filter-container select:focus, .filter-container input[type="number"]:focus {
+        border-color: #80bdff;
+        outline: none;
+        background-color: #fff;
+    }
+</style>
+<div class="container">
+    <div class="main-content">
+        <h1>Objetivos de Nutrientes por Etapa de Vida</h1>
+
+        <div class="filter-container">
+            <label for="genero">Género:</label>
+            <select id="genero" onchange="filtrarObjetivos()">
+                <option value="">Todos</option>
+                <option value="Hombres">Hombres</option>
+                <option value="Mujeres">Mujeres</option>
+                <option value="Ambos">Ambos</option>
+            </select>
+
+            <label for="edadRango">Rango de Edad:</label>
+            <select id="edadRango" onchange="filtrarObjetivos()">
+                <option value="">Todos</option>
+                <option value="0-6">0-6 meses</option>
+                <option value="7-12">7-12 meses</option>
+                <option value="1-3">1-3 años</option>
+                <option value="4-8">4-8 años</option>
+                <option value="9-13">9-13 años</option>
+                <option value="14-18">14-18 años</option>
+                <option value="19-30">19-30 años</option>
+                <option value="31-50">31-50 años</option>
+                <option value="51-70">51-70 años</option>
+                <option value="71-150">71 años o más</option>
+            </select>
+        </div>
+
+        <div id="objetivosContainer">
+            {% for etapa_vida, datos in objetivos.items() %}
+            <div class="objetivo" data-genero="{{ datos['genero'] }}" data-anoinicio="{{ datos['anoInicio'] }}" data-mesinicio="{{ datos['mesInicio'] }}" data-anofin="{{ datos['anoFin'] }}" data-mesfin="{{ datos['mesFin'] }}">
+                <h2>{{ etapa_vida }}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre del Nutriente</th>
+                            <th>Descripción</th>
+                            <th>Unidad</th>
+                            <th>Cantidad Necesaria</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for nutriente in datos['nutrientes'] %}
+                        <tr>
+                            <td>{{ nutriente.nombreNutriente }}</td>
+                            <td>{{ nutriente.descripcion }}</td>
+                            <td>{{ nutriente.unidad }}</td>
+                            <td>{{ nutriente.cantidad }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function filtrarObjetivos() {
+        let genero = document.getElementById('genero').value;
+        let edadRango = document.getElementById('edadRango').value;
+
+        let objetivos = document.querySelectorAll('.objetivo');
+        objetivos.forEach(objetivo => {
+            let objGenero = objetivo.getAttribute('data-genero');
+            let objAnoInicio = parseInt(objetivo.getAttribute('data-anoinicio'));
+            let objMesInicio = parseInt(objetivo.getAttribute('data-mesinicio'));
+            let objAnoFin = parseInt(objetivo.getAttribute('data-anofin'));
+            let objMesFin = parseInt(objetivo.getAttribute('data-mesfin'));
+
+            let edadInicio = objAnoInicio + objMesInicio / 12;
+            let edadFin = objAnoFin + objMesFin / 12;
+
+            let mostrar = (genero === "" || genero === objGenero || objGenero === 'Ambos');
+
+            if (edadRango !== "") {
+                let [rangoInicio, rangoFin] = edadRango.split('-').map(num => parseInt(num));
+                let rangoEdadInicio = rangoInicio + (rangoInicio < 1 ? 0 : 0); // Manejo especial para meses
+                let rangoEdadFin = rangoFin + (rangoFin < 1 ? rangoFin / 12 : 0); // Manejo especial para meses
+
+                mostrar = mostrar && (edadInicio <= rangoEdadFin && edadFin >= rangoEdadInicio);
+            }
+
+            objetivo.style.display = mostrar ? '' : 'none';
+        });
+    }
+</script>
+
+{% endblock %}

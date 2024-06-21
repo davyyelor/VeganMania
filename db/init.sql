@@ -2,17 +2,15 @@ DROP DATABASE IF EXISTS usuarios;
 CREATE DATABASE IF NOT EXISTS usuarios CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE usuarios;
 
-
 CREATE TABLE IF NOT EXISTS Etapa_Vida (
     id_etapaVida INT PRIMARY KEY,
-    descripcion VARCHAR(255),
+    descripcion VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     anoInicio INT,
     anoFin INT,
     mesInicio INT,
     mesFin INT,
     genero VARCHAR(10)
 );
-
 
 INSERT INTO Etapa_Vida (id_etapaVida, descripcion, anoInicio, anoFin, mesInicio, mesFin, genero) VALUES
 (1, 'Lactante 0-6 meses', 0, 0, 0, 6, 'Ambos'),
@@ -31,6 +29,7 @@ INSERT INTO Etapa_Vida (id_etapaVida, descripcion, anoInicio, anoFin, mesInicio,
 (14, 'Mujeres 31-50 años', 31, 50, 0, 0, 'Mujeres'),
 (15, 'Mujeres 51-70 años', 51, 70, 0, 0, 'Mujeres'),
 (16, 'Mujeres >70 años', 71, 150, 0, 0, 'Mujeres');
+
 
 -- Crear la tabla Cliente con la referencia a Etapa_Vida
 CREATE TABLE IF NOT EXISTS Cliente (

@@ -61,7 +61,7 @@ def eliminarCuenta():
                 'port': '3306',
                 'database': 'usuarios'
             }
-            connection = mysql.connect(**config)
+            connection = mysql.connector.connect(**config)
             cur = connection.cursor()
 
             # Obtener el id_cliente del cliente
@@ -80,23 +80,23 @@ def eliminarCuenta():
                 connection.commit()
 
                 # Eliminar las comidas del cliente
-                cur.execute('DELETE FROM Comidas WHERE id_cliente = %s', (cliente_id,))
+                cur.execute('DELETE FROM Comida WHERE id_cliente = %s', (cliente_id,))
                 connection.commit()
 
                 # Eliminar los alimentos ingeridos por el cliente
-                cur.execute('DELETE FROM Alimentos WHERE id_cliente = %s', (cliente_id,))
+                cur.execute('DELETE FROM Alimento WHERE id_cliente = %s', (cliente_id,))
                 connection.commit()
 
                 # Eliminar las alergias del cliente
-                cur.execute('DELETE FROM Alergias WHERE id_cliente = %s', (cliente_id,))
+                cur.execute('DELETE FROM Alergia WHERE id_cliente = %s', (cliente_id,))
                 connection.commit()
 
                 # Eliminar el historial de contraseñas del cliente
-                cur.execute('DELETE FROM HistorialContraseñas WHERE id_cliente = %s', (cliente_id,))
+                cur.execute('DELETE FROM PasswordHistory WHERE id_cliente = %s', (cliente_id,))
                 connection.commit()
 
                 # Eliminar el historial de resets del cliente
-                cur.execute('DELETE FROM HistorialResets WHERE id_cliente = %s', (cliente_id,))
+                cur.execute('DELETE FROM PasswordReset WHERE id_cliente = %s', (cliente_id,))
                 connection.commit()
 
                 # Eliminar la cuenta de usuario
@@ -115,10 +115,13 @@ def eliminarCuenta():
                 return redirect(url_for('modificarUsuario'))
 
         except Exception as e:
+            # Log de errores para debugging
+            print(f"Error: {e}")
             return redirect(url_for('modificarUsuario'))
 
     else:
         return redirect(url_for('modificarUsuario'))
+
 
 
 @app.route('/modificarAlergenos', methods=['GET', 'POST'])
@@ -456,6 +459,26 @@ def registro():
             cliente_id = cur.fetchone()[0]
 
             if cliente_id:
+                # Calcular la edad del usuario
+                from datetime import datetime
+                today = datetime.today()
+                fecha_nacimiento = datetime.strptime(fechaNacimiento, '%Y-%m-%d')
+                edad = today.year - fecha_nacimiento.year - ((today.month, today.day) < (fecha_nacimiento.month, fecha_nacimiento.day))
+
+                # Determinar la etapa de vida
+                cur.execute('''
+                    SELECT id_etapaVida FROM Etapa_Vida 
+                    WHERE (anoInicio IS NULL OR anoInicio <= %s) 
+                      AND (anoFin IS NULL OR anoFin >= %s) 
+                      AND (mesInicio IS NULL OR (mesInicio <= %s AND mesFin >= %s))
+                      AND (genero = %s OR genero = 'Ambos')
+                ''', (edad, edad, fecha_nacimiento.month, fecha_nacimiento.month, genero))
+
+                etapa_vida = cur.fetchone()
+                if etapa_vida:
+                    cur.execute('UPDATE Cliente SET id_etapaVida = %s WHERE id_cliente = %s', (etapa_vida[0], cliente_id))
+                    connection.commit()
+
                 cur.execute('INSERT INTO consume (id_cliente, id_nutriente, fecha_consumo, cantidad) SELECT %s, n.id_nutriente, CURDATE(), 0 FROM Nutriente n', (cliente_id,))
                 connection.commit()
                 cur.execute('INSERT INTO tiene_objetivo (id_cliente, id_nutriente, cantidad) SELECT %s, id_nutriente, 2000 FROM Nutriente', (cliente_id,))
@@ -477,6 +500,8 @@ def registro():
             return redirect(url_for('registro'))
 
     return render_template('registro.html')
+
+
 
 @app.route('/logout')
 def logout():
@@ -557,26 +582,43 @@ def inicioUsu():
             frecuencia = request.args.get('frecuencia', 'diario')
             orden = request.args.get('orden', 'normal')
 
-            # Determinar el rango de fechas y el factor de multiplicación según la frecuencia
+            # Determinar el rango de fechas según la frecuencia
             if frecuencia == 'diario':
                 rango_fecha = 'CURDATE()'
-                factor = 1
             elif frecuencia == 'semanal':
                 rango_fecha = 'CURDATE() - INTERVAL 7 DAY'
-                factor = 7
             elif frecuencia == 'mensual':
                 rango_fecha = 'CURDATE() - INTERVAL 1 MONTH'
-                factor = 30
 
+            # Consultar las comidas del usuario en el rango de fecha especificado
             cur.execute(f'''
-                SELECT id_nutriente, SUM(cantidad)
-                FROM consume
-                WHERE id_cliente = %s AND fecha_consumo >= {rango_fecha}
-                GROUP BY id_nutriente
+                SELECT id_comida 
+                FROM Comida 
+                WHERE id_cliente = %s AND fecha >= {rango_fecha}
             ''', (cliente_id,))
-            consumo = cur.fetchall()
+            comidas = cur.fetchall()
+            comidas_ids = [comida[0] for comida in comidas]
 
-            consumo_dict = {nutriente: cantidad for nutriente, cantidad in consumo}
+            if not comidas_ids:
+                return render_template('inicioUsu.html', nutrientes_agrupados={}, frecuencia=frecuencia, orden=orden)
+
+            # Consultar los alimentos incluidos en esas comidas
+            format_strings = ','.join(['%s'] * len(comidas_ids))
+            cur.execute(f'''
+                SELECT i.id_alimento, i.cantidad, i.unidad, c.id_nutriente, c.cantidad 
+                FROM incluye i
+                JOIN contiene c ON i.id_alimento = c.id_alimento
+                WHERE i.id_comida IN ({format_strings})
+            ''', tuple(comidas_ids))
+            alimentos_nutrientes = cur.fetchall()
+
+            # Sumar los nutrientes contenidos en esos alimentos
+            consumo_dict = {}
+            for id_alimento, cantidad_alimento, unidad_alimento, id_nutriente, cantidad_nutriente in alimentos_nutrientes:
+                if id_nutriente not in consumo_dict:
+                    consumo_dict[id_nutriente] = 0
+                # Ajustar la cantidad de nutrientes según la cantidad del alimento
+                consumo_dict[id_nutriente] += cantidad_nutriente
 
             cur.execute('''
                 SELECT n.id_nutriente, n.nombreNutriente, n.unidad, ne.cantidad, n.tipo
@@ -587,6 +629,12 @@ def inicioUsu():
             necesidades = cur.fetchall()
 
             nutrientes = []
+            factor = 1
+            if frecuencia == 'semanal':
+                factor = 7
+            elif frecuencia == 'mensual':
+                factor = 30
+
             for id_nutriente, nombre, unidad, cantidad_necesaria, tipo in necesidades:
                 cantidad_necesaria_ajustada = cantidad_necesaria * factor
                 cantidad_consumida = consumo_dict.get(id_nutriente, 0)
@@ -628,17 +676,60 @@ def inicioUsu():
     return redirect(url_for('login'))
 
 
-
-
-
-
+@app.route('/consultarObjetivos', methods=['GET', 'POST'])
+def consultarObjetivos():
+    if 'email' in session:
+        try:
+            email = session['email']
             
+            config = {
+                'user': 'root',
+                'password': 'rootasdeg2324',
+                'host': 'db',
+                'port': '3306',
+                'database': 'usuarios'
+            }
 
+            connection = mysql.connect(**config)
+            cur = connection.cursor()
 
-            
+            query = """
+                SELECT ev.descripcion AS etapa_vida, ev.genero, ev.anoInicio, ev.mesInicio, ev.anoFin, ev.mesFin,
+                       n.nombreNutriente, n.descripcion, n.unidad, ne.cantidad
+                FROM Necesita ne
+                JOIN Nutriente n ON ne.id_nutriente = n.id_nutriente
+                JOIN Etapa_Vida ev ON ne.id_etapaVida = ev.id_etapaVida
+                ORDER BY ev.id_etapaVida, n.id_nutriente
+            """
+            cur.execute(query)
+            results = cur.fetchall()
 
+            # Organizar los resultados en un diccionario
+            objetivos = {}
+            for row in results:
+                etapa_vida = row[0]
+                if etapa_vida not in objetivos:
+                    objetivos[etapa_vida] = {
+                        'genero': row[1],
+                        'anoInicio': row[2],
+                        'mesInicio': row[3],
+                        'anoFin': row[4],
+                        'mesFin': row[5],
+                        'nutrientes': []
+                    }
+                objetivos[etapa_vida]['nutrientes'].append({
+                    'nombreNutriente': row[6],
+                    'descripcion': row[7],
+                    'unidad': row[8],
+                    'cantidad': row[9]
+                })
 
-
+            return render_template('consultarObjetivos.html', objetivos=objetivos)
+        
+        except Exception as e:
+            return str(e)
+    else:
+        return redirect(url_for('login'))
 
 
 
@@ -1199,15 +1290,42 @@ def borrarComida(id_comida):
         cur = connection.cursor()
         
         try:
-            cur.execute("SELECT id_alimento FROM incluye WHERE id_comida = %s", [id_comida])
+            # Obtener el id del cliente
+            cur.execute("SELECT id_cliente FROM Comida WHERE id_comida = %s", [id_comida])
+            id_cliente = cur.fetchone()[0]
+            
+            # Obtener los alimentos incluidos en la comida
+            cur.execute("SELECT id_alimento, cantidad FROM incluye WHERE id_comida = %s", [id_comida])
             alimentos = cur.fetchall()
-
-            # Primero eliminar los registros en la tabla incluye
+            
+            for alimento in alimentos:
+                id_alimento = alimento[0]
+                cantidad_alimento = alimento[1]
+                
+                # Obtener los nutrientes de cada alimento
+                cur.execute("SELECT id_nutriente, cantidad FROM contiene WHERE id_alimento = %s", [id_alimento])
+                nutrientes = cur.fetchall()
+                
+                for nutriente in nutrientes:
+                    id_nutriente = nutriente[0]
+                    cantidad_nutriente = nutriente[1]
+                    
+                    # Calcular la cantidad total del nutriente
+                    cantidad_total_nutriente = cantidad_alimento * cantidad_nutriente
+                    
+                    # Restar esta cantidad de la tabla consume
+                    cur.execute("""
+                        UPDATE consume 
+                        SET cantidad = cantidad - %s 
+                        WHERE id_cliente = %s AND id_nutriente = %s AND fecha_consumo = (SELECT fecha FROM Comida WHERE id_comida = %s)
+                    """, (cantidad_total_nutriente, id_cliente, id_nutriente, id_comida))
+            
+            # Eliminar los registros en la tabla incluye
             cur.execute("DELETE FROM incluye WHERE id_comida = %s", [id_comida])
             
-            # Luego eliminar la comida en sí
+            # Eliminar la comida en sí
             cur.execute("DELETE FROM Comida WHERE id_comida = %s", [id_comida])
-
+            
             for alimento in alimentos:
                 cur.execute("DELETE FROM contiene WHERE id_alimento = %s", [alimento[0]])
                 cur.execute("DELETE FROM Alimento WHERE id_alimento = %s", [alimento[0]])
@@ -1215,6 +1333,7 @@ def borrarComida(id_comida):
             connection.commit()
         except Exception as e:
             connection.rollback()
+            print(f"Error: {e}")
         finally:
             cur.close()
             connection.close()
@@ -1222,6 +1341,7 @@ def borrarComida(id_comida):
         return redirect(url_for('misComidas'))
     else:
         return redirect(url_for('index'))
+
 
 
 
