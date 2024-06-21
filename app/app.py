@@ -537,8 +537,7 @@ def inicioUsu():
     if 'email' in session:
         try:
             email = session['email']
-            frecuencia = request.args.get('frecuencia', 'diario')  # Obtener la frecuencia seleccionada
-            orden = request.args.get('orden', 'normal')  # Obtener el orden seleccionado
+            
             config = {
                 'user': 'root',
                 'password': 'rootasdeg2324',
@@ -546,98 +545,97 @@ def inicioUsu():
                 'port': '3306',
                 'database': 'usuarios'
             }
+            
             connection = mysql.connect(**config)
             cur = connection.cursor()
 
-            # Obtener datos del cliente
-            cur.execute('SELECT id_cliente, nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento FROM Cliente WHERE email = %s', (email,))
-            cliente = cur.fetchone()
+            cur.execute('SELECT id_cliente, id_etapaVida FROM Cliente WHERE email = %s', (email,))
+            cliente_data = cur.fetchone()
+            cliente_id = cliente_data[0]
+            etapa_vida = cliente_data[1]
 
-            if cliente:
-                id_cliente = cliente[0]
+            frecuencia = request.args.get('frecuencia', 'diario')
+            orden = request.args.get('orden', 'normal')
 
-                # Establecer los días según la frecuencia
-                if frecuencia == 'semanal':
-                    dias = 7
-                    cur.execute('''
-                        SELECT n.nombreNutriente, n.descripcion, n.unidad, 
-                               IFNULL(SUM(c.cantidad), 0) as consumido, 
-                               o.cantidad * 7 as objetivo, 
-                               n.categoria
-                        FROM Nutriente n
-                        LEFT JOIN contiene c ON n.id_nutriente = c.id_nutriente
-                        LEFT JOIN incluye i ON c.id_alimento = i.id_alimento
-                        LEFT JOIN Comida m ON i.id_comida = m.id_comida
-                        LEFT JOIN Cliente cl ON m.id_cliente = cl.id_cliente
-                        LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
-                        WHERE cl.id_cliente = %s AND YEARWEEK(m.fecha, 1) = YEARWEEK(CURDATE(), 1)
-                        GROUP BY n.id_nutriente, o.cantidad, n.categoria
-                    ''', (id_cliente, id_cliente))
-                elif frecuencia == 'mensual':
-                    cur.execute('SELECT DAY(LAST_DAY(CURDATE()))')
-                    dias_en_mes = cur.fetchone()[0]
-                    dias = dias_en_mes
-                    cur.execute('''
-                        SELECT n.nombreNutriente, n.descripcion, n.unidad, 
-                               IFNULL(SUM(c.cantidad), 0) as consumido, 
-                               o.cantidad * %s as objetivo, 
-                               n.categoria
-                        FROM Nutriente n
-                        LEFT JOIN contiene c ON n.id_nutriente = c.id_nutriente
-                        LEFT JOIN incluye i ON c.id_alimento = i.id_alimento
-                        LEFT JOIN Comida m ON i.id_comida = m.id_comida
-                        LEFT JOIN Cliente cl ON m.id_cliente = cl.id_cliente
-                        LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
-                        WHERE cl.id_cliente = %s AND MONTH(m.fecha) = MONTH(CURDATE()) AND YEAR(m.fecha) = YEAR(CURDATE())
-                        GROUP BY n.id_nutriente, o.cantidad, n.categoria
-                    ''', (dias_en_mes, id_cliente, id_cliente))
-                else:  # Por defecto, diario
-                    dias = 1
-                    cur.execute('''
-                        SELECT n.nombreNutriente, n.descripcion, n.unidad, 
-                               IFNULL(SUM(c.cantidad), 0) as consumido, 
-                               o.cantidad as objetivo, 
-                               n.categoria
-                        FROM Nutriente n
-                        LEFT JOIN contiene c ON n.id_nutriente = c.id_nutriente
-                        LEFT JOIN incluye i ON c.id_alimento = i.id_alimento
-                        LEFT JOIN Comida m ON i.id_comida = m.id_comida
-                        LEFT JOIN Cliente cl ON m.id_cliente = cl.id_cliente
-                        LEFT JOIN tiene_objetivo o ON n.id_nutriente = o.id_nutriente AND o.id_cliente = %s
-                        WHERE cl.id_cliente = %s AND m.fecha = CURDATE()
-                        GROUP BY n.id_nutriente, o.cantidad, n.categoria
-                    ''', (id_cliente, id_cliente))
+            # Determinar el rango de fechas y el factor de multiplicación según la frecuencia
+            if frecuencia == 'diario':
+                rango_fecha = 'CURDATE()'
+                factor = 1
+            elif frecuencia == 'semanal':
+                rango_fecha = 'CURDATE() - INTERVAL 7 DAY'
+                factor = 7
+            elif frecuencia == 'mensual':
+                rango_fecha = 'CURDATE() - INTERVAL 1 MONTH'
+                factor = 30
 
-                nutrientes = cur.fetchall()
+            cur.execute(f'''
+                SELECT id_nutriente, SUM(cantidad)
+                FROM consume
+                WHERE id_cliente = %s AND fecha_consumo >= {rango_fecha}
+                GROUP BY id_nutriente
+            ''', (cliente_id,))
+            consumo = cur.fetchall()
 
+            consumo_dict = {nutriente: cantidad for nutriente, cantidad in consumo}
+
+            cur.execute('''
+                SELECT n.id_nutriente, n.nombreNutriente, n.unidad, ne.cantidad, n.tipo
+                FROM Necesita ne
+                JOIN Nutriente n ON ne.id_nutriente = n.id_nutriente
+                WHERE ne.id_etapaVida = %s
+            ''', (etapa_vida,))
+            necesidades = cur.fetchall()
+
+            nutrientes = []
+            for id_nutriente, nombre, unidad, cantidad_necesaria, tipo in necesidades:
+                cantidad_necesaria_ajustada = cantidad_necesaria * factor
+                cantidad_consumida = consumo_dict.get(id_nutriente, 0)
+                porcentaje = (cantidad_consumida / cantidad_necesaria_ajustada) * 100 if cantidad_necesaria_ajustada > 0 else 0
+                nutrientes.append({
+                    'id_nutriente': id_nutriente,
+                    'nombre': nombre,
+                    'unidad': unidad,
+                    'cantidad_necesaria': cantidad_necesaria_ajustada,
+                    'cantidad_consumida': cantidad_consumida,
+                    'porcentaje': porcentaje,
+                    'tipo': tipo
+                })
+
+            # Ordenar según el grado de completitud
+            if orden == 'mayor-menor':
+                nutrientes = sorted(nutrientes, key=lambda x: x['porcentaje'], reverse=True)
+            elif orden == 'menor-mayor':
+                nutrientes = sorted(nutrientes, key=lambda x: x['porcentaje'])
+
+            # Agrupar por tipo de nutriente
+            nutrientes_agrupados = {}
+            for nutriente in nutrientes:
+                tipo = nutriente['tipo']
+                if tipo not in nutrientes_agrupados:
+                    nutrientes_agrupados[tipo] = []
+                nutrientes_agrupados[tipo].append(nutriente)
+
+            return render_template('inicioUsu.html', nutrientes_agrupados=nutrientes_agrupados, frecuencia=frecuencia, orden=orden)
+
+        except mysql.Error as e:
+            return f"Error connecting to MySQL Platform: {e}"
+        except Exception as e:
+            return f"An error occurred: {e}"
+        finally:
+            if connection.is_connected():
                 cur.close()
                 connection.close()
+    return redirect(url_for('login'))
 
-                # Agrupar los nutrientes por categoría
-                nutrientes_por_categoria = {}
-                for nutriente in nutrientes:
-                    categoria = nutriente[5]
-                    if categoria not in nutrientes_por_categoria:
-                        nutrientes_por_categoria[categoria] = []
-                    nutrientes_por_categoria[categoria].append(nutriente)
 
-                # Ordenar nutrientes según el parámetro de ordenación
-                for categoria in nutrientes_por_categoria:
-                    if orden == 'mayor-menor':
-                        nutrientes_por_categoria[categoria].sort(key=lambda x: (x[3] / x[4]) if x[4] > 0 else 0, reverse=True)
-                    elif orden == 'menor-mayor':
-                        nutrientes_por_categoria[categoria].sort(key=lambda x: (x[3] / x[4]) if x[4] > 0 else 0)
-                    # 'normal' mantiene el orden original, no se requiere acción
 
-                return render_template('inicioUsu.html', nombre=cliente[2], nutrientes_por_categoria=nutrientes_por_categoria, frecuencia=frecuencia)
-            else:
-                return redirect(url_for('login'))
 
-        except Exception as e:
-            return render_template('inicioUsu.html', error=f'Error al conectar a la base de datos: {e}')
-    else:
-        return redirect(url_for('login'))
 
+
+            
+
+
+            
 
 
 
