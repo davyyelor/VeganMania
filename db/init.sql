@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS Etapa_Vida (
     mesInicio INT,
     mesFin INT,
     genero VARCHAR(10)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 INSERT INTO Etapa_Vida (id_etapaVida, descripcion, anoInicio, anoFin, mesInicio, mesFin, genero) VALUES
 (1, 'Lactante 0-6 meses', 0, 0, 0, 6, 'Ambos'),
@@ -443,10 +443,6 @@ INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
 (15, 16, 2600);
 
 
-
-
-
-
 -- Tabla tiene_alergia
 CREATE TABLE IF NOT EXISTS tiene_alergia (
   id_cliente INT,
@@ -512,8 +508,8 @@ CREATE TABLE productos (
     EnTemporada TEXT,
     InicioTemporada TEXT,
     FueraDeTemporada TEXT,
-    Descripcion TEXT 
-);
+    Descripcion TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
 VALUES ('acelga', 'ENERO, FEBRERO, MARZO, ABRIL, MAYO, JUNIO, JULIO, SEPTIEMBRE, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'AGOSTO', NULL, 'Se puede encontrar acelgas de varios colores (rosas, amarillas, blancas...) dependiendo de su variedad. La acelga se adapta bien a cualquier clima, por lo tanto se recolecta durante casi todo el año.');
