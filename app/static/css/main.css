@@ -235,8 +235,8 @@ nav {
   text-transform: uppercase;
 }
 
-.nav-content ul li a:hover {
-  color: white;
+.nav-content ul li a:hover, .nav-content ul li a.active {
+  color: white !important; /* Añadido !important para asegurar que el color sea blanco */
   text-decoration: none;
 }
 
@@ -300,12 +300,17 @@ nav {
 }
 
 .user-menu ul li a:hover {
-  transform: scale(1.1); /* Added to create a zoom effect on hover */
+  color: #57b846;
+  transform: scale(1.05); /* Slight zoom effect */
+  transition: transform 0.3s ease, color 0.3s ease; /* Smooth transition for hover effects */
 }
 
 .user-info:hover .user-menu {
-  display: block;
+  display: flex; /* Changed to flex to display the menu items vertically */
 }
+
+
+
 
 
 

@@ -2,74 +2,131 @@
 
 {% block content %}
 <div class="container">
-    <div class="main-content">
-        <section>
-            <h1 class="tuSeguimiento">Tu Seguimiento</h1>
-
-            <!-- Botones adicionales -->
-            <div class="botones-adicionales">
-                <div class="dropdown">
-                    <button class="btn-anadir-comidas">Añadir...</button>
-                    <div class="dropdown-content">
-                        <a href="{{ url_for('añadirComida') }}">Comida</a>
-                        <a href="{{ url_for('añadirAlimento') }}">Alimentos</a>
-                    </div>
+    {% if primeraVez %}
+        <!-- Interfaz de bienvenida -->
+        <div class="bienvenida">
+            <h1>¡Bienvenido a Tu Seguimiento!</h1>
+            <div class="slideshow-container">
+                <div class="mySlides fade">
+                    <div class="numbertext">1 / 3</div>
+                    <img src="img1.jpg" style="width:100%">
+                    <div class="text">Descripción de la primera opción</div>
                 </div>
-                <div class="dropdown">
-                    <button class="btn-dropdown">Frecuencia</button>
-                    <div class="dropdown-content">
-                        <a href="{{ url_for('inicioUsu', frecuencia='diario') }}">Diario</a>
-                        <a href="{{ url_for('inicioUsu', frecuencia='semanal') }}">Semanal</a>
-                        <a href="{{ url_for('inicioUsu', frecuencia='mensual') }}">Mensual</a>
-                    </div>
+                <div class="mySlides fade">
+                    <div class="numbertext">2 / 3</div>
+                    <img src="img2.jpg" style="width:100%">
+                    <div class="text">Descripción de la segunda opción</div>
                 </div>
-                <div>
-                    <a href="{{ url_for('misComidas') }}" class="btn-anadir-comidas btn-ver-comidas">Ver Comidas</a>
-                </div>
-                
-                <div class="dropdown">
-                    <button class="btn-dropdown">Ordenar por porcentaje</button>
-                    <div class="dropdown-content">
-                        <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='mayor-menor') }}">Mayor a menor</a>
-                        <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='menor-mayor') }}">Menor a mayor</a>
-                        <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='normal') }}">Normal</a>
-                    </div>
-                </div>
-                <div>
-                    <a href="{{ url_for('consultarObjetivos') }}" class="btn-anadir-comidas btn-ver-objetivos">Ver Objetivos</a>
+                <div class="mySlides fade">
+                    <div class="numbertext">3 / 3</div>
+                    <img src="img3.jpg" style="width:100%">
+                    <div class="text">Descripción de la tercera opción</div>
                 </div>
             </div>
+            <br>
+            <div style="text-align:center">
+                <span class="dot"></span> 
+                <span class="dot"></span> 
+                <span class="dot"></span> 
+            </div>
+            <div class="tutorial">
+                <p>¿Quieres ver un tutorial rápido sobre cómo funciona la página?</p>
+                <button class="btn-tutorial" onclick="window.location.href='{{ url_for('tutorial') }}'">Ver Tutorial</button>
+                <p>O puedes verlo en cualquier momento desde tu perfil en el menú desplegable arriba a la derecha.</p>
+            </div>
+        </div>
 
-            {% if nutrientes_agrupados %}
-                {% for tipo, nutrientes in nutrientes_agrupados.items() %}
-                    <h2>{{ tipo }}</h2>
-                    {% for nutriente in nutrientes %}
-                    <!-- Sección de nutrientes -->
-                    <article>
-                        <h3>{{ nutriente.nombre }}</h3>
-                        <div class="contenido">
-                            <ul>{{ nutriente.nombre }}: {{ nutriente.cantidad_consumida }} {{ nutriente.unidad }}</ul>
+        <script>
+            let slideIndex = 0;
+            showSlides();
+
+            function showSlides() {
+                let slides = document.getElementsByClassName("mySlides");
+                let dots = document.getElementsByClassName("dot");
+                for (let i = 0; i < slides.length; i++) {
+                    slides[i].style.display = "none";  
+                }
+                slideIndex++;
+                if (slideIndex > slides.length) {slideIndex = 1}    
+                for (let i = 0; i < dots.length; i++) {
+                    dots[i].className = dots[i].className.replace(" active", "");
+                }
+                slides[slideIndex-1].style.display = "block";  
+                dots[slideIndex-1].className += " active";
+                setTimeout(showSlides, 2000); // Cambia de imagen cada 2 segundos
+            }
+        </script>
+
+    {% else %}
+        <div class="main-content">
+            <section>
+                <h1 class="tuSeguimiento">Tu Seguimiento</h1>
+
+                <!-- Botones adicionales -->
+                <div class="botones-adicionales">
+                    <div class="dropdown">
+                        <button class="btn-anadir-comidas">Añadir...</button>
+                        <div class="dropdown-content">
+                            <a href="{{ url_for('añadirComida') }}">Comida</a>
+                            <a href="{{ url_for('añadirAlimento') }}">Alimentos</a>
                         </div>
-                        <div class="porcentajes">
-                            {% set porcentaje = (nutriente.cantidad_consumida / nutriente.cantidad_necesaria) * 100 if nutriente.cantidad_necesaria > 0 else 0 %}
-                            {% set color = "green" if porcentaje >= 75 else "orange" if porcentaje >= 50 else "red" %}
-                            <div class='porcentajes' style="--porcentaje: {{ porcentaje }}; --color: {{ color }}">
-                                <span class="spanP">{{ porcentaje | round(0) }}%</span>
-                                <svg width="150" height="150">
-                                    <circle r="65" cx="50%" cy="50%" pathlength="100"></circle>
-                                    <circle r="65" cx="50%" cy="50%" pathlength="100" style="stroke-dasharray: {{ porcentaje }}, 100;"></circle>
-                                </svg>
-                                <span class="spanN">{{ nutriente.cantidad_consumida }}/{{ nutriente.cantidad_necesaria }} {{ nutriente.unidad }}</span>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn-dropdown">Frecuencia</button>
+                        <div class="dropdown-content">
+                            <a href="{{ url_for('inicioUsu', frecuencia='diario') }}">Diario</a>
+                            <a href="{{ url_for('inicioUsu', frecuencia='semanal') }}">Semanal</a>
+                            <a href="{{ url_for('inicioUsu', frecuencia='mensual') }}">Mensual</a>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('misComidas') }}" class="btn-anadir-comidas btn-ver-comidas">Ver Comidas</a>
+                    </div>
+                    
+                    <div class="dropdown">
+                        <button class="btn-dropdown">Ordenar por porcentaje</button>
+                        <div class="dropdown-content">
+                            <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='mayor-menor') }}">Mayor a menor</a>
+                            <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='menor-mayor') }}">Menor a mayor</a>
+                            <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='normal') }}">Normal</a>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('consultarObjetivos') }}" class="btn-anadir-comidas btn-ver-comidas">Consultar Objetivos</a>
+                    </div>
+
+                </div>
+
+                {% if nutrientes_agrupados %}
+                    {% for tipo, nutrientes in nutrientes_agrupados.items() %}
+                        <h2>{{ tipo }}</h2>
+                        {% for nutriente in nutrientes %}
+                        <!-- Sección de nutrientes -->
+                        <article>
+                            <h3>{{ nutriente.nombre }}</h3>
+                            <div class="contenido">
+                                <ul>{{ nutriente.nombre }}: {{ nutriente.cantidad_consumida }} {{ nutriente.unidad }}</ul>
                             </div>
-                        </div>
-                    </article>
+                            <div class="porcentajes">
+                                {% set porcentaje = (nutriente.cantidad_consumida / nutriente.cantidad_necesaria) * 100 if nutriente.cantidad_necesaria > 0 else 0 %}
+                                {% set color = "green" if porcentaje >= 75 else "orange" if porcentaje >= 50 else "red" %}
+                                <div class='porcentajes' style="--porcentaje: {{ porcentaje }}; --color: {{ color }}">
+                                    <span class="spanP">{{ porcentaje | round(0) }}%</span>
+                                    <svg width="150" height="150">
+                                        <circle r="65" cx="50%" cy="50%" pathlength="100"></circle>
+                                        <circle r="65" cx="50%" cy="50%" pathlength="100" style="stroke-dasharray: {{ porcentaje }}, 100;"></circle>
+                                    </svg>
+                                    <span class="spanN">{{ nutriente.cantidad_consumida }}/{{ nutriente.cantidad_necesaria }} {{ nutriente.unidad }}</span>
+                                </div>
+                            </div>
+                        </article>
+                        {% endfor %}
                     {% endfor %}
-                {% endfor %}
-            {% else %}
-                <p>Todavía no has introducido datos para este día/mes/semana.</p>
-            {% endif %}
-        </section>
-    </div>
+                {% else %}
+                    <p>Todavía no has introducido datos para este día/mes/semana.</p>
+                {% endif %}
+            </section>
+        </div>
+    {% endif %}
 </div>
-
 {% endblock %}

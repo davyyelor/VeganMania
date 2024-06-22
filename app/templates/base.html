@@ -30,12 +30,12 @@
         </div>
         <div class="nav-content">
             <ul>
-                <li><a href="{{url_for('inicioUsu')}}">Inicio</a></li>
-                <li><a href="{{url_for('recetas')}}">Recetas</a></li>
-                <li><a href="{{url_for('infoComida')}}">Info Comida</a></li>
-                <li><a href="{{url_for('articulos')}}">Blog</a></li>
-                <li><a href="{{url_for('articulosDeTemporada')}}">Artículos de Temporada</a></li>
-                <li><a href="{{url_for('sobreNosotros')}}">Sobre Nosotros</a></li>
+                <li><a href="{{url_for('inicioUsu')}}" class="{% if request.endpoint == 'inicioUsu' %}active{% endif %}">Inicio</a></li>
+                <li><a href="{{url_for('recetas')}}" class="{% if request.endpoint == 'recetas' %}active{% endif %}">Recetas</a></li>
+                <li><a href="{{url_for('infoComida')}}" class="{% if request.endpoint == 'infoComida' %}active{% endif %}">Info Comida</a></li>
+                <li><a href="{{url_for('articulos')}}" class="{% if request.endpoint == 'articulos' %}active{% endif %}">Blog</a></li>
+                <li><a href="{{url_for('articulosDeTemporada')}}" class="{% if request.endpoint == 'articulosDeTemporada' %}active{% endif %}">Artículos de Temporada</a></li>
+                <li><a href="{{url_for('sobreNosotros')}}" class="{% if request.endpoint == 'sobreNosotros' %}active{% endif %}">Sobre Nosotros</a></li>
             </ul>
             <div class="user-info" id="user-info">
                 <span id="user-name">{{ session['email'] }}</span>
@@ -45,6 +45,7 @@
                     <ul>
                         <li><a href="{{url_for('logout')}}">Cerrar Sesión</a></li>
                         <li><a href="{{url_for('modificarUsuario')}}">Modificar Usuario</a></li>
+                        <li><a href="{{url_for('tutorial')}}">Tutorial</a></li>
                     </ul>
                 </div>
             </div>

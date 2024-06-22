@@ -562,11 +562,22 @@ def inicioUsu():
             connection = mysql.connect(**config)
             cur = connection.cursor()
 
-            cur.execute('SELECT id_cliente, id_etapaVida FROM Cliente WHERE email = %s', (email,))
+            # Obtener datos del cliente
+            cur.execute('SELECT id_cliente, id_etapaVida, primeraVez FROM Cliente WHERE email = %s', (email,))
             cliente_data = cur.fetchone()
+            if not cliente_data:
+                raise ValueError("No se encontró el cliente con el email proporcionado.")
+            
             cliente_id = cliente_data[0]
             etapa_vida = cliente_data[1]
+            primeraVez = bool(cliente_data[2])
 
+            if primeraVez:
+                cur.execute('UPDATE Cliente SET primeraVez = FALSE WHERE id_cliente = %s', (cliente_id,))
+                connection.commit()
+                print(f'primeraVez actualizado a False para el cliente {cliente_id}')
+
+            # Determinar la frecuencia y el orden
             frecuencia = request.args.get('frecuencia', 'diario')
             orden = request.args.get('orden', 'normal')
 
@@ -588,7 +599,7 @@ def inicioUsu():
             comidas_ids = [comida[0] for comida in comidas]
 
             if not comidas_ids:
-                return render_template('inicioUsu.html', nutrientes_agrupados={}, frecuencia=frecuencia, orden=orden)
+                return render_template('inicioUsu.html', nutrientes_agrupados={}, frecuencia=frecuencia, orden=orden, primeraVez=primeraVez)
 
             # Consultar los alimentos incluidos en esas comidas
             format_strings = ','.join(['%s'] * len(comidas_ids))
@@ -608,6 +619,7 @@ def inicioUsu():
                 # Ajustar la cantidad de nutrientes según la cantidad del alimento
                 consumo_dict[id_nutriente] += cantidad_nutriente
 
+            # Consultar las necesidades nutricionales del usuario
             cur.execute('''
                 SELECT n.id_nutriente, n.nombreNutriente, n.unidad, ne.cantidad, n.tipo
                 FROM Necesita ne
@@ -651,17 +663,22 @@ def inicioUsu():
                     nutrientes_agrupados[tipo] = []
                 nutrientes_agrupados[tipo].append(nutriente)
 
-            return render_template('inicioUsu.html', nutrientes_agrupados=nutrientes_agrupados, frecuencia=frecuencia, orden=orden)
+            return render_template('inicioUsu.html', nutrientes_agrupados=nutrientes_agrupados, frecuencia=frecuencia, orden=orden, primeraVez=primeraVez)
 
-        except mysql.Error as e:
-            return f"Error connecting to MySQL Platform: {e}"
         except Exception as e:
-            return f"An error occurred: {e}"
+            return str(e)
         finally:
             if connection.is_connected():
                 cur.close()
                 connection.close()
     return redirect(url_for('login'))
+
+
+
+
+@app.route('/tutorial')
+def tutorial():
+    return render_template('tutorial.html')
 
 
 @app.route('/consultarObjetivos', methods=['GET', 'POST'])
@@ -1068,6 +1085,9 @@ def recetas():
         connection = mysql.connect(**config)
         cur = connection.cursor()
 
+        cur.execute("SELECT * FROM recetas WHERE categoria = 'Recetas de Verduras' AND images IS NOT NULL AND images != '' LIMIT 7")
+        recetas_recomendadas = cur.fetchall()
+
         recetas_por_pagina = 9
         pagina_actual = request.args.get('pagina', 1, type=int)
         offset = (pagina_actual - 1) * recetas_por_pagina
@@ -1166,7 +1186,7 @@ def recetas():
                         'ingredientes': receta[12], 'imagen': receta[13]} for receta in recetas_paginadas]
             cur.close()
             connection.close()
-            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria)
+            return render_template('recetas.html', recetas=recetas, total_paginas=total_paginas, pagina_actual=pagina_actual, max=max, min=min, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria, recetas_recomendadas=recetas_recomendadas)
         else:
             cur.close()
             connection.close()

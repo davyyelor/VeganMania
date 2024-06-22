@@ -30,7 +30,6 @@ INSERT INTO Etapa_Vida (id_etapaVida, descripcion, anoInicio, anoFin, mesInicio,
 (15, 'Mujeres 51-70 años', 51, 70, 0, 0, 'Mujeres'),
 (16, 'Mujeres >70 años', 71, 150, 0, 0, 'Mujeres');
 
-
 -- Crear la tabla Cliente con la referencia a Etapa_Vida
 CREATE TABLE IF NOT EXISTS Cliente (
   id_cliente INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,16 +44,17 @@ CREATE TABLE IF NOT EXISTS Cliente (
   fecha_nacimiento DATE NOT NULL,
   email_verificado BOOLEAN NOT NULL DEFAULT FALSE,
   id_etapaVida INT,
+  primeraVez BOOLEAN NOT NULL DEFAULT TRUE,
   UNIQUE (email),
   FOREIGN KEY (id_etapaVida) REFERENCES Etapa_Vida(id_etapaVida)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Insertar datos de ejemplo en Cliente con id_etapaVida
 INSERT INTO Cliente (nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento, email_verificado, id_etapaVida)
 VALUES
-  ('Kepa', 'kepab', 'kepa@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 70.5, 180.0, 'Hombre', 'Sedentario', '1990-05-15', TRUE, 7), -- Reemplazar 1 con el id_etapaVida correspondiente
-  ('Ander', 'andere', 'ander@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20', TRUE, 8), -- Reemplazar 2 con el id_etapaVida correspondiente
-  ('David', 'davidd', 'davy.elorza@gmail.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20', TRUE, 8); -- Reemplazar 2 con el id_etapaVida correspondiente
+  ('Kepa', 'kepab', 'kepa@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 70.5, 180.0, 'Hombre', 'Sedentario', '1990-05-15', TRUE, 7),
+  ('Ander', 'andere', 'ander@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20', TRUE, 8),
+  ('David', 'davidd', 'davy.elorza@gmail.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20', TRUE, 8);
 
 -- Tabla PasswordReset
 CREATE TABLE IF NOT EXISTS PasswordReset (
