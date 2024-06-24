@@ -1,68 +1,175 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .recetas-recomendadas {
+        margin-top: 100px;
+        text-align: center;
+    }
+    .slideshow-container {
+        max-width: 1000px;
+        position: relative;
+        margin: auto;
+    }
+
+    .mySlides {
+        display: none;
+    }
+
+    img {
+        vertical-align: middle;
+        width: 500px; /* Ajusta el ancho deseado */
+        height: 300px; /* Ajusta la altura deseada */
+        object-fit: cover; /* Esto asegura que la imagen se recorte para ajustarse al tamaño especificado */
+    }
+
+    /* Number text (1/3 etc) */
+    .numbertext {
+        color: #f2f2f2;
+        font-size: 12px;
+        padding: 8px 12px;
+        position: absolute;
+        top: 0;
+    }
+
+    /* The dots/bullets/indicators */
+    .dot {
+        height: 15px;
+        width: 15px;
+        margin: 0 2px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+        transition: background-color 0.6s ease;
+    }
+
+    .active-slide {
+        background-color: #717171;
+    }
+
+    /* Fading animation */
+    .fade {
+        -webkit-animation-name: fade;
+        -webkit-animation-duration: 1.5s;
+        animation-name: fade;
+        animation-duration: 1.5s;
+    }
+
+    @-webkit-keyframes fade {
+        from {opacity: .4}
+        to {opacity: 1}
+    }
+
+    @keyframes fade {
+        from {opacity: .4}
+        to {opacity: 1}
+    }
+</style>
+<div class="recetas-recomendadas">
+        
+    <h2>Recetas Recomendadas</h2>
+    <div class="slideshow-container">
+        {% set slide_index = 1 %}
+        {% for receta in recetas_recomendadas %}
+        <div class="mySlides fade">
+            <div class="numbertext">{{ slide_index }} / 7</div>
+            <img src="{{ receta[13] }}" alt="{{ receta[2] }}">
+            <div class="text">{{ receta[2] }}</div>
+        </div>
+        {% set slide_index = slide_index + 1 %}
+        {% endfor %}
+    </div>
+    <br>
+    <div style="text-align:center">
+        {% for _ in recetas_recomendadas %}
+        <span class="dot"></span>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    let slideIndex = 0;
+    showSlides();
+
+    function showSlides() {
+        let slides = document.getElementsByClassName("mySlides");
+        let dots = document.getElementsByClassName("dot");
+        for (let i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
+        }
+        slideIndex++;
+        if (slideIndex > slides.length) {
+            slideIndex = 1;
+        }
+        for (let i = 0; i < dots.length; i++) {
+            dots[i].className = dots[i].className.replace(" active-slide", "");
+        }
+        slides[slideIndex - 1].style.display = "block";
+        dots[slideIndex - 1].className += " active-slide";
+        setTimeout(showSlides, 2000); // Cambia de imagen cada 2 segundos
+    }
+</script>
+
 <div class="recetas">
     <aside>
         <h2>Filtrar Recetas</h2>
         <form action="{{ url_for('recetas') }}" method="post">
-            <div>
-                <label for="categoria">Categoría:</label>
-                <div id="categoria">
-                    <label class="checkbox-label">Aperitivos y tapas<input type="checkbox" name="categoria" value="Recetas de Aperitivos y tapas" {% if 'Recetas de Aperitivos y tapas' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Pan y bollería<input type="checkbox" name="categoria" value="Recetas de Pan y bollería" {% if 'Recetas de Pan y bollería' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Carne<input type="checkbox" name="categoria" value="Recetas de Carne" {% if 'Recetas de Carne' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Aves y caza<input type="checkbox" name="categoria" value="Recetas de Aves y caza" {% if 'Recetas de Aves y caza' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Ensaladas<input type="checkbox" name="categoria" value="Recetas de Ensaladas" {% if 'Recetas de Ensaladas' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Cócteles y bebidas<input type="checkbox" name="categoria" value="Cócteles y bebidas" {% if 'Cócteles y bebidas' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Huevos y lácteos<input type="checkbox" name="categoria" value="Recetas de Huevos y lácteos" {% if 'Recetas de Huevos y lácteos' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Mariscos<input type="checkbox" name="categoria" value="Recetas de Mariscos" {% if 'Recetas de Mariscos' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Arroces y cereales<input type="checkbox" name="categoria" value="Recetas de Arroces y cereales" {% if 'Recetas de Arroces y cereales' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Legumbres<input type="checkbox" name="categoria" value="Recetas de Legumbres" {% if 'Recetas de Legumbres' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Postres<input type="checkbox" name="categoria" value="Recetas de Postres" {% if 'Recetas de Postres' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Guisos y Potajes<input type="checkbox" name="categoria" value="Recetas de Guisos y Potajes" {% if 'Recetas de Guisos y Potajes' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Consejos de cocina<input type="checkbox" name="categoria" value="Consejos de cocina" {% if 'Consejos de cocina' in categoria %}checked{% endif %}></label><br>
-                    <label class="checkbox-label">Pasta<input type="checkbox" name="categoria" value="Recetas de Pasta" {% if 'Recetas de Pasta' in categoria %}checked{% endif %}></label><br>
-                </div>
+            <label for="productos_de_temporada" class="styled-label">
+                <input type="checkbox" id="productos_de_temporada" name="productos_de_temporada" {% if productos_de_temporada %}checked{% endif %}> 
+                Productos de temporada
+            </label>
+            <br>
+            <div class="range-slider">
+                <label for="tiempo_min">Tiempo mínimo (min):</label>
+                <input type="range" id="tiempo_min" name="tiempo_min" min="0" max="480" value="{{ tiempo_min }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ tiempo_min }}</output>
             </div>
-            <div>
-                <label for="tiempo_min">Tiempo mínimo:</label>
-                <input type="range" id="tiempo_min" name="tiempo_min" min="0" max="480" value="{{ tiempo_min|default(0) }}" oninput="this.nextElementSibling.value = this.value">
-                <output>{{ tiempo_min|default(0) }}</output> min
+            <div class="range-slider">
+                <label for="tiempo_max">Tiempo máximo (min):</label>
+                <input type="range" id="tiempo_max" name="tiempo_max" min="0" max="480" value="{{ tiempo_max }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ tiempo_max }}</output>
             </div>
-            <div>
-                <label for="tiempo_max">Tiempo máximo:</label>
-                <input type="range" id="tiempo_max" name="tiempo_max" min="0" max="480" value="{{ tiempo_max|default(240) }}" oninput="this.nextElementSibling.value = this.value">
-                <output>{{ tiempo_max|default(240) }}</output> min
-            </div>
-            <div>
-                <label for="dificultad">Dificultad:</label>
-                <select id="dificultad" name="dificultad">
-                    <option value="">Todas</option>
-                    <option value="Fácil" {% if dificultad == 'Fácil' %}selected{% endif %}>Fácil</option>
-                    <option value="Media" {% if dificultad == 'Media' %}selected{% endif %}>Media</option>
-                    <option value="Difícil" {% if dificultad == 'Difícil' %}selected{% endif %}>Difícil</option>
-                </select>
-            </div>
-            <div>
-                <label for="valoracion">Valoración mínima:</label>
-                <input type="range" id="valoracion" name="valoracion" min="0" max="5" value="{{ valoracion|default(0) }}" step="0.1" oninput="this.nextElementSibling.value = this.value">
-                <output>{{ valoracion|default(0) }}</output>
-            </div>
-            <button type="submit">Filtrar</button>
+            <label for="dificultad" class="styled-label">Dificultad:</label>
+            <select id="dificultad" name="dificultad" class="styled-select">
+                <option value="" {% if not dificultad %}selected{% endif %}>Todas</option>
+                <option value="facil" {% if dificultad == 'facil' %}selected{% endif %}>Fácil</option>
+                <option value="media" {% if dificultad == 'media' %}selected{% endif %}>Media</option>
+                <option value="dificil" {% if dificultad == 'dificil' %}selected{% endif %}>Difícil</option>
+            </select>
+            <label for="categoria" class="styled-label">Categoría:</label>
+            <select id="categoria" name="categoria" class="styled-select">
+                <option value="" {% if not categoria %}selected{% endif %}>Todas</option>
+                <option value="Cócteles y bebidas" {% if categoria == 'Cócteles y bebidas' %}selected{% endif %}>Cócteles y bebidas</option>
+                <option value="Recetas de Verduras" {% if categoria == 'Recetas de Verduras' %}selected{% endif %}>Recetas de Verduras</option>
+                <option value="Recetas de Arroces y cereales" {% if categoria == 'Recetas de Arroces y cereales' %}selected{% endif %}>Recetas de Arroces y cereales</option>
+                <option value="Recetas de Sopas y cremas" {% if categoria == 'Recetas de Sopas y cremas' %}selected{% endif %}>Recetas de Sopas y cremas</option>
+                <option value="Recetas de Mariscos" {% if categoria == 'Recetas de Mariscos' %}selected{% endif %}>Recetas de Mariscos</option>
+                <option value="Recetas de Postres" {% if categoria == 'Recetas de Postres' %}selected{% endif %}>Recetas de Postres</option>
+                <option value="Recetas de Huevos y lácteos" {% if categoria == 'Recetas de Huevos y lácteos' %}selected{% endif %}>Recetas de Huevos y lácteos</option>
+                <option value="Recetas de Carne" {% if categoria == 'Recetas de Carne' %}selected{% endif %}>Recetas de Carne</option>
+                <option value="Recetas de Aperitivos y tapas" {% if categoria == 'Recetas de Aperitivos y tapas' %}selected{% endif %}>Recetas de Aperitivos y tapas</option>
+                <option value="Recetas de Aves y caza" {% if categoria == 'Recetas de Aves y caza' %}selected{% endif %}>Recetas de Aves y caza</option>
+                <option value="Recetas de Pan y bollería" {% if categoria == 'Recetas de Pan y bollería' %}selected{% endif %}>Recetas de Pan y bollería</option>
+                <option value="Recetas de Guisos y Potajes" {% if categoria == 'Recetas de Guisos y Potajes' %}selected{% endif %}>Recetas de Guisos y Potajes</option>
+                <option value="Recetas de Legumbres" {% if categoria == 'Recetas de Legumbres' %}selected{% endif %}>Recetas de Legumbres</option>
+                <option value="Recetas de Ensaladas" {% if categoria == 'Recetas de Ensaladas' %}selected{% endif %}>Recetas de Ensaladas</option>
+                <option value="Recetas de Salsas" {% if categoria == 'Recetas de Salsas' %}selected{% endif %}>Recetas de Salsas</option>
+                <option value="Consejos de cocina" {% if categoria == 'Consejos de cocina' %}selected{% endif %}>Consejos de cocina</option>
+                <option value="Recetas de Pasta" {% if categoria == 'Recetas de Pasta' %}selected{% endif %}>Recetas de Pasta</option>
+            </select>
+            <br>
+            <button type="submit" class="styled-button">Filtrar</button>
         </form>
     </aside>
-
     <main>
         <h1 class="title">Buscar Recetas</h1>
         <form class="buscar-wrapper" action="{{ url_for('recetas') }}" method="post">
-            <input type="text" name="ingredientes" placeholder="Buscar recetas por ingredientes">
-            <button type="submit">Buscar</button>
+            <input type="text" name="ingredientes" placeholder="Buscar recetas por ingredientes" value="{{ ingredientes }}" class="styled-input">
+            <button type="submit" class="styled-button">Buscar</button>
         </form>
-        
         {% for message in get_flashed_messages() %}
             <p>{{ message }}</p>
         {% endfor %}
-
         {% if recetas %}
         <h2 style="text-align: center;">Recetas encontradas:</h2>
         <div class="recipe-container">
@@ -96,33 +203,111 @@
                 {% if total_paginas > 1 %}
                 <ul class="pagination">
                     {% if pagina_actual > 1 %}
-                    <li><a class="prev" href="{{ url_for('recetas', pagina=pagina_actual-1, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion) }}">Anterior</a></li>
+                    <li><a class="prev" href="{{ url_for('recetas', pagina=pagina_actual-1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria) }}">Anterior</a></li>
                     {% endif %}
                     {% if pagina_actual > 3 %}
-                    <li><a href="{{ url_for('recetas', pagina=1, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion) }}">1</a></li>
+                    <li><a href="{{ url_for('recetas', pagina=1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria) }}">1</a></li>
                     <li><span class="dots">...</span></li>
                     {% endif %}
                     {% for pagina in range(max(1, pagina_actual-2), min(total_paginas, pagina_actual+2)+1) %}
-                    <li><a href="{{ url_for('recetas', pagina=pagina, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion) }}" class="{% if pagina == pagina_actual %}active{% endif %}">{{ pagina }}</a></li>
+                    <li><a href="{{ url_for('recetas', pagina=pagina, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria) }}" class="{% if pagina == pagina_actual %}active{% endif %}">{{ pagina }}</a></li>
                     {% endfor %}
                     {% if pagina_actual < total_paginas - 2 %}
                     <li><span class="dots">...</span></li>
-                    <li><a href="{{ url_for('recetas', pagina=total_paginas, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion) }}">{{ total_paginas }}</a></li>
+                    <li><a href="{{ url_for('recetas', pagina=total_paginas, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria) }}">{{ total_paginas }}</a></li>
                     {% endif %}
                     {% if pagina_actual < total_paginas %}
-                    <li><a class="next" href="{{ url_for('recetas', pagina=pagina_actual+1, ingredientes=ingredientes, categoria=categoria, tiempo_min=tiempo_min, tiempo_max=tiempo_max, tipo=tipo, dificultad=dificultad, valoracion=valoracion) }}">Siguiente</a></li>
+                    <li><a class="next" href="{{ url_for('recetas', pagina=pagina_actual+1, ingredientes=ingredientes, tiempo_min=tiempo_min, tiempo_max=tiempo_max, dificultad=dificultad, categoria=categoria) }}">Siguiente</a></li>
                     {% endif %}
                 </ul>
                 {% endif %}
             </div>
-            
         </div>
         {% else %}
         <p>No se encontraron recetas con los filtros seleccionados.</p>
         {% endif %}
     </main>
 </div>
+
+
 <style>
+    .styled-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .styled-select, .styled-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    .styled-button {
+        width: 100%;
+        padding: 12px;
+        background-color: #57b846;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+    .styled-button:hover {
+        background-color: #4b9e3e;
+    }
+    .range-slider {
+        margin-bottom: 20px;
+    }
+    .range-slider label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    .range-slider input[type="range"] {
+        width: calc(100% - 60px);
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+    .range-slider output {
+        display: inline-block;
+        width: 50px;
+        text-align: center;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+    .pagination a.active {
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+    }
+    .pagination a {
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #007bff;
+        transition: background-color 0.3s ease;
+    }
+    .pagination a:hover {
+        background-color: #007bff;
+        color: white;
+    }
+    .pagination li {
+        display: inline;
+        margin: 0 5px;
+    }
+    .pagination {
+        display: flex;
+        list-style-type: none;
+        padding: 0;
+    }
+    .pagination .dots {
+        padding: 8px 16px;
+    }
     .recetas {
         display: flex;
     }
@@ -199,7 +384,6 @@
     #volverBtn:hover {
         background-color: #4b9e3e;
     }
-
     .controls-container {
         display: flex;
         flex-direction: column;
@@ -265,6 +449,9 @@
         border: 1px solid #ccc;
         border-radius: 5px;
     }
+    aside form select {
+        margin-bottom: 15px; /* Added margin-bottom */
+    }
     aside form button {
         width: 100%;
         padding: 10px;
@@ -278,7 +465,6 @@
     aside form button:hover {
         background-color: #4b9e3e;
     }
-
     .checkbox-label {
         display: flex;
         justify-content: space-between;
@@ -289,7 +475,6 @@
         margin-left: 10px;
     }
 </style>
-
 
 <script>
     function showRecipeDetails(image) {

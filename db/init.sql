@@ -2,8 +2,35 @@ DROP DATABASE IF EXISTS usuarios;
 CREATE DATABASE IF NOT EXISTS usuarios CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE usuarios;
 
+CREATE TABLE IF NOT EXISTS Etapa_Vida (
+    id_etapaVida INT PRIMARY KEY,
+    descripcion VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+    anoInicio INT,
+    anoFin INT,
+    mesInicio INT,
+    mesFin INT,
+    genero VARCHAR(10)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Tabla Cliente
+INSERT INTO Etapa_Vida (id_etapaVida, descripcion, anoInicio, anoFin, mesInicio, mesFin, genero) VALUES
+(1, 'Lactante 0-6 meses', 0, 0, 0, 6, 'Ambos'),
+(2, 'Lactante 7-12 meses', 0, 0, 7, 12, 'Ambos'),
+(3, 'Niños/as 1-3 años', 1, 3, 0, 0, 'Ambos'),
+(4, 'Niños/as 4-8 años', 4, 8, 0, 0, 'Ambos'),
+(5, 'Hombres 9-13 años', 9, 13, 0, 0, 'Hombres'),
+(6, 'Hombres 14-18 años', 14, 18, 0, 0, 'Hombres'),
+(7, 'Hombres 19-30 años', 19, 30, 0, 0, 'Hombres'),
+(8, 'Hombres 31-50 años', 31, 50, 0, 0, 'Hombres'),
+(9, 'Hombres 51-70 años', 51, 70, 0, 0, 'Hombres'),
+(10, 'Hombres >70 años', 71, 150, 0, 0, 'Hombres'),
+(11, 'Mujeres 9-13 años', 9, 13, 0, 0, 'Mujeres'),
+(12, 'Mujeres 14-18 años', 14, 18, 0, 0, 'Mujeres'),
+(13, 'Mujeres 19-30 años', 19, 30, 0, 0, 'Mujeres'),
+(14, 'Mujeres 31-50 años', 31, 50, 0, 0, 'Mujeres'),
+(15, 'Mujeres 51-70 años', 51, 70, 0, 0, 'Mujeres'),
+(16, 'Mujeres >70 años', 71, 150, 0, 0, 'Mujeres');
+
+-- Crear la tabla Cliente con la referencia a Etapa_Vida
 CREATE TABLE IF NOT EXISTS Cliente (
   id_cliente INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -16,8 +43,18 @@ CREATE TABLE IF NOT EXISTS Cliente (
   actividad VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   fecha_nacimiento DATE NOT NULL,
   email_verificado BOOLEAN NOT NULL DEFAULT FALSE,
-  UNIQUE (email)
-);
+  id_etapaVida INT,
+  primeraVez BOOLEAN NOT NULL DEFAULT TRUE,
+  UNIQUE (email),
+  FOREIGN KEY (id_etapaVida) REFERENCES Etapa_Vida(id_etapaVida)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Insertar datos de ejemplo en Cliente con id_etapaVida
+INSERT INTO Cliente (nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento, email_verificado, id_etapaVida)
+VALUES
+  ('Kepa', 'kepab', 'kepa@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 70.5, 180.0, 'Hombre', 'Sedentario', '1990-05-15', TRUE, 7),
+  ('Ander', 'andere', 'ander@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20', TRUE, 8),
+  ('David', 'davidd', 'davy.elorza@gmail.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20', TRUE, 8);
 
 -- Tabla PasswordReset
 CREATE TABLE IF NOT EXISTS PasswordReset (
@@ -57,14 +94,354 @@ CREATE TABLE IF NOT EXISTS Comida (
   FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente)
 );
 
--- Tabla Nutriente
+-- Crear la tabla Nutriente si no existe, con la columna tipo
 CREATE TABLE IF NOT EXISTS Nutriente (
   id_nutriente INT AUTO_INCREMENT PRIMARY KEY,
   nombreNutriente VARCHAR(255) NOT NULL,
   descripcion TEXT NOT NULL,
   unidad VARCHAR(50) NOT NULL,
-  categoria VARCHAR(50) NOT NULL
+  tipo VARCHAR(50) NOT NULL
 );
+
+-- Insertar nutrientes con categorías y ids
+INSERT INTO Nutriente (id_nutriente, nombreNutriente, descripcion, unidad, tipo) VALUES
+(1, 'Energia', 'Cantidad de energia proporcionada por el alimento', 'kcal', 'Energia'),
+(2, 'Lipidos totales (grasas)', 'Grasas totales presentes en el alimento', 'g', 'Grasas'),
+(3, 'Acidos grasos, saturados totales', 'Grasas saturadas presentes en el alimento', 'g', 'Grasas'),
+(4, 'Acidos grasos, trans totales', 'Grasas trans presentes en el alimento', 'g', 'Grasas'),
+(5, 'Acidos grasos monoinsaturados totales', 'Grasas monoinsaturadas presentes en el alimento', 'g', 'Grasas'),
+(6, 'Acidos grasos poliinsaturados totales', 'Grasas poliinsaturadas presentes en el alimento', 'g', 'Grasas'),
+(7, 'Carbohidratos, por diferencia', 'Carbohidratos presentes en el alimento', 'g', 'Carbohidratos'),
+(8, 'Fibra dietetica total', 'Fibra dietetica presente en el alimento', 'g', 'Carbohidratos'),
+(9, 'Azucares, total incluyendo NLEA', 'Azucares totales presentes en el alimento', 'g', 'Carbohidratos'),
+(10, 'Proteina', 'Proteina presente en el alimento', 'g', 'Proteinas'),
+(11, 'Colesterol', 'Colesterol presente en el alimento', 'mg', 'Minerales'),
+(12, 'Sodio Na', 'Sodio presente en el alimento', 'mg', 'Minerales'),
+(13, 'Calcio', 'Calcio presente en el alimento', 'mg', 'Minerales'),
+(14, 'Magnesio, Mg', 'Magnesio presente en el alimento', 'mg', 'Minerales'),
+(15, 'Potasio, K', 'Potasio presente en el alimento', 'mg', 'Minerales'),
+(16, 'Hierro, Fe', 'Hierro presente en el alimento', 'mg', 'Minerales'),
+(17, 'Zinc, Zn', 'Zinc presente en el alimento', 'mg', 'Minerales'),
+(18, 'Fosforo, P', 'Fosforo presente en el alimento', 'mg', 'Minerales'),
+(19, 'Vitamina A, RAE', 'Vitamina A presente en el alimento', 'mcg', 'Vitaminas'),
+(20, 'Vitamina C, acido ascorbico total', 'Vitamina C presente en el alimento', 'mg', 'Vitaminas'),
+(21, 'Tiamina', 'Tiamina presente en el alimento', 'mg', 'Vitaminas'),
+(22, 'Riboflavina', 'Riboflavina presente en el alimento', 'mg', 'Vitaminas'),
+(23, 'Niacina', 'Niacina presente en el alimento', 'mg', 'Vitaminas'),
+(24, 'Vitamina B-6', 'Vitamina B-6 presente en el alimento', 'mg', 'Vitaminas'),
+(25, 'Folato, DFE', 'Folato presente en el alimento', 'mcg', 'Vitaminas'),
+(26, 'Folato, comida', 'Folato de origen alimentario presente en el alimento', 'mcg', 'Vitaminas'),
+(27, 'Acido folico', 'Acido folico presente en el alimento', 'mcg', 'Vitaminas'),
+(28, 'Vitamina B12', 'Vitamina B12 presente en el alimento', 'mcg', 'Vitaminas'),
+(29, 'Vitamina D (D2 + D3)', 'Vitamina D presente en el alimento', 'mcg', 'Vitaminas'),
+(30, 'Vitamina E (alfa-tocoferol)', 'Vitamina E presente en el alimento', 'mg', 'Vitaminas'),
+(31, 'Vitamina K (filoquinona)', 'Vitamina K presente en el alimento', 'mcg', 'Vitaminas'),
+(32, 'Agua', 'Contenido de agua en el alimento', 'g', 'Otros');
+
+
+
+
+CREATE TABLE IF NOT EXISTS Necesita (
+    id_nutriente INT,
+    id_etapaVida INT,
+    cantidad DECIMAL(10, 2),
+    PRIMARY KEY (id_nutriente, id_etapaVida),
+    FOREIGN KEY (id_nutriente) REFERENCES Nutriente(id_nutriente),
+    FOREIGN KEY (id_etapaVida) REFERENCES Etapa_Vida(id_etapaVida)
+);
+
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+-- Lactante 0-6 meses
+(13, 1, 210), (14, 1, 30), (16, 1, 0.27), (17, 1, 2), (18, 1, 100), (19, 1, 400), (20, 1, 40), (21, 1, 0.2), (22, 1, 0.3), (23, 1, 2), (24, 1, 0.1), (25, 1, 65), (26, 1, 65), (27, 1, 65), (28, 1, 0.4), (29, 1, 5), (30, 1, 4), (31, 1, 2.0), (32, 1, 700),
+-- Lactante 7-12 meses
+(13, 2, 270), (14, 2, 75), (16, 2, 11), (17, 2, 3), (18, 2, 275), (19, 2, 500), (20, 2, 50), (21, 2, 0.3), (22, 2, 0.4), (23, 2, 4), (24, 2, 0.3), (25, 2, 80), (26, 2, 80), (27, 2, 80), (28, 2, 0.5), (29, 2, 5), (30, 2, 5), (31, 2, 2.5), (32, 2, 800),
+-- Niños/as 1-3 años
+(13, 3, 500), (14, 3, 80), (16, 3, 7), (17, 3, 3), (18, 3, 460), (19, 3, 300), (20, 3, 15), (21, 3, 0.5), (22, 3, 0.5), (23, 3, 6), (24, 3, 0.5), (25, 3, 150), (26, 3, 150), (27, 3, 150), (28, 3, 0.9), (29, 3, 5), (30, 3, 6), (31, 3, 30), (32, 3, 1300),
+-- Niños/as 4-8 años
+(13, 4, 800), (14, 4, 130), (16, 4, 10), (17, 4, 5), (18, 4, 500), (19, 4, 400), (20, 4, 25), (21, 4, 0.6), (22, 4, 0.6), (23, 4, 8), (24, 4, 0.6), (25, 4, 200), (26, 4, 200), (27, 4, 200), (28, 4, 1.2), (29, 4, 5), (30, 4, 7), (31, 4, 55), (32, 4, 1700),
+-- Hombres 9-13 años
+(13, 5, 1300), (14, 5, 240), (16, 5, 8), (17, 5, 8), (18, 5, 1250), (19, 5, 600), (20, 5, 45), (21, 5, 0.9), (22, 5, 0.9), (23, 5, 12), (24, 5, 1.0), (25, 5, 300), (26, 5, 300), (27, 5, 300), (28, 5, 1.8), (29, 5, 5), (30, 5, 11), (31, 5, 60), (32, 5, 2400),
+-- Hombres 14-18 años
+(13, 6, 1300), (14, 6, 410), (16, 6, 11), (17, 6, 11), (18, 6, 1250), (19, 6, 900), (20, 6, 75), (21, 6, 1.2), (22, 6, 1.3), (23, 6, 16), (24, 6, 1.3), (25, 6, 400), (26, 6, 400), (27, 6, 400), (28, 6, 2.4), (29, 6, 5), (30, 6, 15), (31, 6, 75), (32, 6, 3300),
+-- Hombres 19-30 años
+(13, 7, 1000), (14, 7, 400), (16, 7, 8), (17, 7, 11), (18, 7, 700), (19, 7, 900), (20, 7, 90), (21, 7, 1.2), (22, 7, 1.3), (23, 7, 16), (24, 7, 1.3), (25, 7, 400), (26, 7, 400), (27, 7, 400), (28, 7, 2.4), (29, 7, 5), (30, 7, 15), (31, 7, 120), (32, 7, 3700),
+-- Hombres 31-50 años
+(13, 8, 1000), (14, 8, 420), (16, 8, 8), (17, 8, 11), (18, 8, 700), (19, 8, 900), (20, 8, 90), (21, 8, 1.2), (22, 8, 1.3), (23, 8, 16), (24, 8, 1.3), (25, 8, 400), (26, 8, 400), (27, 8, 400), (28, 8, 2.4), (29, 8, 5), (30, 8, 15), (31, 8, 120), (32, 8, 3700),
+-- Hombres 51-70 años
+(13, 9, 1200), (14, 9, 420), (16, 9, 8), (17, 9, 11), (18, 9, 700), (19, 9, 900), (20, 9, 90), (21, 9, 1.2), (22, 9, 1.3), (23, 9, 16), (24, 9, 1.7), (25, 9, 400), (26, 9, 400), (27, 9, 400), (28, 9, 2.4), (29, 9, 10), (30, 9, 15), (31, 9, 120), (32, 9, 3700),
+-- Hombres >70 años
+(13, 10, 1200), (14, 10, 420), (16, 10, 8), (17, 10, 11), (18, 10, 700), (19, 10, 900), (20, 10, 90), (21, 10, 1.2), (22, 10, 1.3), (23, 10, 16), (24, 10, 1.7), (25, 10, 400), (26, 10, 400), (27, 10, 400), (28, 10, 2.4), (29, 10, 15), (30, 10, 15), (31, 10, 120), (32, 10, 3700),
+-- Mujeres 9-13 años
+(13, 11, 1300), (14, 11, 240), (16, 11, 8), (17, 11, 8), (18, 11, 1250), (19, 11, 600), (20, 11, 45), (21, 11, 0.9), (22, 11, 0.9), (23, 11, 12), (24, 11, 1.0), (25, 11, 300), (26, 11, 300), (27, 11, 300), (28, 11, 1.8), (29, 11, 5), (30, 11, 11), (31, 11, 60), (32, 11, 2100),
+-- Mujeres 14-18 años
+(13, 12, 1300), (14, 12, 360), (16, 12, 15), (17, 12, 9), (18, 12, 1250), (19, 12, 700), (20, 12, 65), (21, 12, 1.0), (22, 12, 1.0), (23, 12, 14), (24, 12, 1.2), (25, 12, 400), (26, 12, 400), (27, 12, 400), (28, 12, 2.4), (29, 12, 5), (30, 12, 15), (31, 12, 75), (32, 12, 2300),
+-- Mujeres 19-30 años
+(13, 13, 1000), (14, 13, 310), (16, 13, 18), (17, 13, 8), (18, 13, 700), (19, 13, 700), (20, 13, 75), (21, 13, 1.1), (22, 13, 1.1), (23, 13, 14), (24, 13, 1.3), (25, 13, 400), (26, 13, 400), (27, 13, 400), (28, 13, 2.4), (29, 13, 5), (30, 13, 15), (31, 13, 90), (32, 13, 2700),
+-- Mujeres 31-50 años
+(13, 14, 1000), (14, 14, 320), (16, 14, 18), (17, 14, 8), (18, 14, 700), (19, 14, 700), (20, 14, 75), (21, 14, 1.1), (22, 14, 1.1), (23, 14, 14), (24, 14, 1.3), (25, 14, 400), (26, 14, 400), (27, 14, 400), (28, 14, 2.4), (29, 14, 5), (30, 14, 15), (31, 14, 90), (32, 14, 2700),
+-- Mujeres 51-70 años
+(13, 15, 1200), (14, 15, 320), (16, 15, 8), (17, 15, 8), (18, 15, 700), (19, 15, 700), (20, 15, 75), (21, 15, 1.1), (22, 15, 1.1), (23, 15, 14), (24, 15, 1.5), (25, 15, 400), (26, 15, 400), (27, 15, 400), (28, 15, 2.4), (29, 15, 10), (30, 15, 15), (31, 15, 90), (32, 15, 2700),
+-- Mujeres >70 años
+(13, 16, 1200), (14, 16, 320), (16, 16, 8), (17, 16, 8), (18, 16, 700), (19, 16, 700), (20, 16, 75), (21, 16, 1.1), (22, 16, 1.1), (23, 16, 14), (24, 16, 1.5), (25, 16, 400), (26, 16, 400), (27, 16, 400), (28, 16, 2.4), (29, 16, 15), (30, 16, 15), (31, 16, 90), (32, 16, 2700);
+
+
+
+-- Lactante 0-6 meses
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 1, 520),  -- Energía (kcal)
+(2, 1, 31),   -- Lípidos totales (g)
+(3, 1, 11),   -- Ácidos grasos saturados (g)
+(4, 1, 0),    -- Ácidos grasos trans (g)
+(5, 1, 10),   -- Ácidos grasos monoinsaturados (g)
+(6, 1, 4.4),  -- Ácidos grasos poliinsaturados (g)
+(7, 1, 60),   -- Carbohidratos (g)
+(8, 1, 0),    -- Fibra dietética (g)
+(9, 1, 0),    -- Azúcares (g)
+(10, 1, 9.1), -- Proteína (g)
+(11, 1, 0),   -- Colesterol (mg)
+(12, 1, 120), -- Sodio (mg)
+(15, 1, 400); -- Potasio (mg)
+
+-- Lactante 7-12 meses
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 2, 710),
+(2, 2, 30),
+(3, 2, 11),
+(4, 2, 0),
+(5, 2, 10),
+(6, 2, 4.6),
+(7, 2, 95),
+(8, 2, 0),
+(9, 2, 0),
+(10, 2, 11),
+(11, 2, 0),
+(12, 2, 370),
+(15, 2, 860);
+
+-- Niños/as 1-3 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 3, 1020),
+(2, 3, 30),
+(3, 3, 10),
+(4, 3, 0),
+(5, 3, 12),
+(6, 3, 7),
+(7, 3, 130),
+(8, 3, 19),
+(9, 3, 0),
+(10, 3, 13),
+(11, 3, 0),
+(12, 3, 800),
+(15, 3, 2000);
+
+-- Niños/as 4-8 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 4, 1400),
+(2, 4, 25),
+(3, 4, 10),
+(4, 4, 0),
+(5, 4, 13),
+(6, 4, 10),
+(7, 4, 130),
+(8, 4, 25),
+(9, 4, 0),
+(10, 4, 19),
+(11, 4, 0),
+(12, 4, 1000),
+(15, 4, 2300);
+
+-- Hombres 9-13 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 5, 1800),
+(2, 5, 31),
+(3, 5, 12),
+(4, 5, 0),
+(5, 5, 16),
+(6, 5, 12),
+(7, 5, 130),
+(8, 5, 31),
+(9, 5, 0),
+(10, 5, 34),
+(11, 5, 0),
+(12, 5, 1200),
+(15, 5, 2500);
+
+-- Hombres 14-18 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 6, 2200),
+(2, 6, 50),
+(3, 6, 17),
+(4, 6, 0),
+(5, 6, 20),
+(6, 6, 16),
+(7, 6, 130),
+(8, 6, 38),
+(9, 6, 0),
+(10, 6, 52),
+(11, 6, 0),
+(12, 6, 1500),
+(15, 6, 3000);
+
+-- Hombres 19-30 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 7, 2400),
+(2, 7, 70),
+(3, 7, 22),
+(4, 7, 0),
+(5, 7, 28),
+(6, 7, 17),
+(7, 7, 130),
+(8, 7, 38),
+(9, 7, 0),
+(10, 7, 56),
+(11, 7, 0),
+(12, 7, 1500),
+(15, 7, 3400);
+
+-- Hombres 31-50 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 8, 2400),
+(2, 8, 70),
+(3, 8, 22),
+(4, 8, 0),
+(5, 8, 28),
+(6, 8, 17),
+(7, 8, 130),
+(8, 8, 38),
+(9, 8, 0),
+(10, 8, 56),
+(11, 8, 0),
+(12, 8, 1500),
+(15, 8, 3400);
+
+-- Hombres 51-70 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 9, 2200),
+(2, 9, 70),
+(3, 9, 20),
+(4, 9, 0),
+(5, 9, 25),
+(6, 9, 17),
+(7, 9, 130),
+(8, 9, 30),
+(9, 9, 0),
+(10, 9, 56),
+(11, 9, 0),
+(12, 9, 1300),
+(15, 9, 3400);
+
+-- Hombres >70 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 10, 2000),
+(2, 10, 70),
+(3, 10, 18),
+(4, 10, 0),
+(5, 10, 22),
+(6, 10, 14),
+(7, 10, 130),
+(8, 10, 30),
+(9, 10, 0),
+(10, 10, 56),
+(11, 10, 0),
+(12, 10, 1200),
+(15, 10, 3400);
+
+-- Mujeres 9-13 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 11, 1600),
+(2, 11, 25),
+(3, 11, 10),
+(4, 11, 0),
+(5, 11, 14),
+(6, 11, 10),
+(7, 11, 130),
+(8, 11, 26),
+(9, 11, 0),
+(10, 11, 34),
+(11, 11, 0),
+(12, 11, 1200),
+(15, 11, 2300);
+
+-- Mujeres 14-18 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 12, 1800),
+(2, 12, 50),
+(3, 12, 11),
+(4, 12, 0),
+(5, 12, 16),
+(6, 12, 12),
+(7, 12, 130),
+(8, 12, 26),
+(9, 12, 0),
+(10, 12, 46),
+(11, 12, 0),
+(12, 12, 1500),
+(15, 12, 2600);
+
+-- Mujeres 19-30 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 13, 2000),
+(2, 13, 50),
+(3, 13, 12),
+(4, 13, 0),
+(5, 13, 18),
+(6, 13, 12),
+(7, 13, 130),
+(8, 13, 28),
+(9, 13, 0),
+(10, 13, 46),
+(11, 13, 0),
+(12, 13, 1500),
+(15, 13, 2600);
+
+-- Mujeres 31-50 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 14, 2000),
+(2, 14, 50),
+(3, 14, 12),
+(4, 14, 0),
+(5, 14, 18),
+(6, 14, 12),
+(7, 14, 130),
+(8, 14, 28),
+(9, 14, 0),
+(10, 14, 46),
+(11, 14, 0),
+(12, 14, 1500),
+(15, 14, 2600);
+
+-- Mujeres 51-70 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 15, 1800),
+(2, 15, 50),
+(3, 15, 10),
+(4, 15, 0),
+(5, 15, 16),
+(6, 15, 10),
+(7, 15, 130),
+(8, 15, 21),
+(9, 15, 0),
+(10, 15, 46),
+(11, 15, 0),
+(12, 15, 1300),
+(15, 15, 2600);
+
+-- Mujeres >70 años
+INSERT INTO Necesita (id_nutriente, id_etapaVida, cantidad) VALUES
+(1, 16, 1600),
+(2, 16, 50),
+(3, 16, 10),
+(4, 16, 0),
+(5, 16, 14),
+(6, 16, 10),
+(7, 16, 130),
+(8, 16, 21),
+(9, 16, 0),
+(10, 16, 46),
+(11, 16, 0),
+(12, 16, 1200),
+(15, 16, 2600);
+
 
 -- Tabla tiene_alergia
 CREATE TABLE IF NOT EXISTS tiene_alergia (
@@ -119,52 +496,6 @@ CREATE TABLE IF NOT EXISTS tiene_objetivo (
   FOREIGN KEY (id_nutriente) REFERENCES Nutriente(id_nutriente)
 );
 
--- Insertar datos de ejemplo en Cliente
-INSERT INTO Cliente (nombre, nombre_usu, email, contrasena, peso, altura, genero, actividad, fecha_nacimiento, email_verificado)
-VALUES
-  ('Kepa', 'kepab', 'kepa@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 70.5, 180.0, 'Hombre', 'Sedentario', '1990-05-15', TRUE),
-  ('Ander', 'andere', 'ander@example.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20', TRUE),
-  ('David', 'davidd', 'davy.elorza@gmail.com', '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', 65.2, 175.0, 'Hombre', 'Sedentario', '1988-08-20', TRUE);
-
--- Insertar nutrientes con categorías
-INSERT INTO Nutriente (nombreNutriente, descripcion, unidad, categoria) VALUES
-('Energia', 'Cantidad de energia proporcionada por el alimento', 'kcal', 'Energia'),
-('Lipidos totales (grasas)', 'Grasas totales presentes en el alimento', 'g', 'Grasas'),
-('Acidos grasos, saturados totales', 'Grasas saturadas presentes en el alimento', 'g', 'Grasas'),
-('Acidos grasos, trans totales', 'Grasas trans presentes en el alimento', 'g', 'Grasas'),
-('Acidos grasos monoinsaturados totales', 'Grasas monoinsaturadas presentes en el alimento', 'g', 'Grasas'),
-('Acidos grasos poliinsaturados totales', 'Grasas poliinsaturadas presentes en el alimento', 'g', 'Grasas'),
-('Carbohidratos, por diferencia', 'Carbohidratos presentes en el alimento', 'g', 'Carbohidratos'),
-('Fibra dietetica total', 'Fibra dietetica presente en el alimento', 'g', 'Carbohidratos'),
-('Azucares, total incluyendo NLEA', 'Azucares totales presentes en el alimento', 'g', 'Carbohidratos'),
-('Proteina', 'Proteina presente en el alimento', 'g', 'Proteinas'),
-('Colesterol', 'Colesterol presente en el alimento', 'mg', 'Minerales'),
-('Sodio Na', 'Sodio presente en el alimento', 'mg', 'Minerales'),
-('Calcio', 'Calcio presente en el alimento', 'mg', 'Minerales'),
-('Magnesio, Mg', 'Magnesio presente en el alimento', 'mg', 'Minerales'),
-('Potasio, K', 'Potasio presente en el alimento', 'mg', 'Minerales'),
-('Hierro, Fe', 'Hierro presente en el alimento', 'mg', 'Minerales'),
-('Zinc, Zn', 'Zinc presente en el alimento', 'mg', 'Minerales'),
-('Fosforo, P', 'Fosforo presente en el alimento', 'mg', 'Minerales'),
-('Vitamina A, RAE', 'Vitamina A presente en el alimento', 'mcg', 'Vitaminas'),
-('Vitamina C, acido ascorbico total', 'Vitamina C presente en el alimento', 'mg', 'Vitaminas'),
-('Tiamina', 'Tiamina presente en el alimento', 'mg', 'Vitaminas'),
-('Riboflavina', 'Riboflavina presente en el alimento', 'mg', 'Vitaminas'),
-('Niacina', 'Niacina presente en el alimento', 'mg', 'Vitaminas'),
-('Vitamina B-6', 'Vitamina B-6 presente en el alimento', 'mg', 'Vitaminas'),
-('Folato, DFE', 'Folato presente en el alimento', 'mcg', 'Vitaminas'),
-('Folato, comida', 'Folato de origen alimentario presente en el alimento', 'mcg', 'Vitaminas'),
-('Acido folico', 'Acido folico presente en el alimento', 'mcg', 'Vitaminas'),
-('Vitamina B12', 'Vitamina B12 presente en el alimento', 'mcg', 'Vitaminas'),
-('Vitamina D (D2 + D3)', 'Vitamina D presente en el alimento', 'mcg', 'Vitaminas'),
-('Vitamina E (alfa-tocoferol)', 'Vitamina E presente en el alimento', 'mg', 'Vitaminas'),
-('Vitamina K (filoquinona)', 'Vitamina K presente en el alimento', 'mcg', 'Vitaminas'),
-('Agua', 'Contenido de agua en el alimento', 'g', 'Otros');
-
--- Establecer un objetivo de 2000 para todos los nutrientes para cada cliente
-INSERT INTO tiene_objetivo (id_cliente, id_nutriente, cantidad)
-SELECT c.id_cliente, n.id_nutriente, 2000
-FROM Cliente c, Nutriente n;
 
 INSERT INTO consume (id_cliente, id_nutriente, fecha_consumo, cantidad)
 SELECT c.id_cliente, n.id_nutriente, CURDATE(), 0
@@ -177,8 +508,8 @@ CREATE TABLE productos (
     EnTemporada TEXT,
     InicioTemporada TEXT,
     FueraDeTemporada TEXT,
-    Descripcion TEXT 
-);
+    Descripcion TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 INSERT INTO productos (Producto, EnTemporada, InicioTemporada, FueraDeTemporada, Descripcion)
 VALUES ('acelga', 'ENERO, FEBRERO, MARZO, ABRIL, MAYO, JUNIO, JULIO, SEPTIEMBRE, OCTUBRE, NOVIEMBRE, DICIEMBRE', 'AGOSTO', NULL, 'Se puede encontrar acelgas de varios colores (rosas, amarillas, blancas...) dependiendo de su variedad. La acelga se adapta bien a cualquier clima, por lo tanto se recolecta durante casi todo el año.');

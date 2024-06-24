@@ -1,7 +1,64 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<style>
+    
+    h1.tuSeguimiento {
+        font-size: 2em;
+        color: #333;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .alimento-detalles {
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .alimento-detalles h2 {
+        font-size: 1.5em;
+        color: #555;
+        margin-bottom: 10px;
+    }
+    
+    .alimento-detalles p {
+        font-size: 1em;
+        color: #666;
+    }
+    
+    h3 {
+        font-size: 1.2em;
+        color: #444;
+        margin-top: 20px;
+    }
+    
+    .lista-nutrientes {
+        list-style-type: none;
+        padding: 0;
+    }
+    
+    .nutriente-item {
+        background-color: #e0f7fa;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nutriente-item strong {
+        color: #00796b;
+        font-weight: bold;
+    }
+    
+    .nutriente-item p {
+        color: #004d40;
+        margin: 5px 0 0;
+    }
+    
+    </style>
+    
 <div class="container">
     <div class="main-content">
         <section>
