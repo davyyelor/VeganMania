@@ -57,10 +57,31 @@
     .error-input {
         border-color: red;
     }
+
+    .back-button {
+        position: fixed;
+        top: 120px;
+        left: 20px;
+        display: inline-block;
+        padding: 10px 15px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #57b846;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+        z-index: 1000; /* Ajusta este valor si es necesario */
+    }
+    .back-button:hover {
+        background-color: #4b9e3e;
+    }
 </style>
 <div class="loader" id="loader"></div>
 <div class="loader-text" id="loaderText">Añadiendo alimento...</div>
 <div class="notification" id="toastNotification">Alimento añadido correctamente!</div>
+
+<a href="{{ url_for('inicioUsu') }}" class="back-button">Volver</a>
 
 <section class="añadir-alimento">
     <h1>Añadir Alimento</h1>
@@ -112,6 +133,7 @@
         var content = document.querySelector('.añadir-alimento');
         var toastNotification = document.getElementById('toastNotification');
         var errorMessage = document.getElementById('errorMessage');
+        var comidaSelect = document.getElementById('comida');
 
         añadirForm.addEventListener('submit', function(event) {
             event.preventDefault(); // Evitar el envío del formulario
@@ -164,6 +186,12 @@
                 }, 2000);
             } else {
                 errorMessage.textContent = errorText;
+            }
+        });
+
+        comidaSelect.addEventListener('change', function() {
+            if (comidaSelect.value === 'añadir') {
+                window.location.href = "{{ url_for('añadirComida') }}";
             }
         });
 

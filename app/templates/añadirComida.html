@@ -57,14 +57,43 @@
     .error-input {
         border-color: red;
     }
+
+    .back-button {
+        position: fixed;
+        top: 120px;
+        left: 20px;
+        display: inline-block;
+        padding: 10px 15px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #57b846;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+        z-index: 1; /* Asegura que el botón esté por debajo del nav */
+    }
+    .back-button:hover {
+        background-color: #4b9e3e;
+    }
+    .info-text {
+        max-width: 500px; /* Change this value to match your form width */
+        margin-top: 20px;
+    }
 </style>
 <div class="loader" id="loader"></div>
 <div class="loader-text" id="loaderText">Añadiendo comida...</div>
 <div class="notification" id="toastNotification">Comida añadida correctamente!</div>
 
+<a href="{{ url_for('inicioUsu') }}" class="back-button">Volver</a>
+
 <section class="añadir-alimento">
     <h1>Añadir Comida</h1>
     <form class="añadir-alimento-form" method="post" id="añadirComidaForm">
+        <div class="info-text">
+            <p>Una comida está conformada por varios alimentos. Por ejemplo, en el desayuno podemos tener dos alimentos, un zumo de naranja y unas tostadas de jamón y luego en la comida podemos tener un primer plato que sean garbanzos, un segundo pollo y de postre yogur danone.</p>
+            <p>Una vez hayas añadido tu primera comida <a href="{{ url_for('añadirAlimento') }}">añádele los alimentos</a>.</p>
+        </div>
         <div class="form-group">
             <label for="nombreComida">Nombre de la Comida:</label>
             <div class="input-box">
@@ -97,6 +126,7 @@
         </div>
         <div class="error-message" id="errorMessage"></div>
     </form>
+
 </section>
 <script>
     document.addEventListener('DOMContentLoaded', function() {

@@ -42,8 +42,27 @@
     .main-content p {
         font-size: 18px; /* Aumenta el tamaño de la fuente */
     }
+    .back-button {
+        position: absolute;
+        top: 110px;
+        left: 20px;
+        display: inline-block;
+        padding: 10px 15px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #57b846;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+        z-index: 1; /* Asegura que el botón esté por debajo del nav */
+    }
+    .back-button:hover {
+        background-color: #4b9e3e;
+    }
 </style>
 <div class="container">
+    <a href="{{ url_for('inicioUsu') }}" class="back-button">Volver</a>
     <div class="main-content">
         <h1>Objetivos de Nutrientes por Etapa de Vida</h1>
         <p>

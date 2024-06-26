@@ -64,37 +64,37 @@
 
                 <!-- Botones adicionales -->
                 <div class="botones-adicionales">
-                    <div class="dropdown">
-                        <button class="btn-anadir-comidas">Añadir...</button>
-                        <div class="dropdown-content">
-                            <a href="{{ url_for('añadirComida') }}">Comida</a>
-                            <a href="{{ url_for('añadirAlimento') }}">Alimentos</a>
+                    <div class="left-buttons">
+                        <div class="dropdown">
+                            <button class="btn-anadir-comidas">Añadir...</button>
+                            <div class="dropdown-content">
+                                <a href="{{ url_for('añadirComida') }}">Comida</a>
+                                <a href="{{ url_for('añadirAlimento') }}">Alimentos</a>
+                            </div>
                         </div>
+                        {% if nutrientes_agrupados %}
+                            <div class="dropdown">
+                                <button class="btn-dropdown">Frecuencia</button>
+                                <div class="dropdown-content">
+                                    <a href="{{ url_for('inicioUsu', frecuencia='diario') }}">Diario</a>
+                                    <a href="{{ url_for('inicioUsu', frecuencia='semanal') }}">Semanal</a>
+                                    <a href="{{ url_for('inicioUsu', frecuencia='mensual') }}">Mensual</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn-dropdown">Ordenar por porcentaje</button>
+                                <div class="dropdown-content">
+                                    <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='mayor-menor') }}">Mayor a menor</a>
+                                    <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='menor-mayor') }}">Menor a mayor</a>
+                                    <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='normal') }}">Normal</a>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="dropdown">
-                        <button class="btn-dropdown">Frecuencia</button>
-                        <div class="dropdown-content">
-                            <a href="{{ url_for('inicioUsu', frecuencia='diario') }}">Diario</a>
-                            <a href="{{ url_for('inicioUsu', frecuencia='semanal') }}">Semanal</a>
-                            <a href="{{ url_for('inicioUsu', frecuencia='mensual') }}">Mensual</a>
-                        </div>
-                    </div>
-                    <div>
+                    <div class="right-buttons">
                         <a href="{{ url_for('misComidas') }}" class="btn-anadir-comidas btn-ver-comidas">Ver Comidas</a>
-                    </div>
-                    
-                    <div class="dropdown">
-                        <button class="btn-dropdown">Ordenar por porcentaje</button>
-                        <div class="dropdown-content">
-                            <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='mayor-menor') }}">Mayor a menor</a>
-                            <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='menor-mayor') }}">Menor a mayor</a>
-                            <a href="{{ url_for('inicioUsu', frecuencia=frecuencia, orden='normal') }}">Normal</a>
-                        </div>
-                    </div>
-                    <div>
                         <a href="{{ url_for('consultarObjetivos') }}" class="btn-anadir-comidas btn-ver-comidas">Consultar Objetivos</a>
                     </div>
-
                 </div>
 
                 {% if nutrientes_agrupados %}
@@ -129,4 +129,20 @@
         </div>
     {% endif %}
 </div>
+
+<style>
+    .botones-adicionales {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .right-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    .left-buttons {
+        display: flex;
+        gap: 10px;
+    }
+</style>
 {% endblock %}
