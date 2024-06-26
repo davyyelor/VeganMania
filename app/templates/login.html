@@ -11,7 +11,6 @@
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/main.css') }}">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
-</head>
 <body>    
     <div class="limiter">
         <div class="container-login100">
@@ -21,10 +20,14 @@
             </a>
 
             <div class="wrap-login100">
-                <form class="login100-form validate-form p-l-55 p-r-55 p-t-178" action="/login" method="post" novalidate>
+                <form class="login100-form validate-form p-l-55 p-r-55 p-t-178" action="/login" method="post" novalidate onsubmit="return validateForm()">
                     <span class="login100-form-title">
                         Iniciar Sesión
                     </span>
+                    {% if error_message %}
+                    <div id="error-message" style="color: red; margin-bottom: 16px;">{{ error_message }}</div>
+                    {% endif %}
+                    <div id="validation-message" style="color: red; margin-bottom: 16px;"></div>
                     <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter your email">
                         <input class="input100" type="email" name="email" id="email" placeholder="Tu email" required>
                         <span class="focus-input100"></span>
@@ -46,7 +49,7 @@
                     </div>
 
                     <div class="container-login100-form-btn">
-                        <button class="login100-form-btn">
+                        <button class="login100-form-btn" type="submit">
                             Iniciar Sesión
                         </button>
                     </div>
@@ -95,6 +98,24 @@
                 $('#verificationModal').modal('show');
             }
         });
+
+        function validateForm() {
+            var email = document.getElementById("email").value;
+            var contrasena = document.getElementById("contrasena").value;
+            var validationMessage = document.getElementById("validation-message");
+
+            if (!email) {
+                validationMessage.textContent = "El campo de email está vacío.";
+                return false;
+            }
+
+            if (!contrasena) {
+                validationMessage.textContent = "El campo de contraseña está vacío.";
+                return false;
+            }
+
+            return true;
+        }
     </script>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

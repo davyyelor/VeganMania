@@ -498,6 +498,7 @@ def logout():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error_message = None
     if request.method == 'POST':
         email = request.form['email']
         contrasena = request.form['contrasena']
@@ -532,12 +533,14 @@ def login():
             else:
                 cur.close()
                 connection.close()
-                return redirect(url_for('login'))
+                error_message = "Las credenciales son incorrectas. Por favor, inténtalo de nuevo."
 
         except Exception as e:
-            return redirect(url_for('login'))
+            error_message = "Se ha producido un error. Por favor, inténtalo de nuevo."
 
-    return render_template('login.html', verificacion=request.args.get('verificacion'))
+    return render_template('login.html', verificacion=request.args.get('verificacion'), error_message=error_message)
+
+
 
 
 
